@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" 
+	verticalScrollPolicy="off" title="Lineas" creationComplete="init()"
+	xmlns:ns1="componentes.mantencionLineas.*">
+	<mx:states>
+		<mx:State name="AgregarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{lineas_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:AgregarLinea x="0" y="0" complexClick="agregarLineaResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			private var lineas_ac:ArrayCollection = new ArrayCollection();
+			
+			private function init():void
+			{
+				var item1:Object = new Object();
+				item1.nombre = "Linea 1";
+				item1.codigo = "LN001";
+				item1.descripcion = "Descripcion de linea 1";
+				lineas_ac.addItem(item1);
+				
+				var item2:Object = new Object();
+				item2.nombre = "Linea 2";
+				item2.codigo = "LN002";
+				item2.descripcion = "Descripcion de linea 2";
+				lineas_ac.addItem(item2);
+			}
+			
+			private function agregarLineaResult(event:ComplexEvent):void
+			{
+/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
+				if(event.stateOrigin==AgregarLinea.nombre && event.objeto!=null)
+				{
+					lineas_ac.addItem(event.objeto);
+				}
+				currentState = event.stateDestination;
+			}
+			
+			private function filtar():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false
+				}	
+				if(filtro.selectedItem == 'Código')
+				{
+					input.visible = true;
+				}
+				
+				if(filtro.selectedItem == 'Nombre')
+				{
+					input.visible = true;
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="filtar()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="filtar()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Código</mx:String>
+				<mx:String>Nombre</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	<mx:DataGrid id="lineas_dg" width="755" x="10" y="120" dataProvider="{lineas_ac}" height="330">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+			<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) lineas_ac.removeItemAt(lineas_dg.selectedIndex)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+</mx:Panel>

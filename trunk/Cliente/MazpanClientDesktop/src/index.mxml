@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="920" height="560" 
+	horizontalCenter="0" 
+	xmlns:ns1="componentes.*" 
+	xmlns:ns2="componentes.mantencionMaquinas.*" 
+	xmlns:mantencionComponentes="componentes.mantencionComponentes.*" 
+	xmlns:mantencionLineas="componentes.mantencionLineas.*" 
+	xmlns:mantencionPlantas="componentes.mantencionPlantas.*" 
+	xmlns:ns3="componentes.Acordeon.*" xmlns:ns4="componentes.mantencionAgentesExternos.*" xmlns:ns5="componentes.mantencionSistema.*" xmlns:ns6="componentes.general.*">
+	
+	<mx:states>
+		<mx:State name="cleanState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="componentesState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<mantencionComponentes:Componentes y="30" horizontalCenter="61"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="maquinasState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<ns2:Maquinas y="30" horizontalCenter="61"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="lineasState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<mantencionLineas:Lineas y="30" horizontalCenter="61"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="plantasState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<mantencionPlantas:Plantas y="30" horizontalCenter="61"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="agentesExternosState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<ns4:AgentesExternos y="30" horizontalCenter="61"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="trabajoTercerosState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<ns4:TrabajosAgentesExternos y="30" horizontalCenter="61"/>
+			</mx:AddChild>
+			<mx:SetProperty name="height" value="560"/>
+		</mx:State>
+		<mx:State name="personalState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<ns5:Personal x="127.6" y="30">
+				</ns5:Personal>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="usuariosState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<ns5:Usuarios x="127.55" y="30">
+				</ns5:Usuarios>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="solicitudState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild position="lastChild">
+				<ns6:SolicitudTrabajo x="127.6" y="30">
+				</ns6:SolicitudTrabajo>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Script>
+		<![CDATA[
+			import componentes.Acordeon.MenuMantenciones;
+			import mx.controls.Alert;
+			import eventos.ComplexEvent;
+			
+			[Bindable]
+			public static var URL:String = "http://localhost:7070/Servidor/";
+			
+			private function loginResult(event:ComplexEvent):void
+			{
+				currentState = event.stateDestination;
+				cerrar_btn.visible = true;
+				acordeon.visible = true;	
+				acordeon.cargar(event.objeto as int);
+			}
+			private function cerrar():void
+			{
+//Falta hacer, que cuando a`prite este boton todos los componentes pasen a estado base
+				cerrar_btn.visible = false;	
+				acordeon.visible = false;
+				currentState = "";
+			}
+			private function goState(event:ComplexEvent):void
+			{
+				currentState = event.stateDestination;
+			}
+			
+			//<mx:Style source="Estilo.css"/>	
+		]]>
+	</mx:Script>
+	
+	<mx:Style source="Estilo.css"/>
+	
+	<mx:Button label="CERRAR" id="cerrar_btn" click="cerrar()" visible="false" x="845"/>
+	<ns1:Login complexClick="loginResult(event)" id="login" horizontalCenter="0" verticalCenter="0"/>
+	<ns3:Acordeon x="0" y="30" id="acordeon" visible="true" complexClick="goState(event)"/>
+</mx:WindowedApplication>

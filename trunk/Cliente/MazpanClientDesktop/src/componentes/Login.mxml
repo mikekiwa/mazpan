@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="200">
+	
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import eventos.ComplexEvent;
+			
+			[Bindable]
+			private var nombre:String = "Login";
+			
+			private function click():void
+			{
+				if(username_ti.text=="admin" && password_ti.text=="5") 		dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 5));
+				else if(username_ti.text=="admin" && password_ti.text=="6") 	dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 6));
+				else if(username_ti.text=="admin" && password_ti.text=="7") 	dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 7));
+				else if(username_ti.text=="admin" && password_ti.text=="8")	dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 8));
+				else if(username_ti.text=="admin" && password_ti.text=="9")	dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 9));
+				else Alert.show("Nombre de usuario o contraseña invalido");
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Panel x="0" y="0" width="400" height="200" layout="absolute" title="Ingresar">
+		<mx:Label x="135" y="10" text="Nombre Usuario"/>
+		<mx:TextInput x="135" y="36" width="235" id="username_ti"/>
+		<mx:Label x="135" y="70" text="Contraseña"/>
+		<mx:TextInput x="135" y="96" width="235" displayAsPassword="true" id="password_ti"/>
+		<mx:Button x="215" y="128" label="Aceptar" id="aceptar_btn" click="click()"/>
+		<mx:Button x="295" y="128" label="Cancelar" id="cancelar_btn"/>
+		<mx:Image x="8" y="16" width="117" height="124" source="iconos/user.png" tabEnabled="false"/>
+	</mx:Panel>
+</mx:Canvas>
