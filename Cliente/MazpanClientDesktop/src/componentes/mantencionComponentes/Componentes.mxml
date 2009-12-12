@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Componentes" creationComplete="init()" xmlns:ns1="componentes.mantencionComponentes.*" verticalScrollPolicy="off">
+	<mx:states>
+		<mx:State name="AgregarState">
+			<mx:RemoveChild target="{componentes_dg}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{input}"/>
+			<mx:RemoveChild target="{filtro}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:AgregarComponente x="0" y="0" complexClick="agregarComponenteResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			private var componentes_ac:ArrayCollection = new ArrayCollection();
+			
+			private function init():void
+			{
+				var item01:Object = new Object();
+				item01.nombre = "Cadena";
+				item01.codigo = "CM001";
+				item01.descripcion = "Descripcion de la cadena";
+				componentes_ac.addItem(item01);
+				
+				var item02:Object = new Object();
+				item02.nombre = "Motor";
+				item02.codigo = "MQ002";
+				item02.descripcion = "Descripcion del motor";
+				componentes_ac.addItem(item02);
+			}
+			
+			private function agregarComponenteResult(event:ComplexEvent):void
+			{
+/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
+				if(event.stateOrigin==AgregarComponente.nombre && event.objeto!=null)
+				{
+					componentes_ac.addItem(event.objeto);
+				}
+				currentState = event.stateDestination;
+			}
+			
+			private function filtar():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false
+				}	
+				if(filtro.selectedItem == 'Código')
+				{
+					input.visible = true;
+				}
+				
+				if(filtro.selectedItem == 'Nombre')
+				{
+					input.visible = true;	
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="filtar()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="filtar()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Código</mx:String>
+				<mx:String>Nombre</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	
+	<mx:DataGrid id="componentes_dg" width="755" x="10" y="120" dataProvider="{componentes_ac}" height="330">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+			<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(componentes_dg.selectedIndex!=-1) componentes_ac.removeItemAt(componentes_dg.selectedIndex)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+</mx:Panel>

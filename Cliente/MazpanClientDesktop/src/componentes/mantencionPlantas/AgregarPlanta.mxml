@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.collections.ArrayCollection;
+			import eventos.ComplexEvent;
+			
+			[Bindable]
+			public static var nombre:String = "AgregarComponente";
+			
+			[Bindable]
+			private var mantenciones_ac:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva", "Otro"]);
+			[Bindable]
+			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Quincenal","Mensual","Anual","Otro"]);
+			[Bindable]
+			private var maquinasSistema_ac:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var maquinas_ac:ArrayCollection = new ArrayCollection();
+			
+			private function init():void
+			{
+				var item1:Object = new Object();
+				item1.nombre = "Linea 1";
+				item1.codigo = "LN01";
+				item1.descripcion = "Descripcion de la linea 1";
+				maquinasSistema_ac.addItem(item1);
+				
+				var item2:Object = new Object();
+				item2.nombre = "Linea 2";
+				item2.codigo = "LN02";
+				item2.descripcion = "Descripcion de la linea 2";
+				maquinasSistema_ac.addItem(item2);
+			}
+			
+			private function onClick(event:String):void
+			{
+				var linea:Object = null;
+				if(event=="agregar")
+				{
+					linea = new Object();
+					linea.nombre = nombre_ti.text;
+					linea.codigo = codigo_ti.text;
+					linea.descripcion = descripcion_ta.text;
+				}
+				dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, linea));
+			}
+			private function arriba():void
+			{
+				if(mantenciones_dg.selectedIndex!=-1)
+				{
+					var itemIndex:int = mantenciones_dg.selectedIndex;
+					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
+					if( itemIndex == 0) itemIndex = mantenciones_ac.length;
+					else itemIndex = (itemIndex - 1) % (mantenciones_ac.length+1);
+					mantenciones_ac.addItemAt(item, itemIndex);
+				}
+			}
+			private function abajo():void
+			{
+				if(mantenciones_dg.selectedIndex!=-1)
+				{
+					var itemIndex:int = mantenciones_dg.selectedIndex;
+					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
+					mantenciones_ac.addItemAt(item, (itemIndex + 1) % (mantenciones_ac.length+1));
+				}
+			}
+			private function actualizarTipoMantecion():void
+			{
+				tipoMantencion_ti.text = "";
+				if(tipoMantencion_cb.text=="Otro"){tipoMantencion_cb.visible=false; tipoMantencion_ti.visible=true; cancelarTipoMantencion_btn.visible=true;} 
+				else {tipoMantencion_cb.visible=true; tipoMantencion_ti.visible=false; cancelarTipoMantencion_btn.visible=false;}
+			}
+			private function actualizarFrecuencia():void
+			{
+				frecuencia_ti.text = "";
+				if(frecuencia_cb.text=="Otro"){frecuencia_cb.visible=false; frecuencia_ti.visible=true; cancelarFrecuencia_btn.visible=true;} 
+				else{frecuencia_cb.visible=true; frecuencia_ti.visible=false; cancelarFrecuencia_btn.visible=false;}
+			}
+			private function agregarActividadMantencion():void
+			{
+				var item:Object = new Object();
+				item.actividad = actividad_ti.text;
+				if(tipoMantencion_cb.visible) item.mantencion = tipoMantencion_cb.text;
+				else  item.mantencion = tipoMantencion_ti.text;
+				if(frecuencia_cb.visible) item.frecuencia = frecuencia_cb.text;
+				else item.frecuencia = frecuencia_ti.text;
+				mantenciones_ac.addItem(item);
+			}
+			private function agregarLinea():void
+			{
+				if(lineasSistema_dg.selectedIndex!=-1) maquinas_ac.addItem(maquinasSistema_ac.getItemAt(lineasSistema_dg.selectedIndex));
+			}
+			private function eliminarLinea():void
+			{
+				if(lineas_dg.selectedIndex!=-1) maquinas_ac.removeItemAt(lineas_dg.selectedIndex);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:TabNavigator y="0" width="100%" height="421" horizontalCenter="1">
+		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
+			<mx:Label x="197.5" y="76" text="Nombre de la Linea "/>
+			<mx:TextInput x="361.5" y="74" id="nombre_ti" width="213" maxChars="50"/>
+			<mx:Label x="197.5" y="126" text="Código"/>
+			<mx:TextInput x="361.5" y="122" id="codigo_ti" width="213" maxChars="20"/>
+			<mx:Label x="197.5" y="171" text="Encargado"/>
+			<mx:TextInput x="361.5" y="169" id="encargado_ti" width="213" maxChars="50"/>
+			<mx:Label x="197.5" y="221" text="Descripcion"/>
+			<mx:TextArea x="361.5" y="220" width="213" height="120" id="descripcion_ta" maxChars="100"/>
+		</mx:Canvas>
+		<mx:Canvas label="Máquinas" width="100%" height="100%">
+			<mx:Label x="30" y="10" text="Lista de Máquinas en el Sistema" fontWeight="bold"/>
+			<mx:DataGrid id="lineasSistema_dg" width="669" x="29" y="25" dataProvider="{maquinasSistema_ac}" height="163">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+					<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+					<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Label x="29" y="196" text="Lista de Máquinas de la Linea" fontWeight="bold"/>
+			<mx:DataGrid id="lineas_dg" width="669" x="29" y="213" dataProvider="{maquinas_ac}" height="165">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+					<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+					<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Image x="706" y="75" width="40" height="40" source="iconos/add.png" id="agregar_img" click="agregarLinea()"/>
+			<mx:Image x="706" y="288" width="40" height="40" source="iconos/del.png" id="eliminar_img" click="eliminarLinea()"/>
+		</mx:Canvas>
+		<mx:Canvas label="Actividades de Mantención" width="100%" height="100%">
+			<mx:Label x="26" y="10" text="Lista de Actividades de Mantención" fontWeight="bold"/>
+			<mx:DataGrid x="26" y="26" width="668" height="226" id="mantenciones_dg" dataProvider="{mantenciones_ac}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Actividad" 			dataField="actividad" sortable="false"/>
+					<mx:DataGridColumn headerText="Tipo de Mantencion" 	dataField="mantencion" sortable="false"/>
+					<mx:DataGridColumn headerText="Frecuencia" 			dataField="frecuencia" sortable="false"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Image x="703.5" y="75" width="40" height="40" source="iconos/del.png" click="if(mantenciones_dg.selectedIndex!=-1) mantenciones_ac.removeItemAt(mantenciones_dg.selectedIndex)"/>
+			<mx:Image x="703.5" y="123" width="40" height="40" source="iconos/arriba.png" click="arriba()"/>
+			<mx:Image x="703.5" y="171" width="40" height="40" source="iconos/abajo.png" click="abajo()"/>
+			<mx:Label x="28.5" y="260" text="Nueva Actividad de Mantención" fontWeight="bold"/>
+			<mx:Canvas width="667" height="101" borderStyle="solid" y="277" x="28.5" label="Nuevas Actividades">
+				<mx:Label x="130" y="13" text="Actividad"/>
+				<mx:TextInput x="256" y="11" width="279" id="actividad_ti" maxChars="50"/>
+				<mx:Label x="130" y="41" text="Tipo de Mantencion"/>
+				<mx:ComboBox x="256" y="39" width="279" id="tipoMantencion_cb" dataProvider="{tipoMantencion_ac}" change="actualizarTipoMantecion()"/>
+				<mx:TextInput x="256" y="39" width="249" id="tipoMantencion_ti" visible="false" maxChars="50"/>
+				<mx:Image x="513" y="39" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipoMantencion_btn" visible="false" click="tipoMantencion_cb.selectedIndex=0; actualizarTipoMantecion()"/>
+				<mx:Label x="130" y="69" text="Frecuencia"/>
+				<mx:ComboBox x="256" y="67" width="279" id="frecuencia_cb" dataProvider="{frecuencia_ac}" change="actualizarFrecuencia()"/>
+				<mx:TextInput x="256" y="67" width="249" id="frecuencia_ti" visible="false" maxChars="50"/>
+				<mx:Image x="513" y="67" width="22" height="22" source="iconos/cancelar.png" id="cancelarFrecuencia_btn" visible="false" click="frecuencia_cb.selectedIndex=0; actualizarFrecuencia()"/>
+			</mx:Canvas>
+			<mx:Image x="703.5" y="309" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
+		</mx:Canvas>
+	</mx:TabNavigator>
+	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn"/>
+</mx:Canvas>

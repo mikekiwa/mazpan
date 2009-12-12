@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Lista de Agentes Externos">
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			private var agentesExternos_ac:ArrayCollection = new ArrayCollection();
+			
+			private function init():void
+			{
+				var item01:Object = new Object();
+				item01.nombre = "Juan Perez";
+				item01.direccion = "Curico, Aguas negras";
+				item01.fono = "1234556";
+				item01.eMail = "email@dominio.com";
+				agentesExternos_ac.addItem(item01);
+				
+				var item02:Object = new Object();
+				item02.nombre = "Pepito Pereira";
+				item02.direccion = "Molina, sector la plaza";
+				item02.fono = "434556";
+				item02.eMail = "email@dominio.com";
+				agentesExternos_ac.addItem(item02);
+			}
+			
+			private function agregarComponenteResult(event:ComplexEvent):void
+			{
+/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
+				/*(event.stateOrigin==AgregarComponente.nombre && event.objeto!=null)
+				{
+					agentesExternos_ac.addItem(event.objeto);
+				}
+				currentState = event.stateDestination;*/
+			}
+			
+			private function filtar():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false
+				}	
+				if(filtro.selectedItem == 'Dirección')
+				{
+					input.visible = true;
+				}
+				
+				if(filtro.selectedItem == 'Nombre')
+				{
+					input.visible = true;	
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="filtar()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="filtar()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Nombre</mx:String>
+				<mx:String>Dirección</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	
+	<mx:DataGrid id="agentesExternos_dg" width="681" x="10" y="57" dataProvider="{agentesExternos_ac}" height="306">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Nombre"  	dataField="nombre" 		width="350"/>
+			<mx:DataGridColumn headerText="Dirección" 	dataField="direccion" 	width="200"/>
+			<mx:DataGridColumn headerText="Fono" 		dataField="fono" 		width="100"/>
+			<mx:DataGridColumn headerText="E-Mail" 		dataField="eMail" 		width="200"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="699" y="158" width="56" height="55" source="iconos/del.png" id="image2" click="if(agentesExternos_dg.selectedIndex!=-1) agentesExternos_ac.removeItemAt(agentesExternos_dg.selectedIndex)"/>
+	<mx:Canvas x="10" y="387" width="681" height="63">
+		<mx:Label x="10" y="10" text="Nombre"/>
+		<mx:Label x="268" y="10" text="Dirección"/>
+		<mx:Label x="436" y="10" text="Fono"/>
+		<mx:Label x="524" y="10" text="E-Mail"/>
+		<mx:TextInput x="10" y="31" width="250"/>
+		<mx:TextInput x="268" y="31"/>
+		<mx:TextInput x="436" y="31" width="80"/>
+		<mx:TextInput x="524" y="31" width="147"/>
+	</mx:Canvas>
+	<mx:Image x="699" y="390" width="56" height="55" source="iconos/add.png" id="image3"/>
+	<mx:Label x="10" y="371" text="Nuevo Agente Externo" fontWeight="bold"/>
+</mx:Panel>
