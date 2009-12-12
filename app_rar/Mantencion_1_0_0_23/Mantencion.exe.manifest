@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly manifestVersion="1.0" xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asmv1:assemblyIdentity name="Mantencion.exe" version="1.0.0.23" publicKeyToken="02c0d0e812c97843" language="neutral" processorArchitecture="msil" type="win32" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="Mantencion" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="Mantencion.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet class="System.Security.PermissionSet" version="1" Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="4" minorVersion="10" buildNumber="0" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="2.0.50727.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="AccesoDatosMantencion.dll" size="1241088">
+      <assemblyIdentity name="AccesoDatosMantencion" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>ZQBtsHVLP930zso58wtE0K8mDgc=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Mantencion.exe" size="663552">
+      <assemblyIdentity name="Mantencion" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+        <dsig:DigestValue>CIDhd3MpH9dMfd4lPuZTLQ0BKCw=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="Resources\derecha.png" size="658">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>7HWeVXz5sZsfGgAQMMbfQAQ7mks=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="Resources\izquierda.png" size="558">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>It2jeSDsUJxfBiDna5++GFd5KB4=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=dreams\manolo" issuerKeyHash="65f0113b6e79f4417b1cbe7cc015b528e6fd9a04" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>hG5Gn72yhn7G5UAbQiYfoolhGSE=</DigestValue></Reference></SignedInfo><SignatureValue>W7BV/Kg9cL2tqx+FTxj8XPid/llO0KJOMOWWgRcdfVWfH8PRsR/oGD6oGC4jQWJvTrkWts5k6tnmwOkMPqQM7urWA3C9QrddQfdkneZlgQohFpXql3GT7kma52kFGH+k++NyowIiFQNTymjU15UV0GcHkh1dfq15ayM49GKA2rI=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>mXhXhtKV3dM6B9gzOd1X97XdACG05tizdJJyd21Aj7Yg/6fP2SWHj+Pl2f9p7CnPxC6ir8ipBq00t2BUChbDo+SM3Wm9Jy0Y/JwF/M9ukMY/Y8evNsL0xlIe/DRA0oWlyaQEJzNA38XB08XEBzqoIHjIHopYtNiGW6/d9P8D/vU=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="21196189a21f26421b40e5c67e86b2bd9f466e84" Description="" Url=""><as:assemblyIdentity name="Mantencion.exe" version="1.0.0.23" publicKeyToken="02c0d0e812c97843" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=dreams\manolo</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>cAmJ3auzWEZJdc43LwGOcBk/xUQ=</DigestValue></Reference></SignedInfo><SignatureValue>Be4vnJWqCTLOgsjMYHUBB4ZEulxDvSg4f3JilKc65Lw77VoweEAlpSkZ7XCcMJxd6F6yGPniaEEaorDwmHcC6WJJbCaZInn6ep5AvrzDa58vq+Kgg6rKVVSMAC/S6jO5rpeM/VtKyryBVFLORoPOPIhLAzA56yD3TTx55mLEHoY=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>mXhXhtKV3dM6B9gzOd1X97XdACG05tizdJJyd21Aj7Yg/6fP2SWHj+Pl2f9p7CnPxC6ir8ipBq00t2BUChbDo+SM3Wm9Jy0Y/JwF/M9ukMY/Y8evNsL0xlIe/DRA0oWlyaQEJzNA38XB08XEBzqoIHjIHopYtNiGW6/d9P8D/vU=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIBzTCCATagAwIBAgIQWm9P2UETNaRKHrtHZ+kixTANBgkqhkiG9w0BAQUFADAlMSMwIQYDVQQDHhoAZAByAGUAYQBtAHMAXABtAGEAbgBvAGwAbzAeFw0wOTA5MjQwMjMzNThaFw0xMDA5MjQwODMzNThaMCUxIzAhBgNVBAMeGgBkAHIAZQBhAG0AcwBcAG0AYQBuAG8AbABvMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCZeFeG0pXd0zoH2DM53Vf3td0AIbTm2LN0knJ3bUCPtiD/p8/ZJYeP4+XZ/2nsKc/ELqKvyKkGrTS3YFQKFsOj5Izdab0nLRj8nAX8z26Qxj9jx682wvTGUh78NEDShaXJpAQnM0DfxcHTxcQHOqggeMgeili02IZbr930/wP+9QIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAAm4PIa3Fc/hx22xZ8DBvya0jnWhKPxFpAkWwBHf1tFf8/NEUqmRyR7a07/0t8fFy97/WrNl6Ip/CmD/TxxSUgzAFFkc6eup2nMWeDsZorJ3DOZW6D5jah5EtWrljo+yMVCKCmWWoPXIl97zP2c0i/MR8BKCyaia8srDx6OPeXAX</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>
