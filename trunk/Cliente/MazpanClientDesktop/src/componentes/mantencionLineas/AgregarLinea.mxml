@@ -25,9 +25,15 @@
 			[Bindable]
 			private var maquinas_ac:ArrayCollection = new ArrayCollection();
 			
+			private var linea:Object = null;
+			
+			public function clean():void
+			{
+			}
+			
 			private function init():void
 			{
-				var item1:Object = new Object();
+				/*var item1:Object = new Object();
 				item1.nombre = "Maquina 1";
 				item1.codigo = "COD 1";
 				item1.descripcion = "Descripcion de Maquina 1";
@@ -37,12 +43,11 @@
 				item2.nombre = "Maquina 2";
 				item2.codigo = "COD 2";
 				item2.descripcion = "Descripcion de Maquina 2";
-				maquinasSistema_ac.addItem(item2);
+				maquinasSistema_ac.addItem(item2);*/
 			}
 			
 			private function onClick(event:String):void
 			{
-				var linea:Object = null;
 				if(event=="agregar")
 				{
 					linea = new Object();

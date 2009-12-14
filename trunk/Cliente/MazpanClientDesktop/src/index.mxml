@@ -16,14 +16,14 @@
 		<mx:State name="componentesState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild position="lastChild">
-				<mantencionComponentes:Componentes y="30" horizontalCenter="61"/>
+				<mantencionComponentes:Componentes id="comp" y="30" horizontalCenter="61"/>
 			</mx:AddChild>
 			<mx:SetProperty name="height" value="560"/>
 		</mx:State>
 		<mx:State name="maquinasState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild position="lastChild">
-				<ns2:Maquinas y="30" horizontalCenter="61"/>
+				<ns2:Maquinas id="maq" y="30" horizontalCenter="61"/>
 			</mx:AddChild>
 			<mx:SetProperty name="height" value="560"/>
 		</mx:State>
@@ -58,40 +58,38 @@
 		<mx:State name="personalState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild position="lastChild">
-				<ns5:Personal x="127.6" y="30">
-				</ns5:Personal>
+				<ns5:Personal x="127.6" y="30"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="usuariosState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild position="lastChild">
-				<ns5:Usuarios x="127.55" y="30">
-				</ns5:Usuarios>
+				<ns5:Usuarios x="127.55" y="30"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="solicitudState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild position="lastChild">
-				<ns6:SolicitudTrabajo x="127.6" y="30">
-				</ns6:SolicitudTrabajo>
+				<ns6:SolicitudTrabajo x="127.6" y="30"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.mantencionComponentes.Componentes;
 			import componentes.Acordeon.MenuMantenciones;
 			import mx.controls.Alert;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
-			public static var URL:String = "http://localhost:7070/Servidor/";
+			public static var URL:String = "http://localhost:7070/Server/";
 			
 			private function loginResult(event:ComplexEvent):void
 			{
 				currentState = event.stateDestination;
 				cerrar_btn.visible = true;
-				acordeon.visible = true;	
+				acordeon.visible = true;
 				acordeon.cargar(event.objeto as int);
 			}
 			private function cerrar():void
@@ -104,6 +102,8 @@
 			private function goState(event:ComplexEvent):void
 			{
 				currentState = event.stateDestination;
+				if(event.stateDestination == "componentesState") comp.clean();
+				if(event.stateDestination == "maquinasState") maq.clean();
 			}
 			
 			//<mx:Style source="Estilo.css"/>	

@@ -1,49 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Componentes" creationComplete="init()" xmlns:ns1="componentes.mantencionComponentes.*" verticalScrollPolicy="off">
+	
+	<mx:WebService id="ComponenteService" 		wsdl="{index.URL + 'ComponenteService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allComponentes" 	result="allComponentesResult(event)" 	fault="ErrorFaultHandler(event, 'allComponente')"/>
+		<mx:operation name="delComponente" 		result="delComponenteResult(event)" 	fault="ErrorFaultHandler(event, 'delComponente')"/>
+	</mx:WebService>
+	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{componentes_dg}"/>
-			<mx:RemoveChild target="{image2}"/>
-			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{del}"/>
+			<mx:RemoveChild target="{edit}"/>
 			<mx:RemoveChild target="{input}"/>
 			<mx:RemoveChild target="{filtro}"/>
-			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{add}"/>
 			<mx:RemoveChild target="{canvas1}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarComponente x="0" y="0" complexClick="agregarComponenteResult(event)"/>
+				<ns1:AgregarComponente  id="addComponente" x="0" y="0" complexClick="agregarComponenteResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
 			[Bindable]
-			private var componentes_ac:ArrayCollection = new ArrayCollection();
+			public static var nombre:String = "Componentes";
+			
+			[Bindable]
+			private var componentes_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function clean():void
+            {
+            	currentState = "";
+            	if(addComponente!=null) addComponente.clean();
+            	ComponenteService.allComponentes();
+            }
 			
 			private function init():void
 			{
-				var item01:Object = new Object();
-				item01.nombre = "Cadena";
-				item01.codigo = "CM001";
-				item01.descripcion = "Descripcion de la cadena";
-				componentes_ac.addItem(item01);
-				
-				var item02:Object = new Object();
-				item02.nombre = "Motor";
-				item02.codigo = "MQ002";
-				item02.descripcion = "Descripcion del motor";
-				componentes_ac.addItem(item02);
+				ComponenteService.allComponentes();
 			}
 			
+			private function allComponentesResult(event:ResultEvent):void
+			{
+				componentes_ac = event.result.Tables.Componentes.Rows.source as Array;
+			}
 			private function agregarComponenteResult(event:ComplexEvent):void
 			{
 /*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
 				if(event.stateOrigin==AgregarComponente.nombre && event.objeto!=null)
 				{
-					componentes_ac.addItem(event.objeto);
+					componentes_ac.push(event.objeto);
 				}
 				currentState = event.stateDestination;
 			}
@@ -63,6 +80,16 @@
 				{
 					input.visible = true;	
 				}
+			}
+			private function delComponenteResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				if(result == 1)
+					ComponenteService.allComponentes();
+				else if(result == 0)
+					Alert.show("El componente yo no existe en el sistema, intente recargar");
+				else
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 			}
 			
 		]]>
@@ -86,7 +113,7 @@
 			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(componentes_dg.selectedIndex!=-1) componentes_ac.removeItemAt(componentes_dg.selectedIndex)"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="add" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="del" click="if(componentes_dg.selectedIndex!=-1) ComponenteService.delComponente(componentes_dg.selectedItem.codigo)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="edit"/>
 </mx:Panel>

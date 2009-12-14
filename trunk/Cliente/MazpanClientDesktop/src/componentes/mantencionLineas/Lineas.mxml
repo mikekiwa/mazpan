@@ -2,6 +2,12 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" 
 	verticalScrollPolicy="off" title="Lineas" creationComplete="init()"
 	xmlns:ns1="componentes.mantencionLineas.*">
+	
+	<mx:WebService id="LineaService" 		wsdl="{index.URL + 'LineaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allLineas" 		result="allLineasResult(event)" 	fault="ErrorFaultHandler(event, 'allLineas')"/>
+		<mx:operation name="delLinea" 		result="delLineaResult(event)" 		fault="ErrorFaultHandler(event, 'delLinea')"/>
+	</mx:WebService>
+	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{canvas1}"/>
@@ -10,22 +16,40 @@
 			<mx:RemoveChild target="{image3}"/>
 			<mx:RemoveChild target="{lineas_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarLinea x="0" y="0" complexClick="agregarLineaResult(event)"/>
+				<ns1:AgregarLinea id="addLinea" x="0" y="0" complexClick="agregarLineaResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
 			[Bindable]
-			private var lineas_ac:ArrayCollection = new ArrayCollection();
+			public static var nombre:String = "Lineas";
+		
+			[Bindable]
+			private var lineas_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function clean():void
+            {
+            	currentState = "";
+            	if(addLinea!=null) addLinea.clean();
+            	LineaService.allMaquinas();
+            }
 			
 			private function init():void
 			{
-				var item1:Object = new Object();
+				LineaService.allLineas();
+				/*var item1:Object = new Object();
 				item1.nombre = "Linea 1";
 				item1.codigo = "LN001";
 				item1.descripcion = "Descripcion de linea 1";
@@ -35,7 +59,11 @@
 				item2.nombre = "Linea 2";
 				item2.codigo = "LN002";
 				item2.descripcion = "Descripcion de linea 2";
-				lineas_ac.addItem(item2);
+				lineas_ac.addItem(item2);*/
+			}
+			private function allLineasResult(event:ResultEvent):void
+			{
+				lineas_ac = event.result.Tables.Lineas.Rows.source as Array;
 			}
 			
 			private function agregarLineaResult(event:ComplexEvent):void
@@ -43,7 +71,7 @@
 /*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
 				if(event.stateOrigin==AgregarLinea.nombre && event.objeto!=null)
 				{
-					lineas_ac.addItem(event.objeto);
+					lineas_ac.push(event.objeto);
 				}
 				currentState = event.stateDestination;
 			}
@@ -63,6 +91,16 @@
 				{
 					input.visible = true;
 				}
+			}
+			private function delLineaResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				if(result == 1)
+					LineaService.allMaquinas();
+				else if(result == 0)
+					Alert.show("El maquina yo no existe en el sistema, intente recargar");
+				else
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 			}
 		]]>
 	</mx:Script>
@@ -85,6 +123,6 @@
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) lineas_ac.removeItemAt(lineas_dg.selectedIndex)"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) LineaService.delLinea(lineas_dg.selectedItem.codigo)"/>
 	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>
