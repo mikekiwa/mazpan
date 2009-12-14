@@ -1,11 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" verticalScrollPolicy="off" creationComplete="init()">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" verticalScrollPolicy="off" creationComplete="init()" xmlns:ns1="componentes.*">
+	
+	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="TipoMaquina" 			result="tipoMaquinaResult(event)" 			fault="ErrorFaultHandler(event, 'TipoMaquina')"/>
+		<mx:operation name="Paises" 				result="paisesResult(event)" 				fault="ErrorFaultHandler(event, 'Paises')"/>
+		<mx:operation name="TipoEspecificacion" 	result="tipoEspecificacionResult(event)" 	fault="ErrorFaultHandler(event, 'TipoEspecificacion')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="ComponenteService" 		wsdl="{index.URL + 'ComponenteService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allComponentes" 		result="allComponentesResult(event)" 	fault="ErrorFaultHandler(event, 'allComponente')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="MaquinaService" 		wsdl="{index.URL + 'MaquinaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addMaquina" 			result="addMaquinaResult(event)" 			fault="ErrorFaultHandler(event, 'addMaquina')"/>
+		<mx:operation name="addEspecificaciones"	result="addEspecificacionesResult(event)"	fault="ErrorFaultHandler(event, 'addEspecificaciones')"/>
+		<mx:operation name="addMantenciones" 		result="addMantencionesResult(event)"		fault="ErrorFaultHandler(event, 'addMantenciones')"/>
+		<mx:operation name="addComponentes" 		result="addComponentesResult(event)"		fault="ErrorFaultHandler(event, 'addComponentes')"/>
+	</mx:WebService>
+	
 	<mx:Metadata>
 		[Event(name="complexClick",type="eventos.ComplexEvent")]
    	</mx:Metadata>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
 			import mx.controls.Alert;
 			import mx.collections.ArrayCollection;
 			import eventos.ComplexEvent;
@@ -13,23 +33,23 @@
 			[Bindable]
 			public static var nombre:String = "AgregarMaquina";
 			[Bindable]
-			private var componentesSistema_ac:ArrayCollection = new ArrayCollection();
+			private var componentesSistema_ac:Array = new Array();
 			[Bindable]
 			private var componentes_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
-			private var tipoMaquina_ac:ArrayCollection = new ArrayCollection(["Horno","Aire","Cortadora","Compresor","Otro"]);
+			private var tipoMaquina_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
-			private var pais_ac:ArrayCollection = new ArrayCollection(["Chile","Argentina","Colombia","Japon","Otro"]);
+			private var pais_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
 			private var especificaciones_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
-			private var especificacion_ac:ArrayCollection = new ArrayCollection(["Voltaje","Peso","Amperaje","Frecuencia","Alto","Ancho","Otro"]);
+			private var especificacion_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
 			private var mantenciones_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
-			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva", "Otro"]);
+			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva"]);
 			[Bindable]
-			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Quincenal","Mensual","Anual","Otro"]);
+			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Mensual","Anual"]);
 			[Bindable]
 			private var planta_ac:ArrayCollection = new ArrayCollection(["Planta 1","Planta 2"]);
 			[Bindable]
@@ -37,46 +57,154 @@
 			[Bindable]
 			private var recepcion_ac:ArrayCollection = new ArrayCollection(["Nueva","Usada"]);
 			
+			private var maquina:Object = null;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
 			private function init():void
 			{
-				var item1:Object = new Object();
-				item1.actividad = "Actividad 1";
-				item1.mantencion = "Correctiva";
-				item1.frecuencia = "Mensual";
-				mantenciones_ac.addItem(item1);
-				
-				var item2:Object = new Object();
-				item2.actividad = "Actividad 2";
-				item2.mantencion = "Preventiva";
-				item2.frecuencia = "Anual";
-				mantenciones_ac.addItem(item2);
-				
-				var item01:Object = new Object();
-				item01.nombre = "Cadena";
-				item01.codigo = "CM001";
-				item01.descripcion = "Descripcion de la cadena";
-				componentesSistema_ac.addItem(item01);
-				
-				var item02:Object = new Object();
-				item02.nombre = "Motor";
-				item02.codigo = "MQ002";
-				item02.descripcion = "Descripcion del motor";
-				componentesSistema_ac.addItem(item02);
+				CombosService.TipoMaquina();
+				tabNavigator.initialize();
+				ComponenteService.allComponentes();	
 			}
-			
+			private function allComponentesResult(event:ResultEvent):void
+			{
+				componentesSistema_ac = event.result.Tables.Componentes.Rows.source as Array;
+			}
+			private function tipoMaquinaResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.TipoMaquinas.Rows.source as Array;
+            	
+            	for(var i:int=0; i<aux.length; i++)
+            	{
+            		tipoMaquina_ac.addItem(aux[i].tipo);
+            	}
+            	tipoMaquina_ac.addItem("Otro");
+            	
+            	CombosService.Paises();
+            }
+			private function paisesResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Paises.Rows.source as Array;
+            	
+            	for(var i:int=0; i<aux.length; i++)
+            	{
+            		pais_ac.addItem(aux[i].pais);
+            	}
+            	pais_ac.addItem("Otro");
+            	
+            	CombosService.TipoEspecificacion();
+            }
+            private function tipoEspecificacionResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.TipoEspecificacion.Rows.source as Array;
+            	
+            	for(var i:int=0; i<aux.length; i++)
+            	{
+            		especificacion_ac.addItem(aux[i].tipo);
+            	}
+            	especificacion_ac.addItem("Otro");
+            	
+            	if(codigo_ti!=null) revisar();
+/**************/
+//falta cargar plantas aun
+            }
 			private function onClick(event:String):void
 			{
-				var maquina:Object = null;
 				if(event=="agregar")
 				{
+					agregar_btn.enabled = false;
 					maquina = new Object();
-					maquina.nombre = nombre_ti.text;
+					
+					//Hoja 1
+					if(tipo_cb.visible) maquina.tipo = tipo_cb.text;
+					else maquina.tipo = tipo_ti.text;
 					maquina.codigo = codigo_ti.text;
+					maquina.puestaMarcha = "RESCATAR FECHA CON";
+					maquina.nombre = nombre_ti.text;
+					maquina.ubicacion = ubicacion_ti.text;
+					maquina.planta = planta_cb.text;
+					maquina.estado = estado_cb.text;
+					maquina.condicionRecepcion = recepcion_cb.text;
+					maquina.costo = costo_ti.text;
+					maquina.horasVidaUtil = vidaUtil_ti.text;
+					maquina.horasActuales = horasActuales_ti.text;
+					maquina.horasDiariasPromedio = horasPromedio_ti.text;
 					maquina.descripcion = descripcion_ta.text;
+					//Hoja 2
+					maquina.marca = marca_ti.text;
+					maquina.ano = ano_ti.text;
+					if(pais_cb.visible) maquina.pais = pais_cb.text;
+					else maquina.pais = pais_ti.text;
+					maquina.modelo = modelo_ti.text;
+					maquina.serie = serie_ti.text;
+					maquina.fabricante = fabricante_ti.text;
+					
+					MaquinaService.addMaquina(maquina);
 				}
-				
-				dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, maquina));
+				else
+				{
+					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, null));
+				}
+				clean();
 			}
+			public function clean():void
+			{
+				if(codigo_ti!=null) codigo_ti.text = "";
+				if(nombre_ti!=null) nombre_ti.text = "";
+				if(tipo_ti!=null) tipo_ti.text = "";
+				if(puestaMarcha_df!=null) puestaMarcha_df.text = "";
+				if(ubicacion_ti!=null) ubicacion_ti.text="";
+				if(codigo_ti!=null) codigo_ti.text=""; 
+				if(vidaUtil_ti!=null) vidaUtil_ti.text="";
+				if(horasActuales_ti!=null) horasActuales_ti.text=""; 
+				if(horasPromedio_ti!=null) horasPromedio_ti.text=""; 
+				if(descripcion_ta!=null) descripcion_ta.text="";
+				if(marca_ti!=null) marca_ti.text="";
+			 	if(ano_ti!=null) ano_ti.text="";
+			 	if(pais_ti!=null) pais_ti.text="";
+			 	if(modelo_ti!=null) modelo_ti.text="";
+			 	if(serie_ti!=null) serie_ti.text="";
+			 	if(fabricante_ti!=null) fabricante_ti.text="";
+			 	if(especificacion_ti!=null) especificacion_ti.text="";
+			 	if(valor_ti!=null) valor_ti.text="";
+			 	if(actividad_ti!=null) actividad_ti.text="";
+			 	if(especificacion_ti!=null) especificacion_ti.text="";
+			 	tabNavigator.selectedIndex=0;
+			}
+			private function addMaquinaResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				if(result == 1)
+				{
+					MaquinaService.addEspecificaciones(especificaciones_ac, maquina.codigo);
+					MaquinaService.addMantenciones(mantenciones_ac, maquina.codigo);
+					MaquinaService.addComponentes(componentes_ac, maquina.codigo);
+					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, maquina));
+				}
+				else if(result==-1)
+				{
+					Alert.show("Lo siento el codigo ya exite");
+				}
+				else 
+				{
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+				}
+			}
+			private function addEspecificacionesResult(event:ResultEvent):void
+            {
+            	trace("Especificacion result: "+event.result);
+            }
+            private function addMantencionesResult(event:ResultEvent):void
+            {
+            	trace("Mantencion result: "+event.result);
+            }
+            private function addComponentesResult(event:ResultEvent):void
+            {
+            	trace("Componentes de la Maquina result: "+event.result);
+            }
 			
 			private function agregarEspecificacion():void
 			{
@@ -157,29 +285,34 @@
 			
 			private function agregarComponente():void
 			{
-				if(componentesSistema_dg.selectedIndex!=-1) componentes_ac.addItem(componentesSistema_ac.getItemAt(componentesSistema_dg.selectedIndex));
+				if(componentesSistema_dg.selectedIndex!=-1) componentes_ac.addItem(componentesSistema_ac[componentesSistema_dg.selectedIndex]);
 			}
 			private function eliminarComponente():void
 			{
 				if(componentes_dg.selectedIndex!=-1) componentes_ac.removeItemAt(componentes_dg.selectedIndex);
 			}
-			
+			private function revisar():void
+			{
+				if(codigo_ti.length>0) agregar_btn.enabled=true;
+				else agregar_btn.enabled=false;
+//aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
+			}
 		]]>
 	</mx:Script>
-	<mx:TabNavigator y="0" width="100%" height="421" horizontalCenter="1">
-		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
+	<mx:TabNavigator id="tabNavigator" y="0" width="100%" height="421" horizontalCenter="1" fontWeight="normal" selectedIndex="1">
+		<mx:Canvas label="Datos Básicos" width="100%" height="100%" fontWeight="normal" fontStyle="normal">
 			<mx:Label x="73" y="10" text="Tipo Maquina"/>
 			<mx:ComboBox x="186" y="10" id="tipo_cb" dataProvider="{tipoMaquina_ac}" change="actualizarTipo()"/>
 			<mx:TextInput x="186" y="10" width="319" id="tipo_ti" visible="false" maxChars="50"/>
 			<mx:Image x="512" y="10" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
 			<mx:Label x="73" y="38" text="Codigo"/>
-			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20"/>
+			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20" focusOut="revisar()"/>
 			<mx:Label x="73" y="66" text="Puesta en Marcha"/>
 			<mx:DateField x="186" y="64" width="175" id="puestaMarcha_df"/>
 			<mx:Label x="75" y="94" text="Nombre"/>
 			<mx:TextInput x="186" y="92" width="319" id="nombre_ti" maxChars="50"/>
 			<mx:Label x="75" y="122" text="Ubicacion"/>
-			<mx:TextInput x="186" y="120" width="319" id="ubicacion_cb" maxChars="50"/>
+			<mx:TextInput x="186" y="120" width="319" id="ubicacion_ti" maxChars="50"/>
 			<mx:Label x="539" y="122" text="Planta"/>
 			<mx:ComboBox x="587" y="120" id="planta_cb" width="162" dataProvider="{planta_ac}"/>
 			<mx:Label x="75" y="150" text="Estado"/>
@@ -282,6 +415,7 @@
 			<mx:Image x="703.5" y="309" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
+	
+	<mx:Button x="565" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
 	<mx:Button x="677" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
-	<mx:Button x="597" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn"/>
 </mx:Canvas>
