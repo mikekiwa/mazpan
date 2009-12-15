@@ -24,7 +24,7 @@ public class LineaService : System.Web.Services.WebService
     [WebMethod]
     public int addLinea(Linea l)
     {
-        String select = "SELECT COUNT(*) FROM Lineas WHERE codigo = '" + m.codigo + "'";
+        String select = "SELECT COUNT(*) FROM Lineas WHERE codigo = '" + l.codigo + "'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand selectUsuarios = new SqlCommand(select, selectConn);
