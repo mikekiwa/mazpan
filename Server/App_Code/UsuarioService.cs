@@ -3,7 +3,6 @@ using System.Web;
 using System.Collections;
 using System.Web.Services;
 using System.Web.Services.Protocols;
-
 using System.Data.SqlClient;
 using System.Data;
 
@@ -16,7 +15,7 @@ public class UsuarioService : System.Web.Services.WebService
 {
 
     private String coneccionString = Coneccion.coneccionString;
-
+    
     public UsuarioService ()
     { 
     }
@@ -26,7 +25,7 @@ public class UsuarioService : System.Web.Services.WebService
     {
         SqlConnection cn = new SqlConnection(coneccionString);
         cn.Open();
-        String query = "SELECT privilegio FROM Usuario WHERE Usuario.userName='" + userName + "' AND Usuario.password='" + password + "'";
+        string query = "SELECT privilegio FROM Usuario WHERE Usuario.userName='" + userName + "' AND Usuario.password='" + password + "'";
         SqlCommand selectUsuarios = new SqlCommand(query, cn);
 
         SqlDataReader reader = selectUsuarios.ExecuteReader();
