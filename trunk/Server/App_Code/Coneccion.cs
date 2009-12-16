@@ -13,7 +13,8 @@ using System.Web.UI.HtmlControls;
 /// </summary>
 public class Coneccion
 {
-    public static String coneccionString = @"Data Source=MARCELO-NETBOOK\SQLEXPRESS;Initial Catalog='Mantencion';Integrated Security=false;User='mazpan';Password='heman'";
+    //public static String coneccionString = @"Data Source=192.168.3.131;Initial Catalog='Mantencion';Integrated Security=false;User='sa';Password='1234'";
+    public static String coneccionString = "Data Source=localhost;Initial Catalog='Mantencion';Integrated Security=false;User='mazpan';Password='heman7'";
 
 	public Coneccion()
 	{
