@@ -7,7 +7,6 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Collections.Generic;
 
-
 /// <summary>
 /// Descripción breve de LineaService
 /// </summary>
@@ -155,6 +154,74 @@ public class LineaService : System.Web.Services.WebService
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
         String query = "SELECT * FROM ActividadMantencionLineas WHERE codigo='" + codigo + "'";
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
+    [WebMethod]
+    public int addMaquinas(List<Maquina> maquinas, string codigo)
+    {
+        String queryDelete = "DELETE FROM MaquinaLinea WHERE codigoLinea='" + codigo + "'";
+        SqlConnection cndel = new SqlConnection(coneccionString);
+        cndel.Open();
+        SqlCommand delete = new SqlCommand(queryDelete, cndel);
+
+        try
+        {
+            delete.ExecuteNonQuery();
+            cndel.Close();
+        }
+        catch
+        {
+            cndel.Close();
+            return -2;
+        }
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        int result = 0;
+        cn.Open();
+        try
+        {
+            foreach (Maquina m in maquinas)
+            {
+                String query = "INSERT INTO MaquinaLinea(codigoMaquina, codigoLinea)" +
+                               " VALUES('"+m.codigo+"','"+codigo+"')";
+
+                SqlCommand insert = new SqlCommand(query, cn);
+
+                result += insert.ExecuteNonQuery();
+            }
+            cn.Close();
+        }
+        catch
+        {//Puede ser que el codigo ya no exista, (por la concurrencia)
+            cn.Close();
+            return -2;
+        }
+        if (maquinas.Count == result) return 1;
+        return 0;
+    }
+
+    [WebMethod]
+    public DataTable getMaquinas(string codigo)
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = "MaquinaLinea";
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+        String query = "SELECT * FROM MaquinaLinea WHERE codigoLinea='" + codigo + "'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
