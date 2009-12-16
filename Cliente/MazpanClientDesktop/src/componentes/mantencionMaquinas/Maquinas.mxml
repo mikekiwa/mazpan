@@ -85,7 +85,7 @@
 				if(result == 1)
 					MaquinaService.allMaquinas();
 				else if(result == 0)
-					Alert.show("El maquina yo no existe en el sistema, intente recargar");
+					Alert.show("La maquina yo no existe en el sistema, intente recargar");
 				else
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 			}

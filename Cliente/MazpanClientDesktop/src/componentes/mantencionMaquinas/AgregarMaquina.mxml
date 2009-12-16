@@ -107,7 +107,7 @@
             	}
             	especificacion_ac.addItem("Otro");
             	
-            	if(codigo_ti!=null) revisar();
+            	if(codigo_ti!=null){ agregar_btn.visible=true; revisar();}
 /**************/
 //falta cargar plantas aun
             }
@@ -220,34 +220,17 @@
 			{
 				var item:Object = new Object();
 				item.actividad = actividad_ti.text;
-				if(tipoMantencion_cb.visible) item.mantencion = tipoMantencion_cb.text;
-				else  item.mantencion = tipoMantencion_ti.text;
-				if(frecuencia_cb.visible) item.frecuencia = frecuencia_cb.text;
-				else item.frecuencia = frecuencia_ti.text;
+				item.mantencion = tipoMantencion_cb.text;
+				item.frecuencia = frecuencia_cb.text;
 				mantenciones_ac.addItem(item);
+				actividad_ti.text="";
 			}
-			
-			private function actualizarTipoMantecion():void
-			{
-				tipoMantencion_ti.text = "";
-				if(tipoMantencion_cb.text=="Otro"){tipoMantencion_cb.visible=false; tipoMantencion_ti.visible=true; cancelarTipoMantencion_btn.visible=true;} 
-				else {tipoMantencion_cb.visible=true; tipoMantencion_ti.visible=false; cancelarTipoMantencion_btn.visible=false;}
-			}
-			
-			private function actualizarFrecuencia():void
-			{
-				frecuencia_ti.text = "";
-				if(frecuencia_cb.text=="Otro"){frecuencia_cb.visible=false; frecuencia_ti.visible=true; cancelarFrecuencia_btn.visible=true;} 
-				else{frecuencia_cb.visible=true; frecuencia_ti.visible=false; cancelarFrecuencia_btn.visible=false;}
-			}
-			
 			private function actualizarPais():void
 			{
 				pais_ti.text = "";
 				if(pais_cb.text=="Otro"){pais_cb.visible=false; pais_ti.visible=true; cancelarPais_btn.visible=true;} 
 				else{pais_cb.visible=true; pais_ti.visible=false; cancelarPais_btn.visible=false;}
 			}
-			
 			private function actualizarTipo():void
 			{
 				tipo_ti.text = "";
@@ -404,18 +387,14 @@
 				<mx:Label x="130" y="13" text="Actividad"/>
 				<mx:TextInput x="256" y="11" width="279" id="actividad_ti" maxChars="50"/>
 				<mx:Label x="130" y="41" text="Tipo de Mantencion"/>
-				<mx:ComboBox x="256" y="39" width="279" id="tipoMantencion_cb" dataProvider="{tipoMantencion_ac}" change="actualizarTipoMantecion()"/>
-				<mx:TextInput x="256" y="39" width="249" id="tipoMantencion_ti" visible="false" maxChars="50"/>
-				<mx:Image x="513" y="39" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipoMantencion_btn" visible="false" click="tipoMantencion_cb.selectedIndex=0; actualizarTipoMantecion()"/>
+				<mx:ComboBox x="256" y="39" width="279" id="tipoMantencion_cb" dataProvider="{tipoMantencion_ac}"/>
 				<mx:Label x="130" y="69" text="Frecuencia"/>
-				<mx:ComboBox x="256" y="67" width="279" id="frecuencia_cb" dataProvider="{frecuencia_ac}" change="actualizarFrecuencia()"/>
-				<mx:TextInput x="256" y="67" width="249" id="frecuencia_ti" visible="false" maxChars="50"/>
-				<mx:Image x="513" y="67" width="22" height="22" source="iconos/cancelar.png" id="cancelarFrecuencia_btn" visible="false" click="frecuencia_cb.selectedIndex=0; actualizarFrecuencia()"/>
+				<mx:ComboBox x="256" y="67" width="279" id="frecuencia_cb" dataProvider="{frecuencia_ac}" />
 			</mx:Canvas>
 			<mx:Image x="703.5" y="309" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
 	
-	<mx:Button x="565" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
-	<mx:Button x="677" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false" visible="false"/>
+	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 </mx:Canvas>

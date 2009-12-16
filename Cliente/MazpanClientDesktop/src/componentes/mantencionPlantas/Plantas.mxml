@@ -2,48 +2,56 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" width="795" height="500" layout="absolute" title="Plantas"
 	xmlns:ns1="componentes.mantencionPlantas.*" creationComplete="init()">
 	
+	<mx:WebService id="PlantaService" 		wsdl="{index.URL + 'PlantaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allPlantas" 	result="allPlantasResult(event)" 	fault="ErrorFaultHandler(event, 'allPlantas')"/>
+		<mx:operation name="delPlanta" 		result="delPlantaResult(event)" 	fault="ErrorFaultHandler(event, 'delPlanta')"/>
+	</mx:WebService>
+	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{canvas1}"/>
 			<mx:RemoveChild target="{image1}"/>
 			<mx:RemoveChild target="{image2}"/>
 			<mx:RemoveChild target="{image3}"/>
-			<mx:RemoveChild target="{lineas_dg}"/>
+			<mx:RemoveChild target="{plantas_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarPlanta x="0" y="0" complexClick="agregarLineaResult(event)"/>
+				<ns1:AgregarPlanta x="0" y="0" complexClick="agregarPlantaResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
 			[Bindable]
-			private var plantas_ac:ArrayCollection = new ArrayCollection();
+			public static var nombre:String = "Plantas";
 			
+			[Bindable]
+			private var plantas_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
 			private function init():void
 			{
-				var item1:Object = new Object();
-				item1.nombre = "Planta 1";
-				item1.codigo = "P001";
-				item1.descripcion = "Descripcion de planta 1";
-				plantas_ac.addItem(item1);
-				
-				var item2:Object = new Object();
-				item2.nombre = "Planta 2";
-				item2.codigo = "P002";
-				item2.descripcion = "Descripcion de planta 2";
-				plantas_ac.addItem(item2);
+				PlantaService.allPlantas();
 			}
-			
-			private function agregarLineaResult(event:ComplexEvent):void
+			private function allPlantasResult(event:ResultEvent):void
+			{
+				plantas_ac = event.result.Tables.Plantas.Rows.source as Array;
+			}
+			private function agregarPlantaResult(event:ComplexEvent):void
 			{
 /*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
 				if(event.stateOrigin==AgregarPlanta.nombre && event.objeto!=null)
 				{
-					plantas_ac.addItem(event.objeto);
+					plantas_ac.push(event.objeto);
 				}
 				currentState = event.stateDestination;
 			}
@@ -64,6 +72,16 @@
 					input.visible = true;
 				}
 			}
+			private function delPlantaResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				if(result == 1)
+					PlantaService.allPlantas();
+				else if(result == 0)
+					Alert.show("La planta yo no existe en el sistema, intente recargar");
+				else
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+			}
 		]]>
 	</mx:Script>
 	
@@ -77,7 +95,7 @@
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>
-	<mx:DataGrid id="lineas_dg" width="755" x="10" y="120" dataProvider="{plantas_ac}" height="330">
+	<mx:DataGrid id="plantas_dg" width="755" x="10" y="120" dataProvider="{plantas_ac}" height="330">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
 			<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
@@ -85,6 +103,6 @@
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) plantas_ac.removeItemAt(lineas_dg.selectedIndex)"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(plantas_dg.selectedIndex!=-1) PlantaService.delPlanta(plantas_dg.selectedItem.codigo)"/>
 	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>
