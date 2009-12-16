@@ -49,23 +49,11 @@
 			private function init():void
 			{
 				LineaService.allLineas();
-				/*var item1:Object = new Object();
-				item1.nombre = "Linea 1";
-				item1.codigo = "LN001";
-				item1.descripcion = "Descripcion de linea 1";
-				lineas_ac.addItem(item1);
-				
-				var item2:Object = new Object();
-				item2.nombre = "Linea 2";
-				item2.codigo = "LN002";
-				item2.descripcion = "Descripcion de linea 2";
-				lineas_ac.addItem(item2);*/
 			}
 			private function allLineasResult(event:ResultEvent):void
 			{
 				lineas_ac = event.result.Tables.Lineas.Rows.source as Array;
 			}
-			
 			private function agregarLineaResult(event:ComplexEvent):void
 			{
 /*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
@@ -98,7 +86,7 @@
 				if(result == 1)
 					LineaService.allMaquinas();
 				else if(result == 0)
-					Alert.show("El maquina yo no existe en el sistema, intente recargar");
+					Alert.show("La linea yo no existe en el sistema, intente recargar");
 				else
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 			}

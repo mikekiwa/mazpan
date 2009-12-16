@@ -91,7 +91,7 @@
             	}
             	especificacion_ac.addItem("Otro");
             	
-            	if(codigo_ti!=null) revisar();
+            	if(codigo_ti!=null){ agregar_btn.visible=true; revisar();}
             }
 			
 			private function onClick(event:String):void
@@ -331,7 +331,7 @@
 			<mx:Image x="709" y="306" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
-	<mx:Button x="598" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
-	<mx:Button x="678" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false" visible="false"/>
+	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 	
 </mx:Canvas>
