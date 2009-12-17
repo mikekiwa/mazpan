@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "MaspanMantencion", "MaspanMantencion\MaspanMantencion.vdproj", "{9DFC42CF-0E1D-4234-BFD4-43A1321D27FA}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "C:\...\Server\", "..\..\ParaSubir\Server\", "{258DE0D9-B4A4-4FFB-849A-6D36EFECC298}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.VirtualPath = "/Server"
+		Debug.AspNetCompiler.PhysicalPath = "..\..\ParaSubir\Server\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\Server\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/Server"
+		Release.AspNetCompiler.PhysicalPath = "..\..\ParaSubir\Server\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\Server\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "50689"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|.NET = Debug|.NET
+		Release|.NET = Release|.NET
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9DFC42CF-0E1D-4234-BFD4-43A1321D27FA}.Debug|.NET.ActiveCfg = Debug
+		{9DFC42CF-0E1D-4234-BFD4-43A1321D27FA}.Debug|.NET.Build.0 = Debug
+		{9DFC42CF-0E1D-4234-BFD4-43A1321D27FA}.Release|.NET.ActiveCfg = Release
+		{9DFC42CF-0E1D-4234-BFD4-43A1321D27FA}.Release|.NET.Build.0 = Release
+		{258DE0D9-B4A4-4FFB-849A-6D36EFECC298}.Debug|.NET.ActiveCfg = Debug|.NET
+		{258DE0D9-B4A4-4FFB-849A-6D36EFECC298}.Debug|.NET.Build.0 = Debug|.NET
+		{258DE0D9-B4A4-4FFB-849A-6D36EFECC298}.Release|.NET.ActiveCfg = Debug|.NET
+		{258DE0D9-B4A4-4FFB-849A-6D36EFECC298}.Release|.NET.Build.0 = Debug|.NET
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
