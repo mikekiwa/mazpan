@@ -14,7 +14,9 @@ using System.Web.UI.HtmlControls;
 public class Coneccion
 {
     //public static String coneccionString = @"Data Source=192.168.3.131;Initial Catalog='Mantencion';Integrated Security=false;User='sa';Password='1234'";
-    public static String coneccionString = "Data Source=localhost;Initial Catalog='Mantencion';Integrated Security=false;User='mazpan';Password='heman7'";
+    //public static String coneccionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog='Mantencion';Integrated Security=false;User='mazpan';Password='heman'";
+    //public static String coneccionString = @"Data Source=192.168.3.130\SQLEXPRESS;Initial Catalog='Mantencion';Integrated Security=SSPI;User='mazpan';Password='heman'";
+    public static String coneccionString = @"Data Source=SVR-MASPAN2;Initial Catalog='Mantencion';Integrated Security=false;User='sa';Password='1234'";
 
 	public Coneccion()
 	{
