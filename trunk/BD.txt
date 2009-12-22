@@ -1,0 +1,62 @@
+(17:47:40) ('.'): mmm
+(17:47:41) ('.'): nop
+(17:47:53) mespina: que tendria q tener
+(17:47:55) mespina: o hacer
+(17:48:11) ('.'): por ke el acceso a la bd es por un puerto definido
+(17:48:12) ('.'): aaaa
+(17:48:26) ('.'): kizas tengas ke agregar el puerto al firewall
+(17:48:26) ('.'): mmm
+(17:48:27) mespina: cual seria en tu opinion el string de coneccion?
+(17:48:31) ('.'): depende de ke coneccion sea
+(17:48:35) ('.'): SQL SERVER
+(17:48:36) mespina: sql server
+(17:48:39) mespina: si
+(17:48:48) ('.'): ??
+(17:48:48) ('.'): mmm
+(17:48:54) ('.'): nop
+(17:48:59) ('.'): no tendrias problemas
+(17:49:06) ('.'): podrias probar la coneccion
+(17:49:11) mespina: y el string como lo obtengo
+(17:49:17) mespina: como?
+(17:49:23) ('.'): tienes el sql server management studio??
+(17:49:30) ('.'): mmm
+(17:49:32) mespina: en mi pc?
+(17:49:33) ('.'): el string de coneccion
+(17:49:35) ('.'): seep
+(17:49:40) mespina: creo q si
+(17:49:53) mespina: tengo el express
+(17:49:58) mespina: ese q usamos en taller
+(17:50:39) ('.'): mm
+(17:50:39) ('.'): pareke nu lo tiene
+(17:51:13) mespina: q no tiene?
+(17:51:36) mespina: tengo sql server management studio express
+(17:53:46) ('.'): aaaa
+(17:53:46) ('.'): ya
+(17:53:53) ('.'): pero ya te has conectado
+(17:53:57) mespina: nop
+(17:54:02) ('.'): o estar recien probando
+(17:54:09) ('.'): ???
+(17:55:36) ('.'): mira abre el management studio
+(17:55:41) ('.'): y pincha en conectar y hay podras probar tu base de datos
+(17:55:47) ('.'): y ver los errores ke tiene
+(17:56:02) mespina: aps
+(17:56:03) ('.'): si es firewall u otro
+(17:56:21) mespina: pera mira yo quiero hacer como tu en taller con lo de venegas
+(17:56:50) mespina: tengo un pc con wind server 2000 algo y quiero acceder
+(17:56:54) mespina: a una bd en el
+(18:00:35) ('.'): yap
+(18:00:51) ('.'): lo unico ke necesitas es ke el pc tenga una ip real
+(18:00:56) ('.'): para acceder desde afuera
+(18:01:13) mespina: como es eso de ip real?
+(18:01:31) ('.'): mmm inet vtr
+(18:01:38) ('.'): vtr te da una ip real 
+(18:02:10) mespina: aps y si no fuera vtr?
+(18:02:11) ('.'): telefonica nop
+(18:02:11) ('.'): nosotros tuvimos ese problema
+(18:02:17) ('.'): mmm
+(18:02:35) mespina: solo por preguntar mira q yo no se q internet hay
+(18:03:16) ('.'): tendrias ke modificar el router y forwarding'ear las peticiones que llegen al router por el puerto del servicio de bd a tu pc con el sql server
+(18:03:46) ('.'): es facil hacerlo igual
+(18:04:09) mespina: ya loco despues si tengo drama me echai una mano porfa
+(18:04:18) ('.'): ok
+(18:05:23) ('.'): no te preocupes
