@@ -13,15 +13,22 @@ using System.Web.UI.HtmlControls;
 /// </summary>
 public class Mantencion
 {
+    private string i;//identificador
     private string c;//codigo
     private string a;//actividad
     private string f;//frecuencia
-    private string m;//mantencion
+    private string m;//tipomantencion
+    private string p;//fecha planificada
+    private string r;//fecha realizada
 
 	public Mantencion()
 	{
 	}
-
+    public string id
+    {
+        set { i = value; }
+        get { return i; }
+    }
     public string codigo
     {
         set { c = value; }
@@ -41,5 +48,15 @@ public class Mantencion
     {
         set { m = value; }
         get { return m; }
+    }
+    public string planificada
+    {
+        set { p = value; }
+        get { return p; }
+    }
+    public string realizada
+    {
+        set { r = value; }
+        get { return r; }
     }
 }
