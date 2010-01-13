@@ -17,23 +17,19 @@
 			import mx.events.CloseEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
-		/*
-		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
-		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
-		<mx:operation name="getCuentasItem" result="getCuentasItemResult(event)" 	fault="ErrorFaultHandler(event, 'getCuentasItem')"/>
-		<mx:operation name="quitar" 		result="quitarResult(event)" 			fault="ErrorFaultHandler(event, 'quitar')"/>
-		<mx:operation name="detalle" 		result="detalleResult(event)" 			fault="ErrorFaultHandler(event, 'detalle')"/>
-		 */
+		
 			public static const nombre:String = "Amarre";//correspondiente al estado en que se debiera colocar
 		
 			[Bindable]
 			private var cuentas:Array;
 			[Bindable]
 			private var itemsCombo:Array;
-			private var items:Array;
 			
-            private var datosParaGuardar:Array;
+			private var items:Array;
+			private var datosParaGuardar:Array;
             private var inicializado:Boolean = false;
+            private var realizaCambios:Boolean = false;
+            private var balanceCargado:Boolean;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -58,8 +54,10 @@
 				tabla.height = (cuentas.length + 1) * 22 + 25;
 				this.height = 30 + (cuentas.length + 1) * 22 + 25;
 			}
-			public function parametros(_items:Array):void
+			public function parametros(_balanceCargado:Boolean,_items:Array):void
 			{
+				balanceCargado = _balanceCargado;
+				realizaCambios = false;
 				items = _items;
 				itemsCombo = new ITEMS(items).getItemsContables();
 				items_cb.selectedIndex = 0;
@@ -103,11 +101,13 @@
 				if(event.result == 1)
 				{
 					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezdan las que amarramos
+					realizaCambios = true;
 					trace("Datos Guardados exitosamente");
 				}
 				else if(event.result == -1)
 				{
-				 	trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				 	realizaCambios = true;
+					trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
 				}
 				else
 				{
@@ -119,7 +119,8 @@
 				cuentas = new Array();
 				tabla.height = 370;
 				this.height = 400;
-				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,true));
+				if(!balanceCargado) realizaCambios = false;
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,realizaCambios));
 			}
 		]]>
 	</mx:Script>
@@ -128,7 +129,7 @@
 		<mx:Label text="ITEM:" fontWeight="bold" fontSize="12"/>
 		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}"/>
 		<mx:Button label="Amarrar" click="guardarDatos()"/>
-		<mx:Button label="Atras" width="75" click="goState('')"/>
+		<mx:Button label="Atras" width="75" click="goState(Balanece.nombre)"/>
 	</mx:HBox>
 	<mx:DataGrid x="0" y="30" width="800" height="100%" id="tabla" dataProvider="{cuentas}">
 		<mx:columns>

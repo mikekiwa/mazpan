@@ -22,9 +22,11 @@
 			
 			private var img:DisplayObject;
 			private var ano:String;
+			private var balanceCargado:Boolean;
 			
-			public function parametros(_items:Array, _meses:ArrayCollection,_img:DisplayObject, _ano:String):void
+			public function parametros(_balanceCargado:Boolean,_items:Array, _meses:ArrayCollection,_img:DisplayObject, _ano:String):void
 			{
+				balanceCargado = _balanceCargado;
 				items = _items;
 				meses_ac = _meses;
 				itemsNames = new ITEMS(items).getItems();
@@ -64,7 +66,7 @@
             private function goState(estadoDestino:String):void
 			{
 				ix = new Array();
-				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,false));
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,balanceCargado));
 			}
 		]]>
 	</mx:Script>

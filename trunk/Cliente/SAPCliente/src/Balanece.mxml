@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	backgroundColor="#cccccc" creationComplete="init()">
+
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
+		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "Balance";//correspondiente al estado en que se debiera colocar 
+			
+			[Bindable]
+			private var items:Array =  new Array();
+			[Bindable]
+            private var meses_ac:ArrayCollection= new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
+            
+			private var cargarOtros:Boolean = false;
+			private var ano_var:int = 2009;
+			private var mes_seleccionado:int = 11;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            private function mostrar(event:ResultEvent):void
+            {
+            	trace(event.result as String);	
+            }
+           
+            private function init():void
+            {
+            	revisar_btn.enabled = false;
+            	amarre_btn.enabled = false;
+            	generar_btn.enabled = false;
+            	grafico_btn.enabled = false;
+            	
+            	Service.getItems();
+            }
+            public function actualizarMeses():void
+            {
+            	meses_cb.selectedIndex = mes_seleccionado;//Esta linea es necesaria, puesto que cuando se vuelve al estado base el combo de seleccion de mes se cambiaba a ENERO
+            }
+            public function cargar():void
+            {
+            	cargarOtros = false;
+            	generar_btn.enabled = false;
+            	cargar_btn.enabled = false;
+            	grafico_btn.enabled = false;
+				var sinUso:ITEMS = new ITEMS(items);sinUso.default_values();
+            	ano_var = ano.value;
+            	Service.getFlujo(items[ITEMS.VENTASZONAS].id, items[ITEMS.VENTASZONAS].itemName, ITEMS.VENTASZONAS,ano_var);
+            	cargar_btn.label='Recargar';
+            	actualizarMeses();
+            }
+            private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+            	revisar_btn.enabled = true;
+            	amarre_btn.enabled = true;
+            	cargar_btn.enabled = true;
+            	meses_cb.enabled = true;
+            }
+            private function getFlujoResult(event:ResultEvent):void
+            {
+            	items[event.result.orden].ENE = event.result.meses.source[0];
+            	items[event.result.orden].FEB = event.result.meses.source[1];
+            	items[event.result.orden].MAR = event.result.meses.source[2];
+            	items[event.result.orden].ABR = event.result.meses.source[3];
+            	items[event.result.orden].MAY = event.result.meses.source[4];
+            	items[event.result.orden].JUN = event.result.meses.source[5];
+            	items[event.result.orden].JUL = event.result.meses.source[6];
+            	items[event.result.orden].AGO = event.result.meses.source[7];
+            	items[event.result.orden].SEP = event.result.meses.source[8];
+            	items[event.result.orden].OCT = event.result.meses.source[9];
+            	items[event.result.orden].NOV = event.result.meses.source[10];
+            	items[event.result.orden].DIC = event.result.meses.source[11];
+	            items[event.result.orden].PPTO = event.result.ppto;
+            	
+            	if(ITEMS.next(event.result.orden)!=ITEMS.MAXVALUE)
+            	{
+            		Service.getFlujo(items[ITEMS.next(event.result.orden)].id, items[ITEMS.next(event.result.orden)].itemName, ITEMS.next(event.result.orden),ano_var);
+            	}
+            	else
+            	{
+            		var calculo:ITEMS = new ITEMS(items);
+            		calculo.CALCULAR(ITEMS.VENTASNETAS);	
+	            	calculo.CALCULAR(ITEMS.COSTOSTOTALES);
+	            	calculo.CALCULAR(ITEMS.MARGENCOMERCIAL);
+	            	calculo.CALCULAR(ITEMS.TOTALGASTOSADMINISTRATIVOS);
+	            	calculo.CALCULAR(ITEMS.MARGENOPERACIONAL);
+	            	calculo.CALCULAR(ITEMS.RESULTADOANTESDEIMPUESTO);
+	            	calculo.CALCULAR_IMPUESTO();
+	            	calculo.CALCULAR(ITEMS.RESULTADO);
+	            	calculo.CALCULAR_OTROS(meses_cb.selectedIndex);
+	            	
+            		generar_btn.enabled = true;
+            		cargar_btn.enabled = true;
+            		cargarOtros = true;
+            		grafico_btn.enabled  = true;
+            	}
+            }
+			private function generarPDF():void
+			{
+				var pdf:LAYOUT = new LAYOUT();
+				pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
+			}
+            private function actualizarColumnas():void
+            {
+            	if(meses_cb.selectedIndex>=1)feb.visible=true; else feb.visible=false;
+            	if(meses_cb.selectedIndex>=2)mar.visible=true; else mar.visible=false;
+            	if(meses_cb.selectedIndex>=3)abr.visible=true; else abr.visible=false;
+            	if(meses_cb.selectedIndex>=4)may.visible=true; else may.visible=false;
+            	if(meses_cb.selectedIndex>=5)jun.visible=true; else jun.visible=false;
+            	if(meses_cb.selectedIndex>=6)jul.visible=true; else jul.visible=false;
+            	if(meses_cb.selectedIndex>=7)ago.visible=true; else ago.visible=false;
+            	if(meses_cb.selectedIndex>=8)sep.visible=true; else sep.visible=false;
+            	if(meses_cb.selectedIndex>=9)oct.visible=true; else oct.visible=false;
+            	if(meses_cb.selectedIndex>=10)nov.visible=true; else nov.visible=false;
+            	if(meses_cb.selectedIndex>=11)dic.visible=true; else dic.visible=false;
+            	
+            	if(cargarOtros)
+            	{
+            		var calculo:ITEMS = new ITEMS(items);
+            		calculo.CALCULAR_OTROS(meses_cb.selectedIndex);
+            	}
+            }
+            
+            private function detalle():void
+            {
+            	if(tabla1.selectedIndex!=-1 && generar_btn.enabled)
+            	{
+            		var esContable:Boolean = false;
+            		var itemsContables:Array = new ITEMS(items).getItemsContables();
+            		for(var i:int=0; i<itemsContables.length; i++)
+            			if(tabla1.selectedItem.itemName == itemsContables[i]) esContable=true;
+            		
+            		if(esContable)
+            		{
+	            		goState(Detalle.nombre);
+	            	}
+            	}
+            }
+            private function goState(estadoDestino:String):void
+			{
+				var parametros:Object = new Object();
+				
+				parametros.items = items;
+				parametros.meses = meses_ac;
+				parametros.img = img;
+				parametros.ano = ano_var.toString();
+				parametros.balanceCargado = generar_btn.enabled; 
+				if(tabla1.selectedIndex!=-1)
+				{
+					parametros.idItem = tabla1.selectedIndex+1;
+					parametros.itemName = tabla1.selectedItem.itemName;
+				}
+				
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,parametros));
+					/*						// si  destino
+				 amarre_cmp.parametros(items)//amerreState
+				revisar_cmp.parametros(items)}
+				grafico_cmp.parametros()}
+				
+          		detalle_cmp.parametros(tabla1.selectedIndex+1, tabla1.selectedItem.itemName, ano_var, meses_ac);
+				*/
+			}
+		]]>
+	</mx:Script>
+
+	<mx:Image x="299" y="124" width="180" height="100" id="img" source="@Embed('maspan.png')"/>
+	<mx:VBox id="vbox1">
+		<mx:HBox id="hbox1" horizontalCenter="0">
+			<mx:Button label="Amarre" click="goState(Amarre.nombre)" 			 id="amarre_btn"  enabled="false"/>
+			<mx:Button label="Revisar" click="goState(Revisar.nombre); " 		 id="revisar_btn" enabled="false"/>
+			<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" enabled="false"/>
+			<mx:Button label="Grafico" click="goState(Grafico.nombre)" 	 	 	 id="grafico_btn" enabled="false"/>
+			<mx:Label  text="             Elija el mes" 						 id="label2"/>
+			<mx:ComboBox dataProvider="{meses_ac}" change="actualizarColumnas()" id="meses_cb" 	  enabled="false" selectedIndex="11"/>
+			<mx:Label  text="      Elija el año" 								 id="label1"/>
+			<mx:NumericStepper minimum="1990" maximum="9999" value="2010" 		 id="ano"/>
+			<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  enabled="false" width="90"/>
+		</mx:HBox>
+		<mx:DataGrid width="100%" height="750" dataProvider="{items}" id="tabla1" doubleClickEnabled="true" doubleClick="detalle()" toolTip="Doble click para ver detalle">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Cuenta" 	dataField="itemName" sortable="false" width="180"/>
+				<mx:DataGridColumn headerText="ENE" 	dataField="ENE" 	sortable="false" textAlign="right" width="68" id="ene"/>
+				<mx:DataGridColumn headerText="FEB" 	dataField="FEB"		sortable="false" textAlign="right" width="68" id="feb"/>
+				<mx:DataGridColumn headerText="MAR" 	dataField="MAR" 	sortable="false" textAlign="right" width="68" id="mar"/>
+				<mx:DataGridColumn headerText="ABR" 	dataField="ABR" 	sortable="false" textAlign="right" width="68" id="abr"/>
+				<mx:DataGridColumn headerText="MAY" 	dataField="MAY" 	sortable="false" textAlign="right" width="68" id="may"/>
+				<mx:DataGridColumn headerText="JUN" 	dataField="JUN" 	sortable="false" textAlign="right" width="68" id="jun"/>
+				<mx:DataGridColumn headerText="JUL" 	dataField="JUL" 	sortable="false" textAlign="right" width="68" id="jul"/>
+				<mx:DataGridColumn headerText="AGO" 	dataField="AGO" 	sortable="false" textAlign="right" width="68" id="ago"/>
+				<mx:DataGridColumn headerText="SEP" 	dataField="SEP" 	sortable="false" textAlign="right" width="68" id="sep"/>
+				<mx:DataGridColumn headerText="OCT" 	dataField="OCT" 	sortable="false" textAlign="right" width="68" id="oct"/>
+				<mx:DataGridColumn headerText="NOV" 	dataField="NOV" 	sortable="false" textAlign="right" width="68" id="nov"/>
+				<mx:DataGridColumn headerText="DIC" 	dataField="DIC" 	sortable="false" textAlign="right" width="68" id="dic"/>
+				<mx:DataGridColumn headerText="REAL" 	dataField="REAL" 	sortable="false" textAlign="right" width="68"/>
+				<mx:DataGridColumn headerText="PPTO" 	dataField="PPTO" 	sortable="false" textAlign="right" width="68"/>
+				<mx:DataGridColumn headerText="DESV" 	dataField="DESV" 	sortable="false" textAlign="right" width="68"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</mx:VBox>
+</mx:Canvas>
