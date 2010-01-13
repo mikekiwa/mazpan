@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%" 
+	verticalScrollPolicy="auto" horizontalScrollPolicy="auto" creationComplete="init()"
+	xmlns:ns1="componentes.*" 
+	xmlns:ns2="componentes.mantencionMaquinas.*" 
+	xmlns:mantencionComponentes="componentes.mantencionComponentes.*" 
+	xmlns:mantencionLineas="componentes.mantencionLineas.*" 
+	xmlns:mantencionPlantas="componentes.mantencionPlantas.*" 
+	xmlns:ns3="componentes.Acordeon.*" 
+	xmlns:ns4="componentes.mantencionAgentesExternos.*" 
+	xmlns:ns5="componentes.mantencionSistema.*" 
+	xmlns:ns6="componentes.general.*" 
+	xmlns:ns7="componentes.planMantencion.*">
+	
+	<mx:states>
+		<mx:State name="maquinasState">
+			<mx:SetProperty target="{acordeon}" name="y" value="33.9"/>
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns2:Maquinas id="maq"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="cleanState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:SetProperty target="{cerrar_btn}" name="x" value="308"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns7:planComponentes>
+				</ns7:planComponentes>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="lineasState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<mantencionLineas:Lineas/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="plantasState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<mantencionPlantas:Plantas/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="componentesState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<mantencionComponentes:Componentes id="comp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="agentesExternosState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns4:AgentesExternos/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="personalState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns5:Personal/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="solicitudState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns6:SolicitudTrabajo/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="trabajoTercerosState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns4:TrabajosAgentesExternos/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="usuariosState">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns5:Usuarios/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import componentes.mantencionComponentes.Componentes;
+			import componentes.Acordeon.MenuMantenciones;
+			import mx.controls.Alert;
+			import eventos.ComplexEvent;
+			
+			[Bindable]
+			public static var URL:String = "http://localhost:7070/Server/";
+			//public static var URL:String = "http://192.168.3.131/Server/";
+			//public static var URL:String = "http://192.168.3.117/Server/";
+						
+			private function init():void
+			{
+				//Security.allowDomain("http://localhost/Cliente/index.cl");
+				//Security.loadPolicyFile("http://localhost/crossdomain.xml");
+			}
+						
+			private function loginResult(event:ComplexEvent):void
+			{
+				currentState = event.stateDestination;
+				cerrar_btn.visible = true;
+				acordeon.visible = true;
+				acordeon.cargar(event.objeto as int);
+			}
+			private function cerrar():void
+			{
+//Falta hacer, que cuando a`prite este boton todos los componentes pasen a estado base
+				cerrar_btn.visible = false;	
+				acordeon.visible = false;
+				currentState = "";
+			}
+			private function goState(event:ComplexEvent):void
+			{
+				currentState = event.stateDestination;
+				if(event.stateDestination == "componentesState") comp.clean();
+				if(event.stateDestination == "maquinasState") maq.clean();
+			}
+			
+			//<mx:Style source="Estilo.css"/>	
+		]]>
+	</mx:Script>
+	
+	<mx:Style source="Estilo.css"/>
+	<mx:Canvas horizontalCenter="0">
+		<mx:VBox width="100%" height="100%" id="canvas">
+			<mx:Canvas width="100%" height="30">
+				<mx:LinkButton label="CERRAR" id="cerrar_btn" click="cerrar()" visible="false" horizontalCenter="0"/>
+			</mx:Canvas>
+			<mx:HBox width="975" id="hbox1">
+				<ns3:Acordeon y="30" id="acordeon" complexClick="goState(event)" visible="false"/>
+				<ns1:Login complexClick="loginResult(event)" id="login"/>
+			</mx:HBox>
+		</mx:VBox>
+	</mx:Canvas>
+</mx:Application>
