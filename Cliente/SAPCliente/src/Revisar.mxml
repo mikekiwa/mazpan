@@ -27,6 +27,8 @@
 			
             private var cuentasParaQuitar:Array;
             private var inicializado:Boolean = false;
+            private var realizaCambios:Boolean = false;
+            private var balanceCargado:Boolean;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -52,11 +54,23 @@
 			private function getCuentasItemResult(event:ResultEvent):void
             {
             	cuentasItem = event.result.Tables.CuentasItem.Rows.source as Array;
+            	for(var i:int=0; i<cuentasItem.length; i++)
+				{//Con esto a cada una de las cuenta se le asigna el cajon correspondiente en SAP,
+				 //esto porque el cajon es solo un label en SAP
+					if(cuentasItem[i].GroupMask == 4) cuentasItem[i].Cajon = "Ingresos Operacionales";
+					if(cuentasItem[i].GroupMask == 5) cuentasItem[i].Cajon = "Costos Operacionales";
+					if(cuentasItem[i].GroupMask == 6) cuentasItem[i].Cajon = "Gastos Operacionales";
+					if(cuentasItem[i].GroupMask == 7) cuentasItem[i].Cajon = "Otros Ingresos";
+					if(cuentasItem[i].GroupMask == 8) cuentasItem[i].Cajon = "Otros Gastos";
+				}
+            	
             	tabla.height = (cuentasItem.length + 1) * 22 + 25;
             	this.height = 30 + (cuentasItem.length + 1) * 22 + 25;
             }
-			public function parametros(_items:Array):void
+			public function parametros(_balanceCargado:Boolean,_items:Array):void
 			{
+				balanceCargado = _balanceCargado;
+				realizaCambios = false;
 				items = _items;
 				itemsCombo = new ITEMS(items).getItemsContables();
 				
@@ -94,10 +108,12 @@
 				if(event.result == 1)
 				{
 					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezdan las que quitamos (desamarramos)
+					realizaCambios = true;
 					trace("Cuentas quitadas exitosamente");
 				}
 				else if(event.result == -1)
 				{
+					realizaCambios = true;
 				 	trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
 				}
 				else
@@ -123,7 +139,8 @@
 				cuentasItem = new Array();
 				tabla.height = 370;
 				this.height = 400;
-				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,true));
+				if(!balanceCargado) realizaCambios = false;
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,realizaCambios));
 			}
 		]]>
 	</mx:Script>
@@ -133,7 +150,7 @@
 		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" change="actualizarCuentas()" selectedIndex="0"/>
 		<mx:Spacer width="100"/>
 		<mx:Button label="Quitar" click="quitarCuentasItem()"/>
-		<mx:Button label="Atras" width="62" click="goState('')"/>
+		<mx:Button label="Atras" width="62" click="goState(Balanece.nombre)"/>
 	</mx:HBox>
 	<mx:DataGrid x="0" y="30" width="800" height="100%" id="tabla" dataProvider="{cuentasItem}">
 		<mx:columns>

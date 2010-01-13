@@ -37,21 +37,22 @@ package
 		public function generar(img:DisplayObject, array:Array, numColumns:int, mes:String, ano:int):void
 		{
           	var itm:GridColumn = new GridColumn("", "itemName", 40, Align.CENTER, Align.LEFT);
-			var ene:GridColumn = new GridColumn("ENE", "ENE", 15, Align.CENTER, Align.RIGHT);
-			var feb:GridColumn = new GridColumn("FEB", "FEB", 15, Align.CENTER, Align.RIGHT);
-			var mar:GridColumn = new GridColumn("MAR", "MAR", 15, Align.CENTER, Align.RIGHT);
-			var abr:GridColumn = new GridColumn("ABR", "ABR", 15, Align.CENTER, Align.RIGHT);
-			var may:GridColumn = new GridColumn("MAY", "MAY", 15, Align.CENTER, Align.RIGHT);
-			var jun:GridColumn = new GridColumn("JUN", "JUN", 15, Align.CENTER, Align.RIGHT);
-			var jul:GridColumn = new GridColumn("JUL", "JUL", 15, Align.CENTER, Align.RIGHT);
-			var ago:GridColumn = new GridColumn("AGO", "AGO", 15, Align.CENTER, Align.RIGHT);
-			var sep:GridColumn = new GridColumn("SEP", "SEP", 15, Align.CENTER, Align.RIGHT);
-			var oct:GridColumn = new GridColumn("OCT", "OCT", 15, Align.CENTER, Align.RIGHT);
-			var nov:GridColumn = new GridColumn("NOV", "NOV", 15, Align.CENTER, Align.RIGHT);
-			var dic:GridColumn = new GridColumn("DIC", "DIC", 15, Align.CENTER, Align.RIGHT);
-			var co1:GridColumn = new GridColumn("REAL", "REAL", 15, Align.CENTER, Align.RIGHT);
-			var co2:GridColumn = new GridColumn("PPTO", "PPTO", 15, Align.CENTER, Align.RIGHT);
-			var co3:GridColumn = new GridColumn("DESV", "DESV", 15, Align.CENTER, Align.RIGHT);
+			var ene:GridColumn = new GridColumn("ENE", "ENE", 14, Align.CENTER, Align.RIGHT);
+			var feb:GridColumn = new GridColumn("FEB", "FEB", 14, Align.CENTER, Align.RIGHT);
+			var mar:GridColumn = new GridColumn("MAR", "MAR", 14, Align.CENTER, Align.RIGHT);
+			var abr:GridColumn = new GridColumn("ABR", "ABR", 14, Align.CENTER, Align.RIGHT);
+			var may:GridColumn = new GridColumn("MAY", "MAY", 14, Align.CENTER, Align.RIGHT);
+			var jun:GridColumn = new GridColumn("JUN", "JUN", 14, Align.CENTER, Align.RIGHT);
+			var jul:GridColumn = new GridColumn("JUL", "JUL", 14, Align.CENTER, Align.RIGHT);
+			var ago:GridColumn = new GridColumn("AGO", "AGO", 14, Align.CENTER, Align.RIGHT);
+			var sep:GridColumn = new GridColumn("SEP", "SEP", 14, Align.CENTER, Align.RIGHT);
+			var oct:GridColumn = new GridColumn("OCT", "OCT", 14, Align.CENTER, Align.RIGHT);
+			var nov:GridColumn = new GridColumn("NOV", "NOV", 14, Align.CENTER, Align.RIGHT);
+			var dic:GridColumn = new GridColumn("DIC", "DIC", 14, Align.CENTER, Align.RIGHT);
+			var co0:GridColumn = new GridColumn("Ppto Mes", "", 15, Align.CENTER, Align.RIGHT);
+			var co1:GridColumn = new GridColumn("Acum", "REAL", 16, Align.CENTER, Align.RIGHT);
+			var co2:GridColumn = new GridColumn("Ppto", "PPTO", 16, Align.CENTER, Align.RIGHT);
+			var co3:GridColumn = new GridColumn("Desv", "DESV", 11, Align.CENTER, Align.RIGHT);
 			
 			var columnas:Array=new Array(itm,ene);
 			if(numColumns>=1) columnas.push(feb);
@@ -65,7 +66,7 @@ package
 	        if(numColumns>=9) columnas.push(oct);
 	        if(numColumns>=10) columnas.push(nov);
 	        if(numColumns>=11) columnas.push(dic);
-			columnas.push(co1,co2,co3);
+			columnas.push(co0,co1,co2,co3);
           	
           	var grid:Grid = new Grid(array,0, 0, new RGBColor (0x9BAFB9),new RGBColor (0xDDDDDD),new RGBColor (0), true, new RGBColor (0xCCCCCC),0,Joint.BEVEL);
           	grid.columns=columnas;

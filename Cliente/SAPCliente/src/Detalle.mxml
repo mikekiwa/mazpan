@@ -29,6 +29,7 @@
 			
 			private var idItem:int;
 			private var ano:int;
+			private var balanceCargado:Boolean;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -38,8 +39,9 @@
 			{
 				
 			}
-			public function parametros(_id:int, _itemName:String, _ano:int, _meses:ArrayCollection):void
+			public function parametros(_balanceCargado:Boolean,_id:int, _itemName:String, _ano:int, _meses:ArrayCollection):void
 			{
+				balanceCargado = _balanceCargado;
 				idItem = _id;
 				ano = _ano;
 				labelText = _itemName + " " + _ano;
@@ -79,7 +81,7 @@
 				detalle_ac = new Array();
 				tabla.height = 370;
 				this.height = 400;
-				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,false));
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,balanceCargado));
 			}
 		]]>
 	</mx:Script>
