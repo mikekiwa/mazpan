@@ -77,6 +77,8 @@
 				if(encargado_ti!=null) encargado_ti.text="";
 				if(descripcion_ta!=null) descripcion_ta.text="";
 				if(actividad_ti!=null) actividad_ti.text="";
+				maquinas_ac = new ArrayCollection();
+			 	mantenciones_ac = new ArrayCollection();
 			}
 			private function addLineaResult(event:ResultEvent):void
 			{
@@ -143,7 +145,9 @@
 			}
 			private function revisar():void
 			{
-				if(codigo_ti.length>0) agregar_btn.enabled=true;
+				//if(codigo_ti.length>0) agregar_btn.enabled=true;
+//No se cual de estas dos lines es la que corresponde, revisar
+				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0) agregar_btn.enabled=true;
 				else agregar_btn.enabled=false;
 //aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
 			}
@@ -152,14 +156,17 @@
 	
 	<mx:TabNavigator y="0" width="100%" height="421" horizontalCenter="1">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
-			<mx:Label x="197.5" y="76" text="Nombre de la Planta "/>
-			<mx:TextInput x="361.5" y="74" id="nombre_ti" width="213" maxChars="50"/>
-			<mx:Label x="197.5" y="126" text="Código"/>
-			<mx:TextInput x="361.5" y="122" id="codigo_ti" width="213" maxChars="20" focusOut="revisar()"/>
-			<mx:Label x="197.5" y="171" text="Encargado"/>
-			<mx:TextInput x="361.5" y="169" id="encargado_ti" width="213" maxChars="50"/>
-			<mx:Label x="197.5" y="221" text="Descripcion"/>
-			<mx:TextArea x="361.5" y="220" width="213" height="120" id="descripcion_ta" maxChars="100"/>
+			<mx:Label x="197.5" y="53" text="Nombre de la Planta "/>
+			<mx:TextInput x="361.5" y="51" id="nombre_ti" width="213" maxChars="50"/>
+			<mx:Label x="197.5" y="103" text="Código (*)"/>
+			<mx:TextInput x="361.5" y="99" id="codigo_ti" width="213" maxChars="20" focusOut="revisar()"/>
+			<mx:Label x="197.5" y="189" text="Puesta en Marcha (*)"/>
+			<mx:Label x="327.5" y="360" text="(*) Dato Obligatorio"/>
+			<mx:DateField x="361.5" y="187" width="160" id="puestaMarcha_df"/>
+			<mx:Label x="197.5" y="148" text="Encargado"/>
+			<mx:TextInput x="361.5" y="146" id="encargado_ti" width="213" maxChars="50"/>
+			<mx:Label x="197.5" y="227" text="Descripcion"/>
+			<mx:TextArea x="361.5" y="226" width="213" height="120" id="descripcion_ta" maxChars="100"/>
 		</mx:Canvas>
 		<mx:Canvas label="Máquinas" width="100%" height="100%">
 			<mx:Label x="30" y="10" text="Lista de Máquinas en el Sistema" fontWeight="bold"/>
