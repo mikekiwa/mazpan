@@ -19,6 +19,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import flash.sampler.NewObjectSample;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 			import mx.controls.Alert;
@@ -108,6 +109,7 @@
 					componente.sistema = sistema_cb.text;
 					componente.nombre = nombre_ti.text;
 					componente.costo = costo_ti.text;
+					componente.puestaMarcha = puestaMarcha_df.text;
 					componente.vidaUtil = vidaUtil_ti.text;
 					componente.descripcion = descripcion_ta.text;
 					//Hoja 2
@@ -118,24 +120,13 @@
 					componente.modelo = modelo_ti.text;
 					componente.fabricante = fabricante_ti.text;
 					
-					ComponenteService.addComponente( componente.tipo,
-													 componente.codigo,
-													 componente.sistema,
-													 componente.nombre,
-													 componente.costo,
-													 componente.vidaUtil,
-													 componente.descripcion,
-													 componente.marca,
-													 componente.ano,
-													 componente.pais,
-													 componente.modelo,
-													 componente.fabricante);
+					ComponenteService.addComponente(componente);
 				}
 				else
 				{
 					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, null));
+					clean();
 				}
-				clean();
 			}
 			public function clean():void
 			{
@@ -143,6 +134,7 @@
 				if(nombre_ti!=null) nombre_ti.text = "";
 				if(tipo_ti!=null) tipo_ti.text = "";
 				if(costo_ti!=null) costo_ti.text = "";
+				if(puestaMarcha_df!=null) puestaMarcha_df.text = "";
 				if(vidaUtil_ti!=null) vidaUtil_ti.text="";
 				if(descripcion_ta!=null) descripcion_ta.text="";
 				if(marca_ti!=null) marca_ti.text="";
@@ -155,6 +147,8 @@
 			 	if(actividad_ti!=null) actividad_ti.text="";
 			 	if(especificacion_ti!=null) especificacion_ti.text="";
 			 	tabNavigator.selectedIndex=0;
+			 	especificacion_ac = new ArrayCollection();
+			 	mantenciones_ac = new ArrayCollection();
 			}
 			private function addComponentesResult(event:ResultEvent):void
             {
@@ -162,7 +156,7 @@
 				if(result == 1)
 				{
 					ComponenteService.addEspecificaciones(especificaciones_ac, componente.codigo);
-					ComponenteService.addMantenciones(mantenciones_ac, componente.codigo);
+					ComponenteService.addMantenciones(mantenciones_ac, componente.codigo, componente.puestaMarcha);
 					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, componente));
 				}
 				else if(result==-1)
@@ -173,6 +167,7 @@
 				{
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 				}
+				clean();
             }
             private function addEspecificacionesResult(event:ResultEvent):void
             {
@@ -235,7 +230,6 @@
 					mantenciones_ac.addItemAt(item, itemIndex);
 				}
 			}
-			
 			private function abajo():void
 			{
 				if(mantenciones_dg.selectedIndex!=-1)
@@ -247,7 +241,7 @@
 			}
 			private function revisar():void
 			{
-				if(codigo_ti.length>0) agregar_btn.enabled=true;
+				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && vidaUtil_ti.text.length>0) agregar_btn.enabled=true;
 				else agregar_btn.enabled=false;
 //aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
 			}
@@ -256,22 +250,25 @@
 	
 	<mx:TabNavigator y="0" width="100%" height="420" id="tabNavigator" horizontalCenter="0" selectedIndex="1">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
-			<mx:Label x="155.5" y="41" text="Tipo Componente"/>
+			<mx:Label x="135.5" y="41" text="Tipo Componente"/>
 			<mx:ComboBox x="268.5" y="41" id="tipo_cb" dataProvider="{tipoComponente_ac}" change="actualizarTipo()"/>
 			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50"/>
 			<mx:Image x="595.5" y="41" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
-			<mx:Label x="155.5" y="79" text="Codigo"/>
+			<mx:Label x="135.5" y="79" text="Codigo (*)"/>
 			<mx:TextInput x="268.5" y="77" id="codigo_ti" maxChars="20" focusOut="revisar()"/>
-			<mx:Label x="155.5" y="114" text="Sistema"/>
+			<mx:Label x="135.5" y="114" text="Sistema"/>
 			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}"/>
-			<mx:Label x="157.5" y="150" text="Nombre"/>
+			<mx:Label x="137.5" y="150" text="Nombre"/>
 			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti"/>
-			<mx:Label x="155.5" y="184" text="Costo"/>
+			<mx:Label x="137.5" y="184" text="Costo"/>
 			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti"/>
-			<mx:Label x="155.5" y="220" text="Horas vida util"/>
-			<mx:TextInput x="268.5" y="218" restrict="0-9" id="vidaUtil_ti"/>
-			<mx:Label x="155.5" y="255" text="Descripcion"/>
-			<mx:TextArea x="268.5" y="254" width="349" maxChars="100" id="descripcion_ta" height="78"/>
+			<mx:Label x="135.5" y="212" text="Puesta en Marcha (*)"/>
+			<mx:DateField x="268.5" y="210" width="160" id="puestaMarcha_df" focusOut="revisar()"/>
+			<mx:Label x="135.5" y="242" text="Horas vida util (*)"/>
+			<mx:TextInput x="268.5" y="240" restrict="0-9" id="vidaUtil_ti" focusOut="revisar()"/>
+			<mx:Label x="135.5" y="277" text="Descripcion"/>
+			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78"/>
+			<mx:Label x="328" y="362" text="(*) Dato Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos  del Fabricante" width="100%" height="100%">
 			<mx:Label x="205" y="62" text="Marca"/>
