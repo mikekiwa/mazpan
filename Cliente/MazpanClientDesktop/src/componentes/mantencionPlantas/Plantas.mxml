@@ -60,13 +60,12 @@
 			{
 				if(filtro.selectedItem == 'Todas')
 				{
-					input.visible = false
-				}	
+					input.visible = false;
+				}
 				if(filtro.selectedItem == 'Código')
 				{
 					input.visible = true;
 				}
-				
 				if(filtro.selectedItem == 'Nombre')
 				{
 					input.visible = true;
