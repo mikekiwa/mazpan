@@ -65,15 +65,16 @@
 				}
             	
             	tabla.height = (cuentasItem.length) * 22 + 25;
-            	this.height = 30 + (cuentasItem.length) * 22 + 25 + 40;
+            	this.height = 95 + (cuentasItem.length) * 22;
             }
 			public function parametros(_items:Array):void
 			{
+				cuentasItem =  new Array();
 				tabla.height = 330;
 				this.height = 400;
 				items = _items;
 				itemsCombo = new ITEMS(items).getItemsContables();
-				
+				if(itemsCombo.length>0) items_cb.selectedIndex = 0;
 				
 				//Esto es para que cada vez que llamen al componente se vuelvan a cargar los datos,
 				//y que no se cargen dos veces, ya que eso pasaria la primera vez que se llama al componente
