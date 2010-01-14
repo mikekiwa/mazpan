@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%"
+	xmlns:estadoResultado="estadoResultado.*" currentState="Balance" title="Balance"
+	borderThicknessLeft="3" borderThicknessRight="3" borderThicknessTop="0" borderThicknessBottom="2" 
+	backgroundColor="#cccccc" headerColors="#cccccc">
+	
+	<mx:states>
+		<mx:State name="Amarre">
+			<mx:AddChild position="lastChild">
+				<estadoResultado:Amarre id="amarre_cmp" complexClick="recargar(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Revisar">
+			<mx:AddChild position="lastChild">
+				<estadoResultado:Revisar id="revisar_cmp" complexClick="recargar(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Grafico">
+			<mx:AddChild position="lastChild">
+				<estadoResultado:Grafico id="grafico_cmp" complexClick="recargar(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Detalle">
+			<mx:AddChild position="lastChild">
+				<estadoResultado:Detalle id="detalle_cmp" complexClick="recargar(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Balance">
+			<mx:AddChild position="lastChild">
+				<estadoResultado:EstadoResultado id="balance_cmp" complexClick="recargar(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "General";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var items:Array =  new Array();
+			[Bindable]
+            private var meses_ac:ArrayCollection= new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
+            
+			private var cargarOtros:Boolean = false;
+			private var ano_var:int = 2009;
+			private var mes_seleccionado:int = 11;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase index.mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            private function mostrar(event:ResultEvent):void
+            {
+            	trace(event.result as String);	
+            }
+            private function recargar(event:ComplexEvent):void
+            {
+            	currentState=event.stateDestination;
+            	if(event.stateDestination==Balance.nombre) 
+            	{
+            		if(event.objeto as Boolean)
+	            		balance_cmp.cargar();
+	            	else
+	            		balance_cmp.actualizarMeses();
+            	}
+            	else
+            	{
+            		if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(event.objeto.balanceCargado,event.objeto.items);
+            		else if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(event.objeto.balanceCargado,event.objeto.items)	
+            		else if(event.stateDestination==Detalle.nombre) detalle_cmp.parametros(event.objeto.balanceCargado,event.objeto.idItem,event.objeto.itemName,event.objeto.ano,event.objeto.meses);
+            		else if(event.stateDestination==Grafico.nombre) grafico_cmp.parametros(event.objeto.balanceCargado,event.objeto.items,event.objeto.meses,event.objeto.img,event.objeto.ano);	
+            	}
+			}
+		]]>
+	</mx:Script>
+</mx:Panel>

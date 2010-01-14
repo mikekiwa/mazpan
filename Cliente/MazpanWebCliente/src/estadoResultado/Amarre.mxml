@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Amarre de Cuentas" width="800" height="400" 
+	backgroundColor="#cccccc" creationComplete="init()">
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getCuentas" 	result="getCuentasResult(event)" 		fault="ErrorFaultHandler(event, 'getCuentas')"/>
+		<mx:operation name="guardar" 		result="guardarResult(event)" 			fault="ErrorFaultHandler(event, 'guardar')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import eventos.ComplexEvent;
+		
+			public static const nombre:String = "Amarre";//correspondiente al estado en que se debiera colocar
+		
+			[Bindable]
+			private var cuentas:Array;
+			[Bindable]
+			private var itemsCombo:Array;
+			
+			private var items:Array;
+			private var datosParaGuardar:Array;
+            private var inicializado:Boolean = false;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function init():void
+			{
+				Service.getCuentas();
+			}
+			private function getCuentasResult(event:ResultEvent):void
+			{
+				cuentas = event.result.Tables.Cuentas.Rows.source as Array;
+				for(var i:int=0; i<cuentas.length; i++)
+				{//Con esto a cada una de las cuenta se le asigna el cajon correspondiente en SAP,
+				 //esto porque el cajon es solo un label en SAP
+					if(cuentas[i].GroupMask == 4) cuentas[i].Cajon = "Ingresos Operacionales";
+					if(cuentas[i].GroupMask == 5) cuentas[i].Cajon = "Costos Operacionales";
+					if(cuentas[i].GroupMask == 6) cuentas[i].Cajon = "Gastos Operacionales";
+					if(cuentas[i].GroupMask == 7) cuentas[i].Cajon = "Otros Ingresos";
+					if(cuentas[i].GroupMask == 8) cuentas[i].Cajon = "Otros Gastos";
+				}
+				tabla.height = (cuentas.length) * 22 + 25;
+				this.height = 30 + (cuentas.length) * 22 + 25 + 40;
+			}
+			public function parametros(_items:Array):void
+			{
+				tabla.height = 330;
+				this.height = 400;
+				items = _items;
+				itemsCombo = new ITEMS(items).getItemsContables();
+				items_cb.selectedIndex = 0;
+				
+				
+				//Esto es para que cada vez que llamen al componente se vuelvan a cargar los datos,
+				//y que no se cargen dos veces, ya que eso pasaria la primera vez que se llama al componente
+				if(inicializado) init();
+				else inicializado = true;
+			}
+		
+			private function guardarDatos():void
+          	{
+	          	datosParaGuardar = new Array();
+	          	for(var i:int=0;i< cuentas.length;i++)
+	          		if(cuentas[i].guardar) datosParaGuardar.push(cuentas[i].AcctCode);
+          		
+          		if(datosParaGuardar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(datosParaGuardar.length==1) Alert.show("¿Está seguro que desea amarrar la cuenta seleccionada?","Amarrar cuenta a "+items_cb.text, 3, this, guardarClick);
+                	else Alert.show("¿Está seguro que desea amarrar las "+datosParaGuardar.length+" cuentas seleccionadas?","Amarrar las cuentas a "+items_cb.text, 3, this, guardarClick);	
+            	}
+                else Alert.show("Debe seleccionar al menos una cuenta para poder proceder");
+          	}
+          	private function guardarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		var id:int=888;
+            		for(var i:int=0; i<items.length; i++) 
+            			if(items_cb.text == items[i].itemName) id=i+1;
+            		
+        			if(id!=888) Service.guardar(datosParaGuardar, id);
+        			else trace("Imposible proceder por ahora, intentelo más tarde.");
+				}
+			}
+			private function guardarResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezdan las que amarramos
+					trace("Datos Guardados exitosamente");
+				}
+				else if(event.result == -1)
+				{
+				 	trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+					trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label text="ITEM:" fontWeight="bold" fontSize="12"/>
+	<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" width="227" x="51"/>
+	<mx:Button label="Amarrar" click="guardarDatos()" x="286"/>
+	<mx:DataGrid x="0" y="30" width="100%" height="100%" id="tabla" dataProvider="{cuentas}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="30" paddingRight="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.guardar=!data.guardar}" selected="{data.guardar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_0" 	width="60" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_1" 	width="30" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_2" 	width="35" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_3" 	width="30" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_4" 	width="35" 	sortable="false"/>
+			<mx:DataGridColumn headerText="Cajon" 	dataField="Cajon" 		width="150" sortable="false"/>
+			<mx:DataGridColumn headerText="Cuenta" 	dataField="AcctName" 	width="460" sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>
