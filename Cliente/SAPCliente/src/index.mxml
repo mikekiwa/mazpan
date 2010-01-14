@@ -10,8 +10,10 @@
 			
 			private function init():void
             {
+            	Security.allowDomain("http://localhost/cliente/index.cl");
+				Security.loadPolicyFile("http://localhost/crossdomain.xml");
             	var httpManager:HTTPUtil = new HTTPUtil();
-            	//if(httpManager.getHostName()!="") URL="http://"+httpManager.getHostName()+"/server/";
+            	if(httpManager.getHostName()!="") URL="http://"+httpManager.getHostName()+"/server/";
             }
 		]]>
 	</mx:Script>

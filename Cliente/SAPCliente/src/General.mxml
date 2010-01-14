@@ -27,7 +27,7 @@
 		</mx:State>
 		<mx:State name="Balance">
 			<mx:AddChild position="lastChild">
-				<local:Balanece id="balance_cmp" complexClick="recargar(event)"/>
+				<local:Balanece id="balance_cmp" width="1208" height="808" complexClick="recargar(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
