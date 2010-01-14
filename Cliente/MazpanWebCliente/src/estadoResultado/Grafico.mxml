@@ -7,6 +7,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.formatters.NumberFormatter;
+			import mx.charts.chartClasses.IAxis;
 			import mx.collections.ArrayCollection;
 			import eventos.ComplexEvent;
 		
@@ -19,15 +21,17 @@
 			[Bindable]
 			private var itemsNames:Array;
 			[Bindable]
-			private var meses_ac:ArrayCollection = index.meses;
+			private var meses_ac:ArrayCollection = new ArrayCollection(["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]);
 			
 			private var img:DisplayObject;
 			private var ano:String;
 			
 			public function parametros(_items:Array,_img:DisplayObject, _ano:String):void
 			{
+				ix =  new Array();
 				items = _items;
 				itemsNames = new ITEMS(items).getItems();
+				if(itemsNames.length>0) comboGrafico.selectedIndex = 0;
 				graficar(ITEMS.VENTASZONAS);
 				img = _img;
 				ano = _ano;
@@ -61,18 +65,39 @@
             	ix.push(new MES(meses_ac.getItemAt(10).toString(),items[index].NOV));
             	ix.push(new MES(meses_ac.getItemAt(11).toString(),items[index].DIC));
             }
+            
+			private function linearAxis_labelFunc(item:String, prevValue:Object, axis:IAxis):String
+			{
+				var flag:int = 0;	            			  			
+				          	           	  
+				for(var i:int = 0 ; i < item.length ; i++)
+				{
+					if(item.charAt(i)=='.')
+					flag++;	         	  	
+				}
+				   
+				if(flag == 0) return formato.format(item);
+				else return null;            	             	             	
+			}
 		]]>
 	</mx:Script>
-	<mx:HBox>
+	
+	<mx:NumberFormatter id="formato" precision="0" useThousandsSeparator="true" thousandsSeparatorFrom="." thousandsSeparatorTo="." decimalSeparatorFrom="," decimalSeparatorTo=","/>
+	
+	<mx:HBox x="10">
 		<mx:Label text="ITEM:" fontSize="12" fontWeight="bold"/>
 		<mx:ComboBox id="comboGrafico" dataProvider="{itemsNames}" selectedIndex="1" change="graficar(comboGrafico.selectedIndex)"/>
 		<mx:Spacer width="100"/>
 		<mx:Button label="PDF" width="58" click="graficoTOPDF()"/>
+		<mx:Spacer width="100"/>
 	</mx:HBox>
-	<mx:ColumnChart id="myChart" x="0" y="30" width="100%" height="100%" dataProvider="{ix}" showDataTips="true" textAlign="center">
+	<mx:ColumnChart id="myChart" x="10" y="30" width="760" height="370" dataProvider="{ix}" showDataTips="true" textAlign="center">
  	  	<mx:horizontalAxis>
- 	  	  		<mx:CategoryAxis categoryField="mes"/>  		
+ 	  	  	<mx:CategoryAxis categoryField="mes"/>  		
  	  	</mx:horizontalAxis>
+ 	  	<mx:verticalAxis>
+ 	  		<mx:LinearAxis id="eje" title="M$" labelFunction="linearAxis_labelFunc"/>
+ 	  	</mx:verticalAxis>
  	  	<mx:series>
  	  		<mx:ColumnSeries dataProvider="{ix}" yField= "valor" xField="mes"/>
  	  	</mx:series>

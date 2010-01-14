@@ -101,6 +101,12 @@
 				<ns11:Grafico id="grafico_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="Detalle">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:Detalle id="detalle_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
@@ -144,18 +150,28 @@
 			}
 			private function goState(event:ComplexEvent):void
 			{
-				if(event.stateDestination!=Grafico.nombre)
+				if(event.stateDestination==EstadoResultado.nombre)
+				{
+					currentState = event.stateDestination;
+					if(estadoResultado_cmp.seCargo())
+						estadoResultado_cmp.cargar();
+	            	else
+	            		estadoResultado_cmp.actualizarMeses();
+	            	
+				}
+				else if(event.stateDestination!=Grafico.nombre)
 				{
 					currentState = event.stateDestination;
 					if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(estadoResultado_cmp.getParametros().items);
 					if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(estadoResultado_cmp.getParametros().items);
-				} 
+					if(event.stateDestination==Detalle.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano);
+				}
 				else
 				{
 					if(estadoResultado_cmp.seCargo())
 					{
 						currentState = event.stateDestination;
-						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano);
+						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano.toString());
 					}
 					else
 					{//quiza lo que se puede hacer es preguntar si se desea cargar los datos y esperar a que se cargen

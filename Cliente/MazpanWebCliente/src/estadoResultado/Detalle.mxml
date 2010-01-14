@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="800" height="400"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Detalle de Movimiento de Cuentas" width="800" height="400"
 	backgroundColor="#cccccc" creationComplete="init()">
 	
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
@@ -22,15 +22,16 @@
 			[Bindable]
 			private var labelText:String;
 			[Bindable]
+			private var total:String = "Total: 0 [M$]";; 
+			[Bindable]
 			private var detalle_ac:Array;
 			[Bindable]
-			private var meses_ac:ArrayCollection;
+			private var meses_ac:ArrayCollection = index.meses;
 			[Bindable]
-			private var total:String = "Total: 0 [M$]";; 
+			private var itemsCombo:Array;
 			
-			private var idItem:int;
+			private var items:Array;
 			private var ano:int;
-			private var balanceCargado:Boolean;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -40,15 +41,19 @@
 			{
 				
 			}
-			public function parametros(_balanceCargado:Boolean,_id:int, _itemName:String, _ano:int, _meses:ArrayCollection):void
+			public function parametros(_items:Array,_ano:int):void
 			{
-				balanceCargado = _balanceCargado;
-				idItem = _id;
+				detalle_ac = new Array();
+				tabla.height = 330;
+				this.height = 400;
+				itemsCombo = new ITEMS(_items).getItemsContables();
+				if(itemsCombo.length>0) items_cb.selectedIndex = 0;
+				meses_cb.selectedIndex = 0;
+				items = _items;
 				ano = _ano;
-				labelText = _itemName + " " + _ano;
-				meses_ac = _meses;
+				labelText = _ano+"";
 				
-				Service.detalle(idItem, 1,ano);
+				Service.detalle(ITEMS.VENTASZONAS+1,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
 			}
 			private function detalleResult(event:ResultEvent):void
             {
@@ -64,38 +69,30 @@
             	
             	total = "Total: "+ formato.format(r.toString()) + " [M$]";
             	
-            	tabla.height = (detalle_ac.length + 1) * 22 + 25;
-            	this.height = 30 + (detalle_ac.length + 1) * 22 + 25;
-            	
-//////            	valor_var = "Miles de pesos: "+r;
-//quiza aqui deberia tomas los valores y aproximarlos cada vez que se suman, para que asi tener el mismo valor
-//en la tabla genera
+            	tabla.height = detalle_ac.length * 22 + 25;
+            	this.height = 95 + detalle_ac.length * 22;
             }
            
 			private function cambiarDetalle():void
             {
             	detalle_ac = new Array();
-            	Service.detalle(idItem, meses_cb.selectedIndex+1,ano);
+				var id:int=888;
+				for(var i:int=0; i<items.length; i++)
+            		if(items_cb.text == items[i].itemName) id=i+1;
+            		          	
+            	Service.detalle(id, meses_cb.selectedIndex+1,ano);
             }
-			private function goState(estadoDestino:String):void
-			{
-				detalle_ac = new Array();
-				tabla.height = 370;
-				this.height = 400;
-				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,estadoDestino,nombre,balanceCargado));
-			}
 		]]>
 	</mx:Script>
 	
 	<mx:NumberFormatter id="formato" precision="0" useThousandsSeparator="true" thousandsSeparatorFrom="." thousandsSeparatorTo="." decimalSeparatorFrom="," decimalSeparatorTo=","/>
 	
-	<mx:HBox horizontalCenter="0">
-		<mx:Label text="{labelText}" fontSize="14" fontWeight="bold"/>
-		<mx:Label text="{total}" fontSize="14" fontWeight="bold"/>
-		<mx:Spacer width="50"/>
-		<mx:Label text="MES:"/>
+	<mx:HBox>
+		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" change="cambiarDetalle()" selectedIndex="0"/>
 		<mx:ComboBox id="meses_cb" dataProvider="{meses_ac}" change="cambiarDetalle()" selectedIndex="0"/>
-		<mx:Button label="Atras" click="goState('')"/>
+		<mx:Label text="{labelText}" fontSize="14" fontWeight="bold"/>
+		<mx:Spacer width="100"/>
+		<mx:Label text="{total}" fontSize="14" fontWeight="bold"/>
 	</mx:HBox>
 	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" >
 		<mx:columns>
@@ -104,4 +101,4 @@
 			<mx:DataGridColumn headerText="Fecha Contable" 	dataField="RefDate"  width="300" sortable="false" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
-</mx:Canvas>
+</mx:Panel>
