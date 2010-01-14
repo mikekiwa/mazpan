@@ -18,6 +18,11 @@ public class Coneccion
     //public static String coneccionString = @"Data Source=192.168.3.130\SQLEXPRESS;Initial Catalog='Mantencion';Integrated Security=SSPI;User='mazpan';Password='heman'";
     public static String coneccionString = @"Data Source=SVR-MASPAN2;Initial Catalog='Mantencion';Integrated Security=false;User='sa';Password='1234'";
 
+	//public static String coneccionStringSVRMASPAN = @"Data Source=SVR-MASPAN;Integrated Security=false;User='sa';Password='1234'";
+    //public static String coneccionStringSVRMASPAN2 = @"Data Source=SVR-MASPAN2;Initial Catalog='PracticaDB';Integrated Security=false;User='sa';Password='1234'";
+    public static String coneccionStringSVRMASPAN = ConfigurationManager.ConnectionStrings["SQLSERVER2005"].ConnectionString;
+
+	
 	public Coneccion()
 	{
 	}
