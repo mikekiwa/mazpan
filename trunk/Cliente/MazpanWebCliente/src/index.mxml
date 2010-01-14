@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%" 
-	verticalScrollPolicy="auto" horizontalScrollPolicy="auto" creationComplete="init()"
+	creationComplete="init()"
 	xmlns:ns1="componentes.*" 
 	xmlns:ns2="componentes.mantencionMaquinas.*" 
-	xmlns:mantencionComponentes="componentes.mantencionComponentes.*" 
-	xmlns:mantencionLineas="componentes.mantencionLineas.*" 
-	xmlns:mantencionPlantas="componentes.mantencionPlantas.*" 
 	xmlns:ns3="componentes.Acordeon.*" 
 	xmlns:ns4="componentes.mantencionAgentesExternos.*" 
 	xmlns:ns5="componentes.mantencionSistema.*" 
 	xmlns:ns6="componentes.general.*" 
-	xmlns:ns7="componentes.planMantencion.*">
+	xmlns:ns7="componentes.planMantencion.*"
+	xmlns:ns8="componentes.mantencionComponentes.*" 
+	xmlns:ns9="componentes.mantencionLineas.*" 
+	xmlns:ns10="componentes.mantencionPlantas.*"
+	xmlns:ns11="estadoResultado.*">
 	
 	<mx:states>
 		<mx:State name="maquinasState">
@@ -31,19 +32,19 @@
 		<mx:State name="lineasState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<mantencionLineas:Lineas/>
+				<ns9:Lineas/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="plantasState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<mantencionPlantas:Plantas/>
+				<ns10:Plantas/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="componentesState">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<mantencionComponentes:Componentes id="comp"/>
+				<ns8:Componentes id="comp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="agentesExternosState">
@@ -76,22 +77,51 @@
 				<ns5:Usuarios/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="EstadoResultado">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:EstadoResultado id="estadoResultado_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Revisar">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:Revisar id="revisar_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Amarre">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:Amarre id="amarre_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Grafico">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:Grafico id="grafico_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
-	
 	
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import estadoResultado.Amarre;
 			import componentes.mantencionComponentes.Componentes;
 			import componentes.Acordeon.MenuMantenciones;
 			import mx.controls.Alert;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
-			public static var URL:String = "http://localhost:7070/Server/";
+			//public static var URL:String = "http://localhost:7070/Server/";
 			//public static var URL:String = "http://192.168.3.131/Server/";
 			//public static var URL:String = "http://192.168.3.117/Server/";
-						
+			public static var URL:String = "http://localhost/server/";
+			
+			[Bindable]
+			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
+
 			private function init():void
 			{
 				//Security.allowDomain("http://localhost/Cliente/index.cl");
@@ -107,16 +137,35 @@
 			}
 			private function cerrar():void
 			{
-//Falta hacer, que cuando a`prite este boton todos los componentes pasen a estado base
+//Falta hacer, que cuando presione este boton todos los componentes pasen a estado base
 				cerrar_btn.visible = false;	
 				acordeon.visible = false;
 				currentState = "";
 			}
 			private function goState(event:ComplexEvent):void
 			{
-				currentState = event.stateDestination;
-				if(event.stateDestination == "componentesState") comp.clean();
-				if(event.stateDestination == "maquinasState") maq.clean();
+				if(event.stateDestination!=Grafico.nombre)
+				{
+					currentState = event.stateDestination;
+					if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(estadoResultado_cmp.getParametros().items);
+					if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(estadoResultado_cmp.getParametros().items);
+				} 
+				else
+				{
+					if(estadoResultado_cmp.seCargo())
+					{
+						currentState = event.stateDestination;
+						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano);
+					}
+					else
+					{//quiza lo que se puede hacer es preguntar si se desea cargar los datos y esperar a que se cargen
+					//con un listener
+						Alert.show("Aun no se cargan los datos del Estado de Resultado");
+					}
+				}
+				
+//				if(event.stateDestination == "componentesState") comp.clean();
+//				if(event.stateDestination == "maquinasState") maq.clean();
 			}
 			
 			//<mx:Style source="Estilo.css"/>	
@@ -124,14 +173,15 @@
 	</mx:Script>
 	
 	<mx:Style source="Estilo.css"/>
-	<mx:Canvas horizontalCenter="0">
-		<mx:VBox width="100%" height="100%" id="canvas">
+	<ns1:Login id="login" complexClick="loginResult(event)" horizontalCenter="0" verticalCenter="0"/>
+	
+	<mx:Canvas id="canvas1">
+		<mx:VBox id="canvas" width="100%" height="100%">
 			<mx:Canvas width="100%" height="30">
-				<mx:LinkButton label="CERRAR" id="cerrar_btn" click="cerrar()" visible="false" horizontalCenter="0"/>
+				<mx:LinkButton id="cerrar_btn" label="CERRAR" click="cerrar()" visible="false"/>
 			</mx:Canvas>
-			<mx:HBox width="975" id="hbox1">
-				<ns3:Acordeon y="30" id="acordeon" complexClick="goState(event)" visible="false"/>
-				<ns1:Login complexClick="loginResult(event)" id="login"/>
+			<mx:HBox id="hbox1" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+				<ns3:Acordeon id="acordeon" complexClick="goState(event)" visible="false"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>

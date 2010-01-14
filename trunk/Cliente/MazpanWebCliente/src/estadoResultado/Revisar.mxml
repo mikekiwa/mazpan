@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Revisar Amarre de Cuentas" width="800" height="400" 
+	backgroundColor="#cccccc" creationComplete="init()">
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getCuentasItem" result="getCuentasItemResult(event)" 	fault="ErrorFaultHandler(event, 'getCuentasItem')"/>
+		<mx:operation name="quitar" 		result="quitarResult(event)" 			fault="ErrorFaultHandler(event, 'quitar')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import eventos.ComplexEvent;
+			
+			public static const nombre:String = "Revisar";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var cuentasItem:Array;
+			[Bindable]
+			private var itemsCombo:Array;
+			private var items:Array;
+			
+            private var cuentasParaQuitar:Array;
+            private var inicializado:Boolean = false;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function init():void
+			{
+				if(inicializado)
+				{
+					var id:int=888;
+					for(var i:int=0; i<items.length; i++)
+	            		if(items_cb.text == items[i].itemName) id=i+1;
+	            	
+	        		if(id!=888) Service.getCuentasItem(id);
+	        		else{ items_cb.selectedIndex = 0; Service.getCuentasItem(ITEMS.VENTASZONAS+1);}
+	   			}
+	   			else
+	   			{
+	   				items_cb.selectedIndex = 0;
+					Service.getCuentasItem(ITEMS.VENTASZONAS+1);
+	   			}
+			}
+			private function getCuentasItemResult(event:ResultEvent):void
+            {
+            	cuentasItem = event.result.Tables.CuentasItem.Rows.source as Array;
+            	for(var i:int=0; i<cuentasItem.length; i++)
+				{//Con esto a cada una de las cuenta se le asigna el cajon correspondiente en SAP,
+				 //esto porque el cajon es solo un label en SAP
+					if(cuentasItem[i].GroupMask == 4) cuentasItem[i].Cajon = "Ingresos Operacionales";
+					if(cuentasItem[i].GroupMask == 5) cuentasItem[i].Cajon = "Costos Operacionales";
+					if(cuentasItem[i].GroupMask == 6) cuentasItem[i].Cajon = "Gastos Operacionales";
+					if(cuentasItem[i].GroupMask == 7) cuentasItem[i].Cajon = "Otros Ingresos";
+					if(cuentasItem[i].GroupMask == 8) cuentasItem[i].Cajon = "Otros Gastos";
+				}
+            	
+            	tabla.height = (cuentasItem.length) * 22 + 25;
+            	this.height = 30 + (cuentasItem.length) * 22 + 25 + 40;
+            }
+			public function parametros(_items:Array):void
+			{
+				tabla.height = 330;
+				this.height = 400;
+				items = _items;
+				itemsCombo = new ITEMS(items).getItemsContables();
+				
+				
+				//Esto es para que cada vez que llamen al componente se vuelvan a cargar los datos,
+				//y que no se cargen dos veces, ya que eso pasaria la primera vez que se llama al componente
+				if(inicializado) init();
+				else inicializado = true;
+			}
+			
+			private function quitarCuentasItem():void
+			{
+				cuentasParaQuitar = new Array();
+	          	for(var i:int=0;i< cuentasItem.length;i++)
+	          		if(cuentasItem[i].quitar) cuentasParaQuitar.push(cuentasItem[i].AcctCode);
+          		
+          		if(cuentasParaQuitar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(cuentasParaQuitar.length==1) Alert.show("¿Está seguro que desea quitar la cuenta seleccionada?","Quitar Cuenta de "+items_cb.text, 3, this, quitarClick);
+                	else Alert.show("¿Está seguro que desea quitar las "+cuentasParaQuitar.length+" cuentas selecionadas?","Quitar Cuentas de "+items_cb.text, 3, this, quitarClick);
+            	}
+                else Alert.show("Debe seleccionar al menos una cuenta para poder proceder");
+			}
+			private function quitarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		Service.quitar(cuentasParaQuitar);
+				}
+			}
+			private function quitarResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezdan las que quitamos (desamarramos)
+					trace("Cuentas quitadas exitosamente");
+				}
+				else if(event.result == -1)
+				{
+					trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+				 	trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+			}
+			private function actualizarCuentas():void
+			{
+				var id:int=888;
+				for(var i:int=0; i<items.length; i++)
+            		if(items_cb.text == items[i].itemName) id=i+1;
+            	
+        		if(id!=888) Service.getCuentasItem(id);
+        		else
+        		{
+        			cuentasItem = new Array();
+        			trace("Imposible proceder por ahora, intentelo más tarde.");
+        		}
+			}
+		]]>
+	</mx:Script>
+	
+		<mx:Label text="ITEM:" fontWeight="bold" fontSize="12"/>
+		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" change="actualizarCuentas()" selectedIndex="0" x="51" width="227"/>
+		<mx:Spacer width="100"/>
+		<mx:Button label="Quitar" click="quitarCuentasItem()" x="286" y="0"/>
+	<mx:DataGrid x="0" y="30" width="100%" height="100%" id="tabla" dataProvider="{cuentasItem}">
+		<mx:columns>
+			<mx:DataGridColumn id="colse2" headerText=""  width="30" paddingRight="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.quitar=!data.quitar}" selected="{data.quitar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_0" 	width="60" sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_1" 	width="30" sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_2" 	width="35" sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_3" 	width="30" sortable="false"/>
+			<mx:DataGridColumn headerText="" 		dataField="Segment_4" 	width="35" sortable="false"/>
+			<mx:DataGridColumn headerText="Cajon" 	dataField="Cajon" 		width="150" sortable="false"/>
+			<mx:DataGridColumn headerText="Cuenta" 	dataField="AcctName" sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>

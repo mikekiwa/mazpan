@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Grafico de Crecimiento" width="800" height="450" backgroundColor="#cccccc">
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import eventos.ComplexEvent;
+		
+			public static const nombre:String = "Grafico";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var items:Array;
+			[Bindable]
+			private var ix:Array; 
+			[Bindable]
+			private var itemsNames:Array;
+			[Bindable]
+			private var meses_ac:ArrayCollection = index.meses;
+			
+			private var img:DisplayObject;
+			private var ano:String;
+			
+			public function parametros(_items:Array,_img:DisplayObject, _ano:String):void
+			{
+				items = _items;
+				itemsNames = new ITEMS(items).getItems();
+				graficar(ITEMS.VENTASZONAS);
+				img = _img;
+				ano = _ano;
+			}
+			private function graficoTOPDF():void
+            {
+            	var l:LAYOUT = new LAYOUT();
+            	l.generarGrafico(myChart,img,ano,comboGrafico.selectedItem.toString());
+            }
+			private function graficar(index:int):void
+            {
+        		if(index==ITEMS.VENTAS)
+        			index = ITEMS.VENTASZONAS;
+        		else if(index==ITEMS.COSTOS)
+        			index = ITEMS.COSTOSINSUMOSZONAS;
+        		else if(index==ITEMS.GASTOSADMISTRATIVOS)
+        			index = ITEMS.REMUNERACIONES;
+        		comboGrafico.selectedIndex = index;
+            	
+            	ix =  new Array();
+            	ix.push(new MES(meses_ac.getItemAt(0).toString(), items[index].ENE));
+            	ix.push(new MES(meses_ac.getItemAt(1).toString(), items[index].FEB));
+            	ix.push(new MES(meses_ac.getItemAt(2).toString(), items[index].MAR));
+            	ix.push(new MES(meses_ac.getItemAt(3).toString(), items[index].ABR));
+            	ix.push(new MES(meses_ac.getItemAt(4).toString(), items[index].MAY));
+            	ix.push(new MES(meses_ac.getItemAt(5).toString(), items[index].JUN));
+            	ix.push(new MES(meses_ac.getItemAt(6).toString(), items[index].JUL));
+            	ix.push(new MES(meses_ac.getItemAt(7).toString(), items[index].AGO));
+            	ix.push(new MES(meses_ac.getItemAt(8).toString(), items[index].SEP));
+            	ix.push(new MES(meses_ac.getItemAt(9).toString(), items[index].OCT));
+            	ix.push(new MES(meses_ac.getItemAt(10).toString(),items[index].NOV));
+            	ix.push(new MES(meses_ac.getItemAt(11).toString(),items[index].DIC));
+            }
+		]]>
+	</mx:Script>
+	<mx:HBox>
+		<mx:Label text="ITEM:" fontSize="12" fontWeight="bold"/>
+		<mx:ComboBox id="comboGrafico" dataProvider="{itemsNames}" selectedIndex="1" change="graficar(comboGrafico.selectedIndex)"/>
+		<mx:Spacer width="100"/>
+		<mx:Button label="PDF" width="58" click="graficoTOPDF()"/>
+	</mx:HBox>
+	<mx:ColumnChart id="myChart" x="0" y="30" width="100%" height="100%" dataProvider="{ix}" showDataTips="true" textAlign="center">
+ 	  	<mx:horizontalAxis>
+ 	  	  		<mx:CategoryAxis categoryField="mes"/>  		
+ 	  	</mx:horizontalAxis>
+ 	  	<mx:series>
+ 	  		<mx:ColumnSeries dataProvider="{ix}" yField= "valor" xField="mes"/>
+ 	  	</mx:series>
+ 	</mx:ColumnChart>
+</mx:Panel>
