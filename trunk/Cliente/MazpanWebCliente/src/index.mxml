@@ -133,8 +133,8 @@
 			{
 				//Security.allowDomain("http://localhost/Cliente/index.cl");
 				//Security.loadPolicyFile("http://localhost/crossdomain.xml");
-            	//var httpManager:HTTPUtil = new HTTPUtil();
-            	//if(httpManager.getHostName()!="") URL="http://"+httpManager.getHostName()+"/server/";
+            	var httpManager:HTTPUtil = new HTTPUtil();
+            	if(httpManager.getHostName()!="") URL="http://"+httpManager.getHostName()+"/server/";
 			}
 			private function loginResult(event:ComplexEvent):void
 			{
