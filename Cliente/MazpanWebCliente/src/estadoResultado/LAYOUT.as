@@ -13,6 +13,14 @@ package estadoResultado
 	import org.alivepdf.pdf.PDF;
 	import org.alivepdf.saving.Method;
 	
+	/*
+	 myPDF.setFont (FontFamily.ARIAL, Style.NORMAL, 12);
+	 
+myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1);
+	 */
+	
+	
+	
 	public class LAYOUT
 	{
 		private var pdf:PDF;
@@ -49,7 +57,7 @@ package estadoResultado
 			var oct:GridColumn = new GridColumn("OCT", "OCT", 14, Align.CENTER, Align.RIGHT);
 			var nov:GridColumn = new GridColumn("NOV", "NOV", 14, Align.CENTER, Align.RIGHT);
 			var dic:GridColumn = new GridColumn("DIC", "DIC", 14, Align.CENTER, Align.RIGHT);
-			var co0:GridColumn = new GridColumn("Ppto Mes", "", 15, Align.CENTER, Align.RIGHT);
+			var co0:GridColumn = new GridColumn("Ppto Mes", "MES", 15, Align.CENTER, Align.RIGHT);
 			var co1:GridColumn = new GridColumn("Acum", "REAL", 16, Align.CENTER, Align.RIGHT);
 			var co2:GridColumn = new GridColumn("Ppto", "PPTO", 16, Align.CENTER, Align.RIGHT);
 			var co3:GridColumn = new GridColumn("Desv", "DESV", 11, Align.CENTER, Align.RIGHT);
@@ -68,7 +76,7 @@ package estadoResultado
 	        if(numColumns>=11) columnas.push(dic);
 			columnas.push(co0,co1,co2,co3);
           	
-          	var grid:Grid = new Grid(array,0, 0, new RGBColor (0x9BAFB9),new RGBColor (0xDDDDDD),new RGBColor (0), true, new RGBColor (0xCCCCCC),0,Joint.BEVEL);
+          	var grid:Grid = new Grid(array,0, 0, new RGBColor (0x9BAFB9),new RGBColor (0xDDDDDD),new RGBColor (0), false, new RGBColor (0xCCCCCC),0,Joint.BEVEL);
           	grid.columns=columnas;
           	
           	pdf.addImage(img,null,20);

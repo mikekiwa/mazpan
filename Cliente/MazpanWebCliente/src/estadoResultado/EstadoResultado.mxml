@@ -91,7 +91,8 @@
             	items[event.result.orden].OCT = event.result.meses.source[9];
             	items[event.result.orden].NOV = event.result.meses.source[10];
             	items[event.result.orden].DIC = event.result.meses.source[11];
-//	            items[event.result.orden].MES = event.result.mes;
+	            items[event.result.orden].PPTOMENSUAL = event.result.pptoMensual;
+	            items[event.result.orden].MES = event.result.pptoMensual.source[mes_seleccionado];
 	            items[event.result.orden].PPTO = event.result.ppto;
 
             	
@@ -128,6 +129,12 @@
             private function actualizarColumnas():void
             {
             	mes_seleccionado = meses_cb.selectedIndex;
+            	
+            	if(balanceCargado)
+            	{
+            		var paraActualizarValores:ITEMS = new ITEMS(items);
+            		paraActualizarValores.actualizarMes(mes_seleccionado);
+            	}
             	
             	tabla1.width = 448 + (meses_cb.selectedIndex +1) * 68;
 				
@@ -219,8 +226,8 @@
 			<mx:DataGridColumn headerText="OCT" 	dataField="OCT" 	sortable="false" textAlign="right" width="68" id="oct"/>
 			<mx:DataGridColumn headerText="NOV" 	dataField="NOV" 	sortable="false" textAlign="right" width="68" id="nov"/>
 			<mx:DataGridColumn headerText="DIC" 	dataField="DIC" 	sortable="false" textAlign="right" width="68" id="dic"/>
-			<mx:DataGridColumn headerText="MES" 	dataField="MES" 	sortable="false" textAlign="right" width="68"/>
-			<mx:DataGridColumn headerText="REAL" 	dataField="REAL" 	sortable="false" textAlign="right" width="68"/>
+			<mx:DataGridColumn headerText="PPTO MES" dataField="MES" 	sortable="false" textAlign="right" width="68"/>
+			<mx:DataGridColumn headerText="ACUM" 	dataField="REAL" 	sortable="false" textAlign="right" width="68"/>
 			<mx:DataGridColumn headerText="PPTO" 	dataField="PPTO" 	sortable="false" textAlign="right" width="68"/>
 			<mx:DataGridColumn headerText="DESV" 	dataField="DESV" 	sortable="false" textAlign="right" width="68"/>
 		</mx:columns>
