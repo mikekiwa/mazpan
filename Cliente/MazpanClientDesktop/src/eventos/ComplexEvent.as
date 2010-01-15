@@ -3,7 +3,7 @@ package eventos
 	import flash.events.Event;
 	public class ComplexEvent extends Event
 	{
-		public static const MENU_CLICK:String="complexClick";
+		public static const COMPLEX_CLICK:String="complexClick";
 		private var _stateDestination:String="";
 		private var _stateOrigin:String="";
 		private var _objeto:Object=null;
