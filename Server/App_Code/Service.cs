@@ -66,7 +66,7 @@ public class Service : System.Web.Services.WebService
     /************************************************/
 
     [WebMethod]
-    public DataTable especifico(int idItem, int mes, int ano)
+    public DataTable especifico(int idItem, int mes, int ano, string codigoCuenta)
     {
         DateTime f1 = new DateTime(ano, mes, 01);
         DateTime f2 = f1.AddMonths(1);
@@ -82,7 +82,7 @@ public class Service : System.Web.Services.WebService
                        " INNER JOIN [Maspan].[dbo].[JDT1] T4            ON T4.[Account]=T1.[AcctCode]" +
                        " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2  ON T1.AcctCode = T2.cuenta" +
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3       ON T3.id = T2.item" +
-                       " WHERE T3.id='" + idItem + "' AND RefDate>='" + fi + "' AND RefDate<'" + ft + "'" +
+                       " WHERE T3.id='" + idItem + "' AND T1.AcctCode='"+codigoCuenta+"' AND RefDate>='" + fi + "' AND RefDate<'" + ft + "'" +
                        " ORDER BY AcctName, RefDate ";
 
         DataTable dt = new DataTable();
@@ -113,13 +113,13 @@ public class Service : System.Web.Services.WebService
         if (f2.Month > 9) ft = f2.Year + "-" + f2.Month + "-01 00:00.000";
         else ft = f2.Year + "-0" + f2.Month + "-01 00:00.000";
 
-        string query = " SELECT T1.Segment_0,T1.Segment_1,T1.Segment_2,T1.Segment_3,T1.Segment_4, T1.AcctName, sum(T4.[Credit]-T4.[Debit])"+
+        string query = " SELECT T1.Segment_0,T1.Segment_1,T1.Segment_2,T1.Segment_3,T1.Segment_4, T1.AcctName, sum(T4.[Credit]-T4.[Debit]),AcctCode" +
                        " FROM [Maspan].[dbo].[OACT] T1"+
                        " INNER JOIN [Maspan].[dbo].[JDT1] T4            ON T4.[Account]=T1.[AcctCode]"+
                        " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2  ON T1.AcctCode = T2.cuenta"+
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3       ON T3.id = T2.item"+
                        " WHERE T3.id='"+idItem+"' AND RefDate>='"+fi+"' AND RefDate<'"+ft+"'"+
-                       " GROUP BY AcctName, segment_0,segment_1,segment_2,segment_3,segment_4";
+                       " GROUP BY AcctName, segment_0,segment_1,segment_2,segment_3,segment_4,AcctCode";
 
         DataTable dt = new DataTable();
         dt.TableName = "Detalle";
