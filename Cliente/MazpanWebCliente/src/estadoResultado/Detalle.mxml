@@ -41,19 +41,25 @@
 			{
 				
 			}
-			public function parametros(_items:Array,_ano:int):void
+			public function parametros(_items:Array,_ano:int,_idItem:int,_itemName:String):void
 			{
+///////////////////
+//////////////////////
+//aqui deberia tratar de usar los datos que vendrian como parametros,  iditem, itemName, 
+//con esos deberia tratar cargar los datos.				
 				detalle_ac = new Array();
 				tabla.height = 330;
 				this.height = 400;
-				itemsCombo = new ITEMS(_items).getItemsContables();
-				if(itemsCombo.length>0) items_cb.selectedIndex = 0;
 				meses_cb.selectedIndex = 0;
 				items = _items;
 				ano = _ano;
 				labelText = _ano+"";
 				
-				Service.detalle(ITEMS.VENTASZONAS+1,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
+				itemsCombo = new ITEMS(_items).getItemsContables();
+				if(itemsCombo.length>0) items_cb.selectedItem = _itemName;
+				
+				
+				Service.detalle(_idItem,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
 			}
 			private function detalleResult(event:ResultEvent):void
             {
@@ -96,9 +102,13 @@
 	</mx:HBox>
 	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" >
 		<mx:columns>
-			<mx:DataGridColumn headerText="Cuenta" 			dataField="AcctName" width="400" sortable="false"/>
-			<mx:DataGridColumn headerText="Valor" 			dataField="Column1"  width="200" sortable="false" textAlign="right"/>
-			<mx:DataGridColumn headerText="Fecha Contable" 	dataField="RefDate"  width="300" sortable="false" textAlign="right"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_0" 	width="60" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_1" 	width="30" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_2" 	width="35" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_3" 	width="30" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_4" 	width="35" 	sortable="false"/>
+			<mx:DataGridColumn headerText="Cuenta" 		dataField="AcctName" 	width="400" sortable="false"/>
+			<mx:DataGridColumn headerText="Valor [$]" 	dataField="Column1"  	width="190" sortable="false" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
 </mx:Panel>
