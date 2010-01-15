@@ -1,6 +1,6 @@
 package estadoResultado
 {
-	import flash.filters.BevelFilter;
+	import mx.formatters.NumberFormatter;
 	
 	public class ITEMS
 	{
@@ -46,12 +46,20 @@ package estadoResultado
 		public static const GASTOSADMISTRATIVOS:int = 15;
 		
 		
+		private var formato:NumberFormatter = new NumberFormatter();
+			
 		/**
 		 * Retorna 999999999 si el elemento es el ultimo de la lista
 		 */ 
 		public function ITEMS(_datos:Array)
 		{
 			this.datos = _datos;
+			formato.precision=0;
+			formato.useThousandsSeparator=true;
+			formato.thousandsSeparatorFrom=".";
+			formato.thousandsSeparatorTo=".";
+			formato.decimalSeparatorFrom=",";
+			formato.decimalSeparatorTo=",";
 		}
 		 
 		public static function next(itemIndex:int):int
@@ -160,93 +168,162 @@ package estadoResultado
 			}
 			return MAXVALUE;
 		}
+		private function removeFormatting(e:String):String
+		{
+			var array:Array;
+			array = e.split(".");
+			return array.join("");
+		}
 		public function CALCULAR(item:int):void
 		{
 			var i:int;var j:int;
 			SET(item);
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].ENE += datos[i].ENE;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].FEB += datos[i].FEB;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].MAR += datos[i].MAR;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].ABR += datos[i].ABR;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].MAY += datos[i].MAY;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].JUN += datos[i].JUN;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].JUL += datos[i].JUL;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].AGO += datos[i].AGO;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].SEP += datos[i].SEP;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].OCT += datos[i].OCT;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].NOV += datos[i].NOV;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].DIC += datos[i].DIC;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].MES += datos[i].MES;
-			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	datos[item].PPTO += datos[i].PPTO;
-		}
+			var ene:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	ene += Number(removeFormatting(datos[i].ENE)) as int;
+			datos[item].ENE = formato.format(ene);
+			
+			var feb:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	feb += Number(removeFormatting(datos[i].FEB)) as int;
+			datos[item].FEB = formato.format(feb);
+			
+			var mar:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	mar += Number(removeFormatting(datos[i].MAR)) as int;
+			datos[item].MAR = formato.format(mar);
+			
+			var abr:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	abr += Number(removeFormatting(datos[i].ABR)) as int;
+			datos[item].ABR = formato.format(abr);
+			
+			var may:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	may += Number(removeFormatting(datos[i].MAY)) as int;
+			datos[item].MAY = formato.format(may);
+			
+			var jun:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	jun += Number(removeFormatting(datos[i].JUN)) as int;
+			datos[item].JUN = formato.format(jun);
+			
+			var jul:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	jul += Number(removeFormatting(datos[i].JUL)) as int;
+			datos[item].JUL = formato.format(jul);
+			
+			var ago:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	ago += Number(removeFormatting(datos[i].AGO)) as int;
+			datos[item].AGO = formato.format(ago);
+			
+			var sep:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	sep += Number(removeFormatting(datos[i].SEP)) as int;
+			datos[item].SEP = formato.format(sep);
+			
+			var oct:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	oct += Number(removeFormatting(datos[i].OCT)) as int;
+			datos[item].OCT = formato.format(oct);
+			
+			var nov:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	nov += Number(removeFormatting(datos[i].NOV)) as int;
+			datos[item].NOV = formato.format(nov);
+			
+			var dic:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	dic += Number(removeFormatting(datos[i].DIC)) as int;
+			datos[item].DIC = formato.format(dic);
+			
+			var mes:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	mes += Number(removeFormatting(datos[i].MES)) as int;
+			datos[item].MES = formato.format(mes);
+			
+			var ppto:int = 0;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	ppto += Number(removeFormatting(datos[i].PPTO)) as int;
+			datos[item].PPTO = formato.format(ppto);
+			
+			}
 		public function CALCULAR_IMPUESTO():void
 		{
 			SET(IMPUESTOALARENTA);
 						
-			var ene:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].ENE;
-			datos[IMPUESTOALARENTA].ENE = Math.round(ene);
-			var feb:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].FEB;
-			datos[IMPUESTOALARENTA].FEB = Math.round(feb);
-			var mar:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].MAR;
-			datos[IMPUESTOALARENTA].MAR = Math.round(mar);
-			var abr:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].ABR;
-			datos[IMPUESTOALARENTA].ABR = Math.round(abr);
-			var may:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].MAY;
-			datos[IMPUESTOALARENTA].MAY = Math.round(may);
-			var jun:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].JUN;
-			datos[IMPUESTOALARENTA].JUN = Math.round(jun);
-			var jul:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].JUL;
-			datos[IMPUESTOALARENTA].JUL =Math.round(jul);
-			var ago:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].AGO;
-			datos[IMPUESTOALARENTA].AGO = Math.round(ago);
-			var sep:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].SEP;
-			datos[IMPUESTOALARENTA].SEP = Math.round(sep);
-			var oct:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].OCT;
-			datos[IMPUESTOALARENTA].OCT = Math.round(oct);
-			var nov:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].NOV;
-			datos[IMPUESTOALARENTA].NOV = Math.round(nov);
-			var dic:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].DIC;
-			datos[IMPUESTOALARENTA].DIC = Math.round(dic);
-			var mes:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].MES;
-			datos[IMPUESTOALARENTA].MES = Math.round(mes);
-			var ppto:Number = -0.17 * datos[RESULTADOANTESDEIMPUESTO].PPTO;
-			datos[IMPUESTOALARENTA].PPTO = Math.round(ppto);
+			var ene:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].ENE)) as Number;
+			datos[IMPUESTOALARENTA].ENE = formato.format(Math.round(ene));
+			
+			var feb:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].FEB)) as Number;
+			datos[IMPUESTOALARENTA].FEB = formato.format(Math.round(feb));
+			
+			var mar:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MAR)) as Number;
+			datos[IMPUESTOALARENTA].MAR = formato.format(Math.round(mar));
+			
+			var abr:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].ABR)) as Number;
+			datos[IMPUESTOALARENTA].ABR = formato.format(Math.round(abr));
+			
+			var may:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MAY)) as Number;
+			datos[IMPUESTOALARENTA].MAY = formato.format(Math.round(may));
+			
+			var jun:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].JUN)) as Number;
+			datos[IMPUESTOALARENTA].JUN = formato.format(Math.round(jun));
+			
+			var jul:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].JUL)) as Number;
+			datos[IMPUESTOALARENTA].JUL = formato.format(Math.round(jul));
+			
+			var ago:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].AGO)) as Number;
+			datos[IMPUESTOALARENTA].AGO = formato.format(Math.round(ago));
+			
+			var sep:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].SEP)) as Number;
+			datos[IMPUESTOALARENTA].SEP = formato.format(Math.round(sep));
+			
+			var oct:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].OCT)) as Number;
+			datos[IMPUESTOALARENTA].OCT = formato.format(Math.round(oct));
+			
+			var nov:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].NOV)) as Number;
+			datos[IMPUESTOALARENTA].NOV = formato.format(Math.round(nov));
+			
+			var dic:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].DIC)) as Number;
+			datos[IMPUESTOALARENTA].DIC = formato.format(Math.round(dic));
+			
+			var mes:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MES)) as Number;
+			datos[IMPUESTOALARENTA].MES = formato.format(Math.round(mes));
+			
+			var ppto:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].PPTO)) as Number;
+			datos[IMPUESTOALARENTA].PPTO = formato.format(Math.round(ppto));
 		}
 		public function CALCULAR_OTROS(numColumns:int):void
 		{
 			for(var orden:int=VENTASZONAS; orden!=MAXVALUE; orden=next(orden))
 			{
-				datos[orden].REAL = datos[orden].ENE;
-				if(numColumns>=1)datos[orden].REAL += datos[orden].FEB;
-		        if(numColumns>=2)datos[orden].REAL += datos[orden].MAR;
-		        if(numColumns>=3)datos[orden].REAL += datos[orden].ABR;
-		        if(numColumns>=4)datos[orden].REAL += datos[orden].MAY;
-		        if(numColumns>=5)datos[orden].REAL += datos[orden].JUN;
-		        if(numColumns>=6)datos[orden].REAL += datos[orden].JUL;
-		        if(numColumns>=7)datos[orden].REAL += datos[orden].AGO;
-		        if(numColumns>=8)datos[orden].REAL += datos[orden].SEP;
-		        if(numColumns>=9)datos[orden].REAL += datos[orden].OCT;
-		        if(numColumns>=10)datos[orden].REAL += datos[orden].NOV;
-		        if(numColumns>=11)datos[orden].REAL += datos[orden].DIC;
+				var real:Number = 0;
+				real = Number(removeFormatting(datos[orden].ENE)) as Number;
+				if(numColumns>=1)real += Number(removeFormatting(datos[orden].FEB)) as Number;
+		        if(numColumns>=2)real += Number(removeFormatting(datos[orden].MAR)) as Number;
+		        if(numColumns>=3)real += Number(removeFormatting(datos[orden].ABR)) as Number;
+		        if(numColumns>=4)real += Number(removeFormatting(datos[orden].MAY)) as Number;
+		        if(numColumns>=5)real += Number(removeFormatting(datos[orden].JUN)) as Number;
+		        if(numColumns>=6)real += Number(removeFormatting(datos[orden].JUL)) as Number;
+		        if(numColumns>=7)real += Number(removeFormatting(datos[orden].AGO)) as Number;
+		        if(numColumns>=8)real += Number(removeFormatting(datos[orden].SEP)) as Number;
+		        if(numColumns>=9)real += Number(removeFormatting(datos[orden].OCT)) as Number;
+		        if(numColumns>=10)real += Number(removeFormatting(datos[orden].NOV)) as Number;
+		        if(numColumns>=11)real += Number(removeFormatting(datos[orden].DIC)) as Number;
+		        datos[orden].REAL = formato.format(real);
    			}
-   			
+   			   			
    			calcularREAL(VENTASNETAS);
    			calcularREAL(COSTOSTOTALES);
    			calcularREAL(MARGENCOMERCIAL);
    			calcularREAL(TOTALGASTOSADMINISTRATIVOS);
    			calcularREAL(MARGENOPERACIONAL);
    			calcularREAL(RESULTADOANTESDEIMPUESTO);
-   			var real:int = -0.17 * datos[RESULTADOANTESDEIMPUESTO].REAL;
-   			datos[IMPUESTOALARENTA].REAL = real;
+   			
+   			var realAcum:int = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].REAL)) as Number;
+   			datos[IMPUESTOALARENTA].REAL = formato.format(realAcum);
    			calcularREAL(RESULTADO);
    			calcularDESV();
   		}
   		private function calcularREAL(item:int):void
 		{
-			datos[item].REAL = 0;
-			datos[item].MES = 0;
-			for(var i:int=sig(item,item); i!=MAXVALUE; i=sig(i,item)) datos[item].REAL += datos[i].REAL;
-			for(var i:int=sig(item,item); i!=MAXVALUE; i=sig(i,item)) datos[item].MES += datos[i].MES;
+			var i:int = 0;
+			var real:Number = 0;
+			var mes:Number = 0;
+			
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item)) real += Number(removeFormatting(datos[i].REAL)) as Number;
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item)) mes += Number(removeFormatting(datos[i].MES)) as Number;
+			
+			datos[item].REAL = formato.format(real);
+			datos[item].MES = formato.format(mes);
 		}
 		private function calcularDESV():void
 		{
@@ -254,19 +331,19 @@ package estadoResultado
 			{
 				if(indice!=COSTOS && indice!=VENTAS && indice!=GASTOSADMISTRATIVOS)//si NO  es titulo
 				{
-					var ppto:Number = datos[indice].PPTO;
+					var ppto:Number = Number(removeFormatting(datos[indice].PPTO)) as Number;
 					var aux:Number;
 					if(ppto==0) aux = 0;
 					else
 					{ 
 						if(indice==VENTASNETAS)
 							aux = 0;
-						aux = datos[indice].REAL;
+						aux = Number(removeFormatting(datos[indice].REAL)) as Number;
 						aux = aux/ppto;
 						aux = aux - 1;
 						aux = aux*1000;
 					}
-					datos[indice].DESV = Math.round(aux)/10;
+					datos[indice].DESV = formato.format(Math.round(aux)/10);
 				}
 				if(indice==RESULTADO) indice = MAXVALUE-1;
 			}

@@ -41,6 +41,15 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 			pdf.addImage(grafico,null,10,30,250,160);
           	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "Grafico.pdf");
 		}
+		
+		public function generarTabla(tabla:DisplayObject, img:DisplayObject, ano:String, item:String):void
+		{
+			pdf.addImage(img,null,0,0);
+			pdf.setFontSize(25);
+			pdf.addText(item+" año "+ano,90,20);
+			pdf.addImage(tabla,null,10,30,250,160);
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "Tabla.pdf");
+		}
 
 		public function generar(img:DisplayObject, array:Array, numColumns:int, mes:String, ano:int):void
 		{
