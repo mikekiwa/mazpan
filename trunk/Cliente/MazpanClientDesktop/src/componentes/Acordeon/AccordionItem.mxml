@@ -23,7 +23,7 @@
             public function goState(stateName:String):void
 			{
 				//de Aqui nos vamos a 'Acordeon.mxml' este nos reenviara donde corresponda
-				dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, stateName,"", null));
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, stateName,"", null));
 			}
 		]]>
 	</mx:Script>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="200">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="200" creationComplete="init()">
 	
 	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="validarUsuario" 	result="validarUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'validarUsuario')"/>
@@ -11,6 +11,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import estadoResultado.EstadoResultado;
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.controls.Alert;
@@ -23,6 +24,19 @@
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
+            private function init():void
+            {
+            	this.addEventListener(KeyboardEvent.KEY_DOWN,teclado);
+            }
+            private function teclado(event:KeyboardEvent):void
+            {
+            	if(event.keyCode == Keyboard.ENTER) click();
+            	if(event.keyCode == Keyboard.ESCAPE)
+        		{
+        			username_ti.text = ""; 
+        			password_ti.text = "";
+        		}
+            }
 			private function click():void
 			{
 				UsuarioService.validarUsuario(username_ti.text, password_ti.text);
@@ -31,11 +45,12 @@
 			private function validarUsuarioResult(event:ResultEvent):void
 			{
 				var privilegio:String = event.result as String;
-				if(privilegio=="5") 		dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 5));
-				else if(privilegio=="6") dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 6));
-				else if(privilegio=="7") dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 7));
-				else if(privilegio=="8")	dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 8));
-				else if(privilegio=="9")	dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "cleanState", nombre, 9));
+				if(privilegio=="5") 		dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 5));
+				else if(privilegio=="6") 	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 6));
+				else if(privilegio=="7") 	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 7));
+				else if(privilegio=="8")	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 8));
+				else if(privilegio=="9")	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 9));
+				else if(privilegio=="10")	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, EstadoResultado.nombre, nombre, 10));
 				else Alert.show("Nombre de usuario o contraseña invalido");
 				username_ti.text="";
 				password_ti.text="";

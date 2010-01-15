@@ -66,7 +66,7 @@
 				}
 				else
 				{
-					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, null));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
 				clean();
 			}
@@ -87,7 +87,7 @@
 				{
 					LineaService.addMaquinas(maquinas_ac, linea.codigo);
 					LineaService.addMantenciones(mantenciones_ac, linea.codigo);
-					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, linea));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, linea));
 				}
 				else if(result==-1)
 				{
