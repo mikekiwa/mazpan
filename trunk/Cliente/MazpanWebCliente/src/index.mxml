@@ -80,7 +80,7 @@
 		<mx:State name="EstadoResultado">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns11:EstadoResultado id="estadoResultado_cmp"/>
+				<ns11:EstadoResultado id="estadoResultado_cmp" complexClick="goState(event)"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Revisar">
@@ -113,17 +113,18 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
 			import estadoResultado.Amarre;
+			import estadoResultado.HTTPUtil;
 			import componentes.mantencionComponentes.Componentes;
 			import componentes.Acordeon.MenuMantenciones;
-			import mx.controls.Alert;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
 			//public static var URL:String = "http://localhost:7070/Server/";
 			//public static var URL:String = "http://192.168.3.131/Server/";
 			//public static var URL:String = "http://192.168.3.117/Server/";
-			public static var URL:String = "http://localhost/server/";
+			public static var URL:String = "http://192.168.3.130/server/";
 			
 			[Bindable]
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
@@ -132,8 +133,9 @@
 			{
 				//Security.allowDomain("http://localhost/Cliente/index.cl");
 				//Security.loadPolicyFile("http://localhost/crossdomain.xml");
+            	//var httpManager:HTTPUtil = new HTTPUtil();
+            	//if(httpManager.getHostName()!="") URL="http://"+httpManager.getHostName()+"/server/";
 			}
-						
 			private function loginResult(event:ComplexEvent):void
 			{
 				currentState = event.stateDestination;
@@ -164,7 +166,9 @@
 					currentState = event.stateDestination;
 					if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(estadoResultado_cmp.getParametros().items);
 					if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(estadoResultado_cmp.getParametros().items);
-					if(event.stateDestination==Detalle.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano);
+					if(event.stateDestination==Detalle.nombre)
+						if(event.stateOrigin!=EstadoResultado.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,estadoResultado_cmp.getParametros().idItem,estadoResultado_cmp.getParametros().itemName);
+						else detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,event.objeto.idItem,event.objeto.itemName);
 				}
 				else
 				{

@@ -13,6 +13,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.ItemResponder;
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
@@ -166,8 +167,29 @@
 				parametros.img = img;
 				parametros.ano = ano_var;
 				parametros.balanceCargado = balanceCargado;
+				parametros.idItem = ITEMS.VENTASZONAS+1;
+				parametros.itemName = items[ITEMS.VENTASZONAS].itemName;
 				
 				return parametros;
+			}
+			private function detalle():void
+			{
+				if(tabla1.selectedIndex!=-1 && generar_btn.enabled)
+            	{
+            		var esContable:Boolean = false;
+            		var itemsContables:Array = new ITEMS(items).getItemsContables();
+            		for(var i:int=0; i<itemsContables.length; i++)
+            			if(tabla1.selectedItem.itemName == itemsContables[i]) esContable=true;
+            		
+            		if(esContable)
+            		{
+	            		var parametros:Object = getParametros();
+						parametros.idItem = tabla1.selectedIndex+1;
+						parametros.itemName = tabla1.selectedItem.itemName;
+						
+						dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,Detalle.nombre,nombre,parametros));
+	            	}
+            	}
 			}
 		]]>
 	</mx:Script>
@@ -182,7 +204,7 @@
 	<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  enabled="false" width="90" x="389" y="10"/>
 	<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" enabled="false" x="487" y="10" width="90"/>
 	
-	<mx:DataGrid id="tabla1" y="38" width="100%" height="100%" dataProvider="{items}">
+	<mx:DataGrid id="tabla1" y="38" width="100%" height="100%" dataProvider="{items}" doubleClickEnabled="true" doubleClick="detalle()">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Cuenta" 	dataField="itemName" sortable="false" width="176"/>
 			<mx:DataGridColumn headerText="ENE" 	dataField="ENE" 	sortable="false" textAlign="right" width="68" id="ene"/>
