@@ -124,7 +124,7 @@
 				}
 				else
 				{
-					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, null));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 					clean();
 				}
 			}
@@ -157,7 +157,7 @@
 				{
 					ComponenteService.addEspecificaciones(especificaciones_ac, componente.codigo);
 					ComponenteService.addMantenciones(mantenciones_ac, componente.codigo, componente.puestaMarcha);
-					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, componente));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, componente));
 				}
 				else if(result==-1)
 				{

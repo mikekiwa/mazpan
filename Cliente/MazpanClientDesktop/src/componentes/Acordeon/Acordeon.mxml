@@ -10,39 +10,47 @@
 		<![CDATA[
 			import mx.controls.Alert;
 			import eventos.ComplexEvent;
-						
 			
 			private function reDireccionar(event:ComplexEvent):void
 			{
-				dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK,event.stateDestination,event.stateOrigin, event.objeto));
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,event.stateDestination,event.stateOrigin, event.objeto));
 			}
 			
 			public function cargar(privilegio:int):void
 			{
 				accordion.removeAllChildren();
-				if(privilegio==9)
+				if(privilegio==10)
 				{
-					var menuMantencion:MenuMantenciones = new MenuMantenciones();
-					menuMantencion.addEventListener(ComplexEvent.MENU_CLICK, reDireccionar);
-					accordion.addChild(menuMantencion);
+					var menuEstadoResultado:MenuEstadoResultado = new MenuEstadoResultado();
+					menuEstadoResultado.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuEstadoResultado);
 				}
-				if(privilegio>=8)
+				else
 				{
-					var menuPersonal:MenuPersonal = new MenuPersonal();
-					menuPersonal.addEventListener(ComplexEvent.MENU_CLICK, reDireccionar);
-					accordion.addChild(menuPersonal);
-				}
-				if(privilegio>=7)
-				{
-					var menuAgentesExternos:MenuAgentesExternos = new MenuAgentesExternos();
-					menuAgentesExternos.addEventListener(ComplexEvent.MENU_CLICK, reDireccionar);
-					accordion.addChild(menuAgentesExternos);
-				}
-				if(privilegio>=6)
-				{
-					var menuGeneral:MenuGerenal = new MenuGerenal();
-					menuGeneral.addEventListener(ComplexEvent.MENU_CLICK, reDireccionar);
-					accordion.addChild(menuGeneral);
+					if(privilegio==9)
+					{
+						var menuMantencion:MenuMantenciones = new MenuMantenciones();
+						menuMantencion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+						accordion.addChild(menuMantencion);
+					}
+					if(privilegio>=8)
+					{
+						var menuPersonal:MenuPersonal = new MenuPersonal();
+						menuPersonal.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+						accordion.addChild(menuPersonal);
+					}
+					if(privilegio>=7)
+					{
+						var menuAgentesExternos:MenuAgentesExternos = new MenuAgentesExternos();
+						menuAgentesExternos.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+						accordion.addChild(menuAgentesExternos);
+					}
+					if(privilegio>=6)
+					{
+						var menuGeneral:MenuGerenal = new MenuGerenal();
+						menuGeneral.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+						accordion.addChild(menuGeneral);
+					}
 				}
 			}
 		]]>

@@ -164,7 +164,7 @@
 				}
 				else
 				{
-					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, null));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
 				clean();
 			}
@@ -203,7 +203,7 @@
 					MaquinaService.addEspecificaciones(especificaciones_ac, maquina.codigo);
 					MaquinaService.addMantenciones(mantenciones_ac, maquina.codigo);
 					MaquinaService.addComponentes(componentes_ac, maquina.codigo);
-					dispatchEvent(new ComplexEvent(ComplexEvent.MENU_CLICK, "", nombre, maquina));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, maquina));
 				}
 				else if(result==-1)
 				{
