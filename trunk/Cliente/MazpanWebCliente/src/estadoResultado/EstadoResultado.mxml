@@ -13,6 +13,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.formatters.NumberFormatter;
 			import mx.collections.ItemResponder;
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
@@ -33,12 +34,21 @@
 			private var inicializado:Boolean = false;
 			private var balanceCargado:Boolean = false;
 
+			public static var formato:NumberFormatter = new NumberFormatter();
+
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
             private function init():void
             {
+				formato.precision=0;
+				formato.useThousandsSeparator=true;
+				formato.thousandsSeparatorFrom=".";
+				formato.thousandsSeparatorTo=".";
+				formato.decimalSeparatorFrom=",";
+				formato.decimalSeparatorTo=",";
+            	
 //            	revisar_btn.enabled = false;
 //            	amarre_btn.enabled = false;
             	generar_btn.enabled = false;
@@ -93,8 +103,13 @@
             	items[event.result.orden].DIC = event.result.meses.source[11];
 	            items[event.result.orden].PPTOMENSUAL = event.result.pptoMensual;
 	            items[event.result.orden].MES = event.result.pptoMensual.source[mes_seleccionado];
-	            items[event.result.orden].PPTO = event.result.ppto;
-
+	            
+	            items[event.result.orden].PPTO=0;
+	            for(var i:int=0;i<=mes_seleccionado;i++)
+	            {
+		            items[event.result.orden].PPTO += items[event.result.orden].PPTOMENSUAL[i];
+		        }
+				
             	
             	if(ITEMS.next(event.result.orden)!=ITEMS.MAXVALUE)
             	{
@@ -125,7 +140,7 @@
 			{
 				var pdf:LAYOUT = new LAYOUT();
 				//pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
-				pdf.generarTabla(tabla1,img,ano_var.toString(),"Funciona?");
+				pdf.generarTabla(tabla1,img,ano_var.toString(),"Estado de Resultado",mes_seleccionado);
 			}
             private function actualizarColumnas():void
             {
