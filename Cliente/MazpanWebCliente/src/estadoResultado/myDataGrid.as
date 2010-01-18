@@ -44,7 +44,7 @@ package estadoResultado
 			 	//item.DESV = formato.format(item.DESV);
 			}
 			else color = 0xFFFFFF;
-			 
+			
 			super.drawRowBackground(s,rowIndex,y,height,color,dataIndex);  
 		} 
 		

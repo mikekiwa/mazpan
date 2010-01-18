@@ -1,5 +1,7 @@
 package estadoResultado
 {
+	import flash.media.ID3Info;
+	
 	import mx.formatters.NumberFormatter;
 	
 	public class ITEMS
@@ -104,8 +106,11 @@ package estadoResultado
 			datos[item].OCT = 0;
 			datos[item].NOV = 0;
 			datos[item].DIC = 0;
-			datos[item].MES = 0;
-			datos[item].PPTO = 0;
+			if(item!=IMPUESTOALARENTA)
+			{
+				datos[item].MES = 0;
+				datos[item].PPTO = 0;
+			}
 		}
 		private function sig(item:int, raiz:int):int
 		{
@@ -275,11 +280,12 @@ package estadoResultado
 			var dic:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].DIC)) as Number;
 			datos[IMPUESTOALARENTA].DIC = formato.format(Math.round(dic));
 			
-			var mes:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MES)) as Number;
+			/*var mes:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MES)) as Number;
 			datos[IMPUESTOALARENTA].MES = formato.format(Math.round(mes));
 			
 			var ppto:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].PPTO)) as Number;
 			datos[IMPUESTOALARENTA].PPTO = formato.format(Math.round(ppto));
+			*/
 		}
 		public function CALCULAR_OTROS(numColumns:int):void
 		{
@@ -329,7 +335,7 @@ package estadoResultado
 		{
 			for(var indice:int=1; indice!=MAXVALUE; indice++)
 			{
-				if(indice!=COSTOS && indice!=VENTAS && indice!=GASTOSADMISTRATIVOS)//si NO  es titulo
+				if(indice!=COSTOS && indice!=VENTAS && indice!=GASTOSADMISTRATIVOS)//si NO es titulo
 				{
 					var ppto:Number = Number(removeFormatting(datos[indice].PPTO)) as Number;
 					var aux:Number;
@@ -411,9 +417,17 @@ package estadoResultado
 		}
 		public function actualizarMes(mes:int):void
 		{
-			for(var indice:int=VENTASZONAS; indice!=IMPUESTOALARENTA; indice=next(indice))
+			for(var indice:int=VENTASZONAS; indice!=MAXVALUE; indice=next(indice))
 			{
-				datos[indice].MES = datos[indice].PPTOMENSUAL[mes];
+				datos[indice].MES = formato.format(datos[indice].PPTOMENSUAL[mes]);
+				
+				var ppto:int = 0;
+	            for(var m:int=0;m<=mes;m++)
+	            {
+		            ppto += datos[indice].PPTOMENSUAL[m];
+		        }
+		        
+		        datos[indice].PPTO = formato.format(ppto);
 			}
 		}
 	}
