@@ -5,6 +5,7 @@
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
 		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
+		<mx:operation name="getSucursales" 	result="getSucursalesResult(event)"		fault="ErrorFaultHandler(event, 'getSucursales')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -13,6 +14,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import flexlib.scheduling.scheduleClasses.utils.Selection;
 			import mx.formatters.NumberFormatter;
 			import mx.collections.ItemResponder;
 			import mx.collections.ArrayCollection;
@@ -25,6 +27,10 @@
 			
 			[Bindable]
 			private var items:Array =  new Array();
+			[Bindable]
+			private var sucursales_ac:Array =  new Array();
+			[Bindable]
+			private var nombreSucursales_ac:Array = new Array();
 			[Bindable]
             private var meses_ac:ArrayCollection= index.meses;
             
@@ -54,14 +60,26 @@
             	generar_btn.enabled = false;
 //            	grafico_btn.enabled = false;
             	
+            	Service.getSucursales();
+            }
+            private function getSucursalesResult(event:ResultEvent):void
+            {
+            	sucursales_ac = event.result.Tables.Sucursales.Rows.source as Array;
+            	for(var i:int=0; i<sucursales_ac.length; i++)
+            	{
+            		nombreSucursales_ac.push(sucursales_ac[i].ShortName);
+            	}
+            	sucursales_cb.selectedIndex = 0;
+            	sucursales_cb.enabled = true;
             	Service.getItems();
             }
-            public function actualizarMeses():void
+            public function actualizarCombos():void
             {
             	meses_cb.selectedIndex = mes_seleccionado;//Esta linea es necesaria, puesto que cuando se vuelve al estado base el combo de seleccion de mes se cambiaba a ENERO
             }
             public function cargar():void
             {
+            	sucursales_cb.enabled = false;
             	cargarOtros = false;
             	balanceCargado = false;
             	generar_btn.enabled = false;
@@ -70,9 +88,9 @@
 //            	grafico_btn.enabled = false;
 				var default_Values:ITEMS = new ITEMS(items);default_Values.default_values();
             	ano_var = ano.value;
-            	Service.getFlujo(items[ITEMS.VENTASZONAS].id, items[ITEMS.VENTASZONAS].itemName, ITEMS.VENTASZONAS,ano_var);
+            	Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.VENTASZONAS].id, items[ITEMS.VENTASZONAS].itemName, ITEMS.VENTASZONAS,ano_var);
             	cargar_btn.label='Recargar';
-            	actualizarMeses();
+            	actualizarCombos();
             }
             private function getItemsResult(event:ResultEvent):void
             {
@@ -113,7 +131,7 @@
             	
             	if(ITEMS.next(event.result.orden)!=ITEMS.MAXVALUE)
             	{
-            		Service.getFlujo(items[ITEMS.next(event.result.orden)].id, items[ITEMS.next(event.result.orden)].itemName, ITEMS.next(event.result.orden),ano_var);
+            		Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.next(event.result.orden)].id, items[ITEMS.next(event.result.orden)].itemName, ITEMS.next(event.result.orden),ano_var);
             	}
             	else
             	{
@@ -133,6 +151,7 @@
             		cargar_btn.enabled = true;
             		cargarOtros = true;
             		meses_cb.enabled = true;
+            		sucursales_cb.enabled = true;
 //            		grafico_btn.enabled  = true;
             	}
             }
@@ -140,7 +159,7 @@
 			{
 				var pdf:LAYOUT = new LAYOUT();
 				//pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
-				pdf.generarTabla(tabla1,img,ano_var.toString(),"Estado de Resultado",mes_seleccionado);
+				pdf.generarTabla(tabla1,img,ano_var.toString(),"Estado de Resultado", sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 			}
             private function actualizarColumnas():void
             {
@@ -154,10 +173,10 @@
             	
             	tabla1.width = 448 + (meses_cb.selectedIndex +1) * 68;
 				
-            	if(meses_cb.selectedIndex>0)
+            	if(meses_cb.selectedIndex>3)
             		this.width = 468 + (meses_cb.selectedIndex +1) * 68;
             	else
-            		this.width = 604
+            		this.width = 808
             	
             	
             	if(meses_cb.selectedIndex>=1)feb.visible=true; else feb.visible=false;
@@ -192,7 +211,10 @@
 				parametros.balanceCargado = balanceCargado;
 				parametros.idItem = ITEMS.VENTASZONAS+1;
 				parametros.itemName = items[ITEMS.VENTASZONAS].itemName;
-				
+				parametros.sucursales = sucursales_ac;
+				parametros.nombreSucursales = nombreSucursales_ac;
+				parametros.selectedSucursal = 0;
+				parametros.sucursal = sucursales_ac[sucursales_cb.selectedIndex].Name;
 				return parametros;
 			}
 			private function detalle():void
@@ -209,6 +231,7 @@
 	            		var parametros:Object = getParametros();
 						parametros.idItem = tabla1.selectedIndex+1;
 						parametros.itemName = tabla1.selectedItem.itemName;
+						parametros.selectedSucursal = sucursales_cb.selectedIndex;
 						
 						dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,Detalle.nombre,nombre,parametros));
 	            	}
@@ -219,14 +242,16 @@
 
 	<mx:Image x="299" y="124" width="180" height="100" id="img" source="@Embed('iconos/maspan.png')"/>
 	
-	<mx:Label  text="Elija el mes:" id="label2" x="10" y="12"/>
-	<mx:Label  text="Elija el año:" id="label1" x="223" y="12"/>
-	
-	<mx:ComboBox dataProvider="{meses_ac}" change="actualizarColumnas()" id="meses_cb" 	  enabled="false" selectedIndex="11" x="92" y="10" width="113"/>
-	<mx:NumericStepper minimum="1990" maximum="9999" value="2010" 		 id="ano" x="302" y="10"/>
-	<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  enabled="false" width="90" x="389" y="10"/>
-	<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" enabled="false" x="487" y="10" width="90"/>
-	
+	<mx:HBox x="0" y="8">
+		<mx:Label text="Sucursal:"/>
+		<mx:ComboBox dataProvider="{nombreSucursales_ac}" change="{if(seCargo())cargar()}"  id="sucursales_cb" enabled="false" selectedIndex="0" maxWidth="110"/>
+		<mx:Label  text="Elija el mes:" id="label2"/>
+		<mx:ComboBox dataProvider="{meses_ac}" change="actualizarColumnas()" id="meses_cb" 	  	enabled="false" selectedIndex="11"/>
+		<mx:Label  text="Elija el año:" id="label1"/>
+		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" 		 id="ano"/>
+		<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  	enabled="false" width="77"/>
+		<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" 	enabled="false" width="77"/>
+	</mx:HBox>
 	
 	<estadoResultado:myDataGrid id="tabla1" y="38" width="100%" height="100%" dataProvider="{items}" doubleClickEnabled="true" doubleClick="detalle()">
 		<estadoResultado:columns>

@@ -15,7 +15,6 @@
 	
 	<mx:states>
 		<mx:State name="maquinasState">
-			<mx:SetProperty target="{acordeon}" name="y" value="33.9"/>
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns2:Maquinas id="maq"/>
@@ -23,10 +22,8 @@
 		</mx:State>
 		<mx:State name="cleanState">
 			<mx:RemoveChild target="{login}"/>
-			<mx:SetProperty target="{cerrar_btn}" name="x" value="308"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns7:planComponentes>
-				</ns7:planComponentes>
+				<ns7:planComponentes/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="lineasState">
@@ -158,7 +155,7 @@
 					if(estadoResultado_cmp.seCargo())
 						estadoResultado_cmp.cargar();
 	            	else
-	            		estadoResultado_cmp.actualizarMeses();
+	            		estadoResultado_cmp.actualizarCombos();
 	            	
 				}
 				else if(event.stateDestination!=Grafico.nombre)
@@ -167,15 +164,16 @@
 					if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(estadoResultado_cmp.getParametros().items);
 					if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(estadoResultado_cmp.getParametros().items);
 					if(event.stateDestination==Detalle.nombre)
-						if(event.stateOrigin!=EstadoResultado.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,estadoResultado_cmp.getParametros().idItem,estadoResultado_cmp.getParametros().itemName);
-						else detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,event.objeto.idItem,event.objeto.itemName);
+						if(event.stateOrigin==EstadoResultado.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,event.objeto.idItem,event.objeto.itemName,event.objeto.sucursales,event.objeto.nombreSucursales,event.objeto.selectedSucursal); 
+						else detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,estadoResultado_cmp.getParametros().idItem,estadoResultado_cmp.getParametros().itemName,estadoResultado_cmp.getParametros().sucursales,estadoResultado_cmp.getParametros().nombreSucursales,estadoResultado_cmp.getParametros().selectedSucursal);
+						 
 				}
 				else
 				{
 					if(estadoResultado_cmp.seCargo())
 					{
 						currentState = event.stateDestination;
-						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano.toString());
+						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano.toString(),estadoResultado_cmp.getParametros().sucursal);
 					}
 					else
 					{//quiza lo que se puede hacer es preguntar si se desea cargar los datos y esperar a que se cargen

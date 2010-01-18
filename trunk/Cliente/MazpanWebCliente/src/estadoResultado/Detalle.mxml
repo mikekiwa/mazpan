@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Detalle de Movimiento de Cuentas" width="800" height="400"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Detalle de Movimiento de Cuentas" width="850" height="400"
 	backgroundColor="#cccccc" creationComplete="init()">
 	
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
@@ -29,6 +29,10 @@
 			private var meses_ac:ArrayCollection = index.meses;
 			[Bindable]
 			private var itemsCombo:Array;
+			[Bindable]
+			private var sucursales_ac:Array =  new Array();
+			[Bindable]
+			private var nombreSucursales_ac:Array = new Array();
 			
 			private var items:Array;
 			private var ano:int;
@@ -41,12 +45,12 @@
 			{
 				
 			}
-			public function parametros(_items:Array,_ano:int,_idItem:int,_itemName:String):void
-			{
-///////////////////
-//////////////////////
-//aqui deberia tratar de usar los datos que vendrian como parametros,  iditem, itemName, 
-//con esos deberia tratar cargar los datos.				
+			public function parametros(_items:Array,_ano:int,_idItem:int,_itemName:String,_sucursales:Array,_nSucursales:Array,_selectedSucursal:int):void
+			{			
+				sucursales_ac = _sucursales;
+				nombreSucursales_ac = _nSucursales;	
+				sucursales_cb.selectedIndex = _selectedSucursal;
+				
 				detalle_ac = new Array();
 				tabla.height = 330;
 				this.height = 400;
@@ -59,7 +63,7 @@
 				if(itemsCombo.length>0) items_cb.selectedItem = _itemName;
 				
 				
-				Service.detalle(_idItem,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
+				Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,_idItem,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
 			}
 			private function detalleResult(event:ResultEvent):void
             {
@@ -86,18 +90,20 @@
 				for(var i:int=0; i<items.length; i++)
             		if(items_cb.text == items[i].itemName) id=i+1;
             		          	
-            	Service.detalle(id, meses_cb.selectedIndex+1,ano);
+            	Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,id, meses_cb.selectedIndex+1,ano);
             }
 		]]>
 	</mx:Script>
 	
 	<mx:NumberFormatter id="formato" precision="0" useThousandsSeparator="true" thousandsSeparatorFrom="." thousandsSeparatorTo="." decimalSeparatorFrom="," decimalSeparatorTo=","/>
 	
-	<mx:HBox>
+	<mx:HBox id="hbox">
+		<mx:Label x="0" y="12" text="Sucursal:"/>
+		<mx:ComboBox dataProvider="{nombreSucursales_ac}" change="cambiarDetalle()" id="sucursales_cb"  selectedIndex="0"/>
 		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" change="cambiarDetalle()" selectedIndex="0"/>
 		<mx:ComboBox id="meses_cb" dataProvider="{meses_ac}" change="cambiarDetalle()" selectedIndex="0"/>
 		<mx:Label text="{labelText}" fontSize="14" fontWeight="bold"/>
-		<mx:Spacer width="100"/>
+		<mx:Spacer width="30"/>
 		<mx:Label text="{total}" fontSize="14" fontWeight="bold"/>
 	</mx:HBox>
 	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" >
