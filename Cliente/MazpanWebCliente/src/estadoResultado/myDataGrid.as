@@ -1,15 +1,16 @@
 package estadoResultado
 {
-	import flash.display.Sprite;
-	
 	import mx.collections.ArrayCollection;
 	import mx.controls.DataGrid;
 	import mx.formatters.NumberFormatter;
-
+	import flash.display.Sprite;
+	
 	public class myDataGrid extends DataGrid
 	{
+		
 		override protected function drawRowBackground(s:Sprite,rowIndex:int,y:Number,height:Number,color:uint,dataIndex:int):void  
 		{  
+			
 			var dp:ArrayCollection = dataProvider as ArrayCollection;
 			var item:Object;
 			var formato:NumberFormatter = new NumberFormatter();
@@ -24,7 +25,6 @@ package estadoResultado
 			if( item != null )
 			{
 			 	if(dataIndex==5 || dataIndex==13 || dataIndex==14 || dataIndex==25 || dataIndex==26 || dataIndex==30 || dataIndex==32) color = 0xAAAAAA;
-			 	else color = 0xFFFFFF;
 			 	
 			 	item.ENE = formato.format(item.ENE);
 			 	item.FEB = formato.format(item.FEB);
@@ -43,10 +43,7 @@ package estadoResultado
 			 	item.REAL = formato.format(item.REAL);
 			 	//item.DESV = formato.format(item.DESV);
 			}
-			else color = 0xFFFFFF;
-			
 			super.drawRowBackground(s,rowIndex,y,height,color,dataIndex);  
-		} 
-		
+		}
 	}
 }

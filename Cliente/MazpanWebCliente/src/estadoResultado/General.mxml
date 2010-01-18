@@ -67,7 +67,7 @@
             		if(event.objeto as Boolean)
 	            		balance_cmp.cargar();
 	            	else
-	            		balance_cmp.actualizarMeses();
+	            		balance_cmp.actualizarCombos();
             	}
             	else
             	{

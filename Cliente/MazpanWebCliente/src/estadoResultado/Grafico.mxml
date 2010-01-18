@@ -25,9 +25,12 @@
 			
 			private var img:DisplayObject;
 			private var ano:String;
+			private var sucursal:String;
 			
-			public function parametros(_items:Array,_img:DisplayObject, _ano:String):void
+			public function parametros(_items:Array,_img:DisplayObject, _ano:String, _sucursal:String):void
 			{
+				sucursal = _sucursal;
+				sucursal_lb.text = "Sucursal: " + sucursal;
 				ix =  new Array();
 				items = _items;
 				itemsNames = new ITEMS(items).getItems();
@@ -39,7 +42,7 @@
 			private function graficoTOPDF():void
             {
             	var l:LAYOUT = new LAYOUT();
-            	l.generarGrafico(myChart,img,ano,comboGrafico.selectedItem.toString());
+            	l.generarGrafico(myChart,img,ano,comboGrafico.selectedItem.toString(),sucursal);
             }
 			private function graficar(index:int):void
             {
@@ -85,6 +88,7 @@
 	<mx:NumberFormatter id="formato" precision="0" useThousandsSeparator="true" thousandsSeparatorFrom="." thousandsSeparatorTo="." decimalSeparatorFrom="," decimalSeparatorTo=","/>
 	
 	<mx:HBox x="10">
+		<mx:Label id="sucursal_lb" text="Sucursal:" fontSize="12" fontWeight="bold"/>
 		<mx:Label text="ITEM:" fontSize="12" fontWeight="bold"/>
 		<mx:ComboBox id="comboGrafico" dataProvider="{itemsNames}" selectedIndex="1" change="graficar(comboGrafico.selectedIndex)"/>
 		<mx:Spacer width="100"/>
