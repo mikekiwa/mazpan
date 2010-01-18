@@ -17,38 +17,14 @@ public class Service : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public DataTable getItems()
+    public DataTable getSucursales()
     {
         DataTable dt = new DataTable();
-        dt.TableName = "Items";
+        dt.TableName = "Sucursales";
 
         SqlConnection cn = new SqlConnection(url);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT *, 0 FROM [PracticaDb].[dbo].[Items] ORDER BY orden";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try{ da.Fill(dt);}
-        finally{ cn.Close();}
-
-        return dt;
-    }
-
-    [WebMethod]
-    public DataTable getFlujos()
-    {
-        DataTable dt = new DataTable();
-        dt.TableName = "Flujos";
-
-        SqlConnection cn = new SqlConnection(url);
-
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT [itemName], SUM(credit)-SUM(debit)"+
-                       " FROM [Maspan].[dbo].[OACT] T1"+ 
-                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]"+ 
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta"+
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item"+
-                       " GROUP BY itemName, orden";
+        String query = "SELECT * FROM [Maspan].[dbo].[OASC] WHERE SegmentId='1'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -58,12 +34,23 @@ public class Service : System.Web.Services.WebService
         return dt;
     }
 
-    
-    /************************************************/
-    /*                                              */
-    /**DE AQUI HACIA ABAJO SON LA FUNCIONES USADAS **/
-    /*                                              */
-    /************************************************/
+    [WebMethod]
+    public DataTable getItems()
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = "Items";
+
+        SqlConnection cn = new SqlConnection(url);
+        SqlDataAdapter da = new SqlDataAdapter();
+        String query = "SELECT * FROM [PracticaDb].[dbo].[Items] ORDER BY orden";
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try{ da.Fill(dt);}
+        finally{ cn.Close();}
+
+        return dt;
+    }
 
     [WebMethod]
     public DataTable especifico(int idItem, int mes, int ano, string codigoCuenta)
@@ -102,7 +89,7 @@ public class Service : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public DataTable detalle(int idItem, int mes, int ano)
+    public DataTable detalle(string sucursal, int idItem, int mes, int ano)
     {
         DateTime f1 = new DateTime(ano, mes, 01);
         DateTime f2 = f1.AddMonths(1);
@@ -114,12 +101,14 @@ public class Service : System.Web.Services.WebService
         else ft = f2.Year + "-0" + f2.Month + "-01 00:00.000";
 
         string query = " SELECT T1.Segment_0,T1.Segment_1,T1.Segment_2,T1.Segment_3,T1.Segment_4, T1.AcctName, sum(T4.[Credit]-T4.[Debit]),AcctCode" +
-                       " FROM [Maspan].[dbo].[OACT] T1"+
-                       " INNER JOIN [Maspan].[dbo].[JDT1] T4            ON T4.[Account]=T1.[AcctCode]"+
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2  ON T1.AcctCode = T2.cuenta"+
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3       ON T3.id = T2.item"+
-                       " WHERE T3.id='"+idItem+"' AND RefDate>='"+fi+"' AND RefDate<'"+ft+"'"+
-                       " GROUP BY AcctName, segment_0,segment_1,segment_2,segment_3,segment_4,AcctCode";
+                       " FROM [Maspan].[dbo].[OACT] T1" +
+                       " INNER JOIN [Maspan].[dbo].[JDT1] T4            ON T4.[Account]=T1.[AcctCode]" +
+                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2  ON T1.AcctCode = T2.cuenta" +
+                       " INNER JOIN [PracticaDb].[dbo].[Items] T3       ON T3.id = T2.item" +
+                       " WHERE T3.id='" + idItem + "' AND RefDate>='" + fi + "' AND RefDate<'" + ft + "'";
+        if (sucursal.CompareTo("00") != 0) 
+            query +=   " AND T1.Segment_1='" + sucursal + "'";
+        query +=       " GROUP BY AcctName, segment_0,segment_1,segment_2,segment_3,segment_4,AcctCode";
 
         DataTable dt = new DataTable();
         dt.TableName = "Detalle";
@@ -137,37 +126,40 @@ public class Service : System.Web.Services.WebService
         return dt;
     }
     [WebMethod]
-    public Flujo getFlujo(int id, string itemName, int itemIndex, int ano)
+    public Flujo getFlujo(string sucursal, int id, string itemName, int itemIndex, int ano)
     {
         Flujo f = new Flujo();
         f.cuenta = itemName;
         f.orden = itemIndex;
         List<int> m = new List<int>();
-
+		List<int> pm = new List<int>();
+		
         double acum = 0;
 
         for (int i = 1; i < 13; i++)
         {
-            DataTable dt = flujo(id, i, ano);
+            DataTable dt = flujo(sucursal,id, i, ano);
             if (dt.Rows.Count == 1)
             {
                 m.Add(Int32.Parse(System.Math.Truncate(double.Parse((dt.Rows[0][1].ToString())+500)/1000) + ""));
                 acum += double.Parse(dt.Rows[0][1].ToString());
             }
             else m.Add(0);
+
+            DataTable dt3 = PresupuestoMensual(sucursal, id, i - 1, ano);
+            if (dt3.Rows.Count != 1) pm.Add(0);
+            else pm.Add(Int32.Parse(System.Math.Truncate(double.Parse((dt3.Rows[0][1].ToString())+500)/1000) + ""));
+
         }
 
         f.meses = m;
+		f.pptoMensual = pm;
 
-        DataTable dt2 = Presupuesto(id, ano);
-        if (dt2.Rows.Count == 1) f.ppto = Int32.Parse(System.Math.Truncate(double.Parse((dt2.Rows[0][1].ToString()) + 500) / 1000) + "");
-        else f.ppto = 0;
-        
         f.ano = ano;
         return f;
     }
 
-    public DataTable flujo(int idItem, int mes, int ano)
+    public DataTable flujo(string sucursal, int idItem, int mes, int ano)
     {
         DateTime f1 = new DateTime(ano,mes,01);
         DateTime f2 = f1.AddMonths(1);
@@ -183,8 +175,9 @@ public class Service : System.Web.Services.WebService
                        " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
                        " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item"+
-                       " WHERE T3.id='"+idItem+"' AND RefDate>='"+fi+"' AND RefDate<'"+ft+"'"+
-                       " GROUP BY itemName";
+                       " WHERE T3.id='"+idItem+"' AND RefDate>='"+fi+"' AND RefDate<'"+ft+"'";
+        if (sucursal.CompareTo("00") != 0) query += " AND T1.Segment_1='"+sucursal+"'";
+        query  += " GROUP BY itemName";
 
         DataTable dt = new DataTable();
         dt.TableName = "MES";
@@ -285,19 +278,23 @@ public class Service : System.Web.Services.WebService
         return 0;
     }
 	
-    public DataTable Presupuesto(int idItem, int ano)
+    
+	public DataTable PresupuestoMensual(string sucursal, int idItem, int mes, int ano)
     {
-        string query = 	" SELECT	t5.itemName, SUM(t1.CredLTotal-t1.DebLTotal)"+
-						" FROM		Maspan.dbo.BGT1				t1"+
-						" JOIN		Maspan.dbo.OBGT				t2		ON		t1.acctcode=t2.acctcode"+
-						" JOIN		Maspan.dbo.OACT				t3		ON		t3.acctcode=t2.acctcode"+
-						" JOIN		PracticaDB.dbo.ItemCuenta	t4		ON		t1.acctcode=t4.cuenta"+
-						" JOIN		PracticaDB.dbo.Items		t5		ON		t5.id=t4.item"+
-						" WHERE		t2.FinancYear>='"+ano+"-01-01 00:00.000' AND t5.id='"+idItem+"'"+
-						" GROUP BY	t5.ItemName";
+        string query = " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal) " +
+                        " FROM 		[Maspan].[dbo].BGT1					T1 " +
+                        " JOIN 		[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                        " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                        " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                        " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+                        " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' " +
+                        " AND 		T4.id='" + idItem + "' " +
+                        " AND 		Line_ID='" + mes + "' ";
+        if(sucursal.CompareTo("00")!=0) query += " AND T5.Segment_1='"+sucursal+"'";
+        query  +=       " GROUP BY 	T4.ItemName ";
 
         DataTable dt = new DataTable();
-        dt.TableName = "Presupuesto";
+        dt.TableName = "PresupuestoMensual";
 
         SqlConnection cn = new SqlConnection(url);
         SqlDataAdapter da = new SqlDataAdapter();
