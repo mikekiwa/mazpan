@@ -17,6 +17,7 @@ public class Flujo
     private string c;
     private int o;
     private List<int> m;
+	private List<int> pm;//presupueto de cada mes
     private int pp;//PPTO
     private int a;//año
 
@@ -37,6 +38,11 @@ public class Flujo
     {
         set { m = value; }
         get { return m; }
+    }
+	public List<int> pptoMensual
+    {
+        set { pm = value; }
+        get { return pm; }
     }
     public string cuenta
     {
