@@ -42,12 +42,12 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "Grafico.pdf");
 		}
 		
-		public function generarTabla(tabla:DisplayObject, img:DisplayObject, ano:String, item:String):void
+		public function generarTabla(tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, meses:int):void
 		{
 			pdf.addImage(img,null,0,0);
 			pdf.setFontSize(25);
-			pdf.addText(item+" año "+ano,90,20);
-			pdf.addImage(tabla,null,10,30,250,160);
+			pdf.addText(titulo+" año "+ano,90,20);
+			pdf.addImage(tabla,null,10+(11-meses)*20,30,(tabla.width*260)/1266,160);
           	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "Tabla.pdf");
 		}
 
