@@ -60,6 +60,7 @@
 				this.height = 400;
 				items = _items;
 				itemsCombo = new ITEMS(items).getItemsContables();
+				itemsCombo.push(items[ITEMS.IMPUESTOALARENTA].itemName);
 				if(itemsCombo.length>0) items_cb.selectedIndex = 0;
 				
 				
