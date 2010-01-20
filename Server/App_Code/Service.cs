@@ -53,7 +53,7 @@ public class Service : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public DataTable especifico(int idItem, int mes, int ano, string codigoCuenta)
+    public DataTable especifico(string sucursal, int idItem, int mes, int ano, string codigoCuenta)
     {
         DateTime f1 = new DateTime(ano, mes, 01);
         DateTime f2 = f1.AddMonths(1);
@@ -69,8 +69,10 @@ public class Service : System.Web.Services.WebService
                        " INNER JOIN [Maspan].[dbo].[JDT1] T4            ON T4.[Account]=T1.[AcctCode]" +
                        " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2  ON T1.AcctCode = T2.cuenta" +
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3       ON T3.id = T2.item" +
-                       " WHERE T3.id='" + idItem + "' AND T1.AcctCode='"+codigoCuenta+"' AND RefDate>='" + fi + "' AND RefDate<'" + ft + "'" +
-                       " ORDER BY AcctName, RefDate ";
+                       " WHERE T3.id='" + idItem + "' AND T1.AcctCode='"+codigoCuenta+"' AND RefDate>='" + fi + "' AND RefDate<'" + ft + "'";
+		if (sucursal.CompareTo("00") != 0) 
+            query +=   " AND T1.Segment_1='" + sucursal + "'";
+        query +=       " ORDER BY AcctName, RefDate ";
 
         DataTable dt = new DataTable();
         dt.TableName = "Especifico";
