@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Estado de Resultado" width="800" height="400" 
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Estado de Resultado" width="820" height="400" 
 	backgroundColor="#cccccc" creationComplete="init()" xmlns:estadoResultado="estadoResultado.*">
 
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
@@ -39,6 +39,7 @@
 			private var mes_seleccionado:int = 11;
 			private var inicializado:Boolean = false;
 			private var balanceCargado:Boolean = false;
+			private var parar:Boolean = false;
 
 			public static var formato:NumberFormatter = new NumberFormatter();
 
@@ -77,6 +78,20 @@
             {
             	meses_cb.selectedIndex = mes_seleccionado;//Esta linea es necesaria, puesto que cuando se vuelve al estado base el combo de seleccion de mes se cambiaba a ENERO
             }
+            public function defaultValues():void
+            {
+            	var defaults:ITEMS = new ITEMS(items);defaults.default_values();
+            	parar = false;
+            	sucursales_cb.enabled = true;
+            	meses_cb.enabled = true;
+            	cargar_btn.enabled = true;
+            	cargar_btn.label = "Cargar";
+            	balanceCargado = false;
+            }
+            public function stop():void
+            {
+            	parar = true;
+            }
             public function cargar():void
             {
             	sucursales_cb.enabled = false;
@@ -86,7 +101,7 @@
             	cargar_btn.enabled = false;
             	meses_cb.enabled = false;
 //            	grafico_btn.enabled = false;
-				var default_Values:ITEMS = new ITEMS(items);default_Values.default_values();
+				var defaults:ITEMS = new ITEMS(items);defaults.default_values();
             	ano_var = ano.value;
             	Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.VENTASZONAS].id, items[ITEMS.VENTASZONAS].itemName, ITEMS.VENTASZONAS,ano_var);
             	cargar_btn.label='Recargar';
@@ -128,32 +143,38 @@
 		            items[event.result.orden].PPTO += items[event.result.orden].PPTOMENSUAL[i];
 		        }
 				
-            	
-            	if(ITEMS.next(event.result.orden)!=ITEMS.MAXVALUE)
+            	if(!parar)
             	{
-            		Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.next(event.result.orden)].id, items[ITEMS.next(event.result.orden)].itemName, ITEMS.next(event.result.orden),ano_var);
-            	}
-            	else
-            	{
-            		var calculo:ITEMS = new ITEMS(items);
-            		calculo.CALCULAR(ITEMS.VENTASNETAS);	
-	            	calculo.CALCULAR(ITEMS.COSTOSTOTALES);
-	            	calculo.CALCULAR(ITEMS.MARGENCOMERCIAL);
-	            	calculo.CALCULAR(ITEMS.TOTALGASTOSADMINISTRATIVOS);
-	            	calculo.CALCULAR(ITEMS.MARGENOPERACIONAL);
-	            	calculo.CALCULAR(ITEMS.RESULTADOANTESDEIMPUESTO);
-	            	calculo.CALCULAR_IMPUESTO();
-	            	calculo.CALCULAR(ITEMS.RESULTADO);
-	            	calculo.CALCULAR_OTROS(meses_cb.selectedIndex);
-	            	
-            		generar_btn.enabled = true;
-					balanceCargado = true;
-            		cargar_btn.enabled = true;
-            		cargarOtros = true;
-            		meses_cb.enabled = true;
-            		sucursales_cb.enabled = true;
-//            		grafico_btn.enabled  = true;
-            	}
+	            	if(ITEMS.next(event.result.orden)!=ITEMS.MAXVALUE)
+	            	{
+	            		Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.next(event.result.orden)].id, items[ITEMS.next(event.result.orden)].itemName, ITEMS.next(event.result.orden),ano_var);
+	            	}
+	            	else
+	            	{
+	            		var calculo:ITEMS = new ITEMS(items);
+	            		calculo.CALCULAR(ITEMS.VENTASNETAS);	
+		            	calculo.CALCULAR(ITEMS.COSTOSTOTALES);
+		            	calculo.CALCULAR(ITEMS.MARGENCOMERCIAL);
+		            	calculo.CALCULAR(ITEMS.TOTALGASTOSADMINISTRATIVOS);
+		            	calculo.CALCULAR(ITEMS.MARGENOPERACIONAL);
+		            	calculo.CALCULAR(ITEMS.RESULTADOANTESDEIMPUESTO);
+		            	calculo.CALCULAR_IMPUESTO();
+		            	calculo.CALCULAR(ITEMS.RESULTADO);
+		            	calculo.CALCULAR_OTROS(meses_cb.selectedIndex);
+		            	
+	            		generar_btn.enabled = true;
+						balanceCargado = true;
+	            		cargar_btn.enabled = true;
+	            		cargarOtros = true;
+	            		meses_cb.enabled = true;
+	            		sucursales_cb.enabled = true;
+	//            		grafico_btn.enabled  = true;
+	            	}
+	           }
+	           else
+	           {
+	           		defaultValues();
+	           }
             }
 			private function generarPDF():void
 			{
@@ -173,10 +194,10 @@
             	
             	tabla1.width = 448 + (meses_cb.selectedIndex +1) * 68;
 				
-            	if(meses_cb.selectedIndex>3)
+            	if(meses_cb.selectedIndex>4)
             		this.width = 468 + (meses_cb.selectedIndex +1) * 68;
             	else
-            		this.width = 808
+            		this.width = 820;//12
             	
             	
             	if(meses_cb.selectedIndex>=1)feb.visible=true; else feb.visible=false;
@@ -251,6 +272,7 @@
 		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" 		 id="ano"/>
 		<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  	enabled="false" width="77"/>
 		<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" 	enabled="false" width="77"/>
+		<mx:Button label="Cancelar" click="stop()"/>
 	</mx:HBox>
 	
 	<estadoResultado:myDataGrid id="tabla1" y="38" width="100%" height="100%" dataProvider="{items}" doubleClickEnabled="true" doubleClick="detalle()">
