@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" width="795" height="500" layout="absolute" title="Plantas"
+	xmlns:ns1="componentes.mantencionPlantas.*" creationComplete="init()">
+	
+	<mx:WebService id="PlantaService" 		wsdl="{index.URL + 'PlantaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allPlantas" 	result="allPlantasResult(event)" 	fault="ErrorFaultHandler(event, 'allPlantas')"/>
+		<mx:operation name="delPlanta" 		result="delPlantaResult(event)" 	fault="ErrorFaultHandler(event, 'delPlanta')"/>
+	</mx:WebService>
+	
+	<mx:states>
+		<mx:State name="AgregarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{plantas_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:AgregarPlanta x="0" y="0" complexClick="agregarPlantaResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			public static var nombre:String = "Plantas";
+			
+			[Bindable]
+			private var plantas_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function init():void
+			{
+				PlantaService.allPlantas();
+			}
+			private function allPlantasResult(event:ResultEvent):void
+			{
+				plantas_ac = event.result.Tables.Plantas.Rows.source as Array;
+			}
+			private function agregarPlantaResult(event:ComplexEvent):void
+			{
+/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
+				if(event.stateOrigin==AgregarPlanta.nombre && event.objeto!=null)
+				{
+					plantas_ac.push(event.objeto);
+				}
+				currentState = event.stateDestination;
+			}
+			
+			private function filtar():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false;
+				}
+				if(filtro.selectedItem == 'Código')
+				{
+					input.visible = true;
+				}
+				if(filtro.selectedItem == 'Nombre')
+				{
+					input.visible = true;
+				}
+			}
+			private function delPlantaResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				if(result == 1)
+					PlantaService.allPlantas();
+				else if(result == 0)
+					Alert.show("La planta yo no existe en el sistema, intente recargar");
+				else
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="filtar()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="filtar()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Código</mx:String>
+				<mx:String>Nombre</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	<mx:DataGrid id="plantas_dg" width="755" x="10" y="120" dataProvider="{plantas_ac}" height="330">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+			<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(plantas_dg.selectedIndex!=-1) PlantaService.delPlanta(plantas_dg.selectedItem.codigo)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+</mx:Panel>

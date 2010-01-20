@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CanvasButtonAccordionHeader xmlns="flexlib.containers.accordionClasses.*" xmlns:mx="http://www.adobe.com/2006/mxml" mouseOver="fakeMouseClick(event)">
+	
+	<mx:Metadata>
+			[Event(name="menuClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.states.State;
+			import mx.controls.Alert;
+			import eventos.ComplexEvent;
+			
+			/**
+			 * This gets called for every MOUSE_OVER event. All we do is dispatch a CLICK event
+			 * and we can trick the Accordion into thinking the header was clicked.
+			 */
+			private function fakeMouseClick(event:MouseEvent):void {
+				var clickEvent:MouseEvent = new MouseEvent(MouseEvent.CLICK, true, false, event.localX, event.localY);
+				dispatchEvent(clickEvent);
+				
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox styleName="mainBox">
+		<mx:Label text="{data.title}" styleName="title" id="estado"/>
+		<mx:Text text="{data.description}" styleName="description" visible="false"/>
+	</mx:VBox>
+	
+</CanvasButtonAccordionHeader>

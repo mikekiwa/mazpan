@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500"
+	creationComplete="init()" title="Trabajos de los Agentes Externos">
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			private var agentesExternos_ac:ArrayCollection = new ArrayCollection(["Juan Perez","Pepito Pereira", "Adan Escobar"]);
+			[Bindable]
+			private var trabajoAgentesExternos_ac:ArrayCollection = new ArrayCollection();
+			
+			private function init():void
+			{
+				var item01:Object = new Object();
+				item01.trabajo = "Pintura de galpon";
+				item01.costo = "120000";
+				item01.agenteExterno = "Juan Perez";
+				trabajoAgentesExternos_ac.addItem(item01);
+				
+				var item02:Object = new Object();
+				item02.trabajo = "Apriete de pernos";
+				item02.costo = "50000";
+				item02.agenteExterno = "Pepito Pereira";
+				trabajoAgentesExternos_ac.addItem(item02);
+			}
+			
+			private function agregarTrabajo():void
+			{
+				var job:Object = new Object();
+				job.trabajo = trabajo_ti.text;
+				job.costo = costo_ti.text;
+				job.agenteExterno = agenteExterno_cb.text;
+				trabajoAgentesExternos_ac.addItem(job);
+			}
+			
+			private function filtar():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false
+				}	
+				if(filtro.selectedItem == 'Trabajo')
+				{
+					input.visible = true;
+				}
+				
+				if(filtro.selectedItem == 'Costo')
+				{
+					input.visible = true;	
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="filtar()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="filtar()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Trabajo</mx:String>
+				<mx:String>Costo</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	
+	<mx:DataGrid id="trabajoAgentesExternos_dg" width="681" x="10" y="57" dataProvider="{trabajoAgentesExternos_ac}" height="306">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Trabajo"  		dataField="trabajo" 		width="400"/>
+			<mx:DataGridColumn headerText="Costo" 			dataField="costo" 			width="100"/>
+			<mx:DataGridColumn headerText="Agente Externo" 	dataField="agenteExterno" 	width="400"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<mx:Image x="699" y="158" width="56" height="55" source="iconos/del.png" id="image2" click="if(trabajoAgentesExternos_dg.selectedIndex!=-1) trabajoAgentesExternos_ac.removeItemAt(trabajoAgentesExternos_dg.selectedIndex)"/>
+
+	<mx:Canvas x="10" y="387" width="681" height="63">
+		<mx:Label x="10" y="10" text="Trabajo"/>
+		<mx:Label x="301" y="10" text="Costo"/>
+		<mx:Label x="390" y="10" text="Agente Externo"/>
+		<mx:TextInput x="10" y="31" width="283" id="trabajo_ti"/>
+		<mx:TextInput x="301" y="31" width="81" id="costo_ti"/>
+		<mx:ComboBox x="390" y="31" width="281" id="agenteExterno_cb" dataProvider="{agentesExternos_ac}"/>
+	</mx:Canvas>
+
+	<mx:Image x="699" y="392" width="56" height="55" source="iconos/add.png" id="image3" click="agregarTrabajo()"/>
+	
+	<mx:Label x="10" y="371" text="Nuevo Agente Externo" fontWeight="bold"/>
+</mx:Panel>
