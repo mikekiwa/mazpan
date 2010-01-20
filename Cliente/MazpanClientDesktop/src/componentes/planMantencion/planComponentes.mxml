@@ -4,7 +4,6 @@
 	<mx:WebService id="ComponenteService" 		wsdl="{index.URL + 'ComponenteService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="getActividades" 		result="getActividadesResult(event)" 	fault="ErrorFaultHandler(event, 'getActividades')"/>
 	</mx:WebService>
-
 	
 	<mx:Script>
 		<![CDATA[
