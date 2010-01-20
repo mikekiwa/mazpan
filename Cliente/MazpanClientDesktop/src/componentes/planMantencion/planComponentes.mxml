@@ -5,6 +5,7 @@
 		<mx:operation name="getActividades" 		result="getActividadesResult(event)" 	fault="ErrorFaultHandler(event, 'getActividades')"/>
 	</mx:WebService>
 
+	
 	<mx:Script>
 		<![CDATA[
 			import mx.rpc.events.FaultEvent;
