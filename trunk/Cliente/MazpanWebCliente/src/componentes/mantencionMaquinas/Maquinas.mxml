@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Maquinas" creationComplete="init()" xmlns:ns1="componentes.mantencionMaquinas.*">
+	
+	<mx:WebService id="MaquinaService" 		wsdl="{index.URL + 'MaquinaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allMaquinas" 		result="allMaquinasResult(event)" 	fault="ErrorFaultHandler(event, 'allMaquinas')"/>
+		<mx:operation name="delMaquina" 		result="delMaquinaResult(event)" 	fault="ErrorFaultHandler(event, 'delMaquina')"/>
+	</mx:WebService>
+	
+	<mx:states>
+		<mx:State name="AgregarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{maquinas_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:AgregarMaquina id="addMaquina" x="0" y="0" complexClick="agregarMaquinaResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			public static var nombre:String = "Maquinas";
+		
+			[Bindable]
+			private var maquinas_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function clean():void
+            {
+            	currentState = "";
+            	if(addMaquina!=null) addMaquina.clean();
+            	MaquinaService.allMaquinas();
+            }
+			
+			private function init():void
+			{
+				MaquinaService.allMaquinas();
+			}
+			private function allMaquinasResult(event:ResultEvent):void
+			{
+				maquinas_ac = event.result.Tables.Maquinas.Rows.source as Array;
+			}
+			
+			private function agregarMaquinaResult(event:ComplexEvent):void
+			{
+/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar maquinas*/
+				if(event.stateOrigin==AgregarMaquina.nombre && event.objeto!=null)
+				{
+					maquinas_ac.push(event.objeto);
+				}
+				currentState = event.stateDestination;
+			}
+			
+			private function filtar():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false
+				}	
+				if(filtro.selectedItem == 'Código')
+				{
+					input.visible = true;
+				}
+				
+				if(filtro.selectedItem == 'Nombre')
+				{
+					input.visible = true;	
+				}
+			}
+			private function delMaquinaResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				if(result == 1)
+					MaquinaService.allMaquinas();
+				else if(result == 0)
+					Alert.show("La maquina yo no existe en el sistema, intente recargar");
+				else
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+			}
+		]]>
+	</mx:Script>
+	
+	
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="filtar()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="filtar()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Código</mx:String>
+				<mx:String>Nombre</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	
+	<mx:DataGrid id="maquinas_dg" width="755" x="10" y="120" dataProvider="{maquinas_ac}" height="330">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+			<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(maquinas_dg.selectedIndex!=-1) MaquinaService.delMaquina(maquinas_dg.selectedItem.codigo)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+</mx:Panel>
