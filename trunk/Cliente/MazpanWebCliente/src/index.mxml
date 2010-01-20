@@ -117,15 +117,20 @@
 			import componentes.Acordeon.MenuMantenciones;
 			import eventos.ComplexEvent;
 			
+			
+			private var httpManager:HTTPUtil = new HTTPUtil();
 			[Bindable]
 			//public static var URL:String = "http://localhost:7070/Server/";
 			//public static var URL:String = "http://192.168.3.131/Server/";
 			public static var URL:String = "http://192.168.3.117/Server/";
+			//public static var URL:String = "http://200.68.44.234/Server/";
 			//public static var URL:String = "http://192.168.3.130/server/";
+			
 			
 			[Bindable]
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
 
+						
 			private function init():void
 			{
 				//Security.allowDomain("http://localhost/Cliente/index.cl");
@@ -133,6 +138,7 @@
 				/*var url_aux:String = URL;
             	var httpManager:HTTPUtil = new HTTPUtil();
             	if(httpManager.getHostName()!="") url_aux="http://"+httpManager.getHostName()+"/server/";
+            	else url_aux = "http://192.168.3.117/Server/";
             	URL = url_aux;*/
 			}
 			private function loginResult(event:ComplexEvent):void
@@ -151,14 +157,20 @@
 			}
 			private function goState(event:ComplexEvent):void
 			{
+				if(event.stateDestination!=EstadoResultado.nombre)
+				{
+					estadoResultado_cmp.stop();
+				}
+				
 				if(event.stateDestination==EstadoResultado.nombre)
 				{
 					currentState = event.stateDestination;
-					if(estadoResultado_cmp.seCargo())
+					estadoResultado_cmp.defaultValues();
+					/*if(estadoResultado_cmp.seCargo())
 						estadoResultado_cmp.cargar();
 	            	else
 	            		estadoResultado_cmp.actualizarCombos();
-	            	
+	            	*/
 				}
 				else if(event.stateDestination!=Grafico.nombre)
 				{
