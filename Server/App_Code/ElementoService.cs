@@ -61,6 +61,7 @@ public class ElementoService : System.Web.Services.WebService
     ///        -2 si no se puede insertar especificaciones del Elemento
     ///        -3 si no se puede insertar mantenciones del Elemento
     ///        -4 si no se puede insertar actividades de mantencion del Elemento
+    ///        -5 si no se puede insertar los elementos subordinasod del elemento en cuestion
     /// </summary>
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
@@ -70,7 +71,9 @@ public class ElementoService : System.Web.Services.WebService
         if(!existe(e.codigo))
         {
             if (e.superClass.CompareTo("CMP") == 0) return addComponente(e);
-            
+            if (e.superClass.CompareTo("MAQ") == 0) return addMaquina(e);
+            if (e.superClass.CompareTo("LIN") == 0) return addLinea(e);
+            if (e.superClass.CompareTo("PLT") == 0) return addPlanta(e);
             return 2;
         }
 
@@ -167,32 +170,118 @@ public class ElementoService : System.Web.Services.WebService
     }
 
 
+     /// <summary>
+    /// retorna 1 si se completa la insercion
+    ///        -1 si no se pueden insertar los datos basicos de la linea
+    ///        -2 si no se puede insertar especificaciones de la linea
+    ///        -3 si no se puede insertar mantenciones de la linea
+    ///        -4 si no se puede insertar actividades de mantencion de la linea
+    ///        -5 si no se puede insertar los componentes de la linea
+    /// </summary>
+    /// <param name="c">El componente a insertar</param>
+    /// <returns></returns>
+    [WebMethod]
+    public int addLinea(Elemento m)
+    {
+        DateTime t = toDateTime(m.puestaMarcha);
+        string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
+
+        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,nombre,codigo,encargado,puestaMarcha,descripcion) " +
+                       " VALUES('LIN','" + m.nombre + "','" + m.codigo + "','" + m.encargado + "','" + puestaMarcha + "','" + m.descripcion + "') ";
+
+        if (Ejecutar(query) == 1)//si insercion exitosa
+            if (addActividades(m.mantenciones, m.codigo) == 1)
+                if (addPlan(m.mantenciones, m.codigo, m.puestaMarcha) == 1)
+                    if (addUnion(m.subordinados, m.codigo) == 1) return 1;
+                    else return -5;
+                else return -4;
+            else return -3;
+        else return -1;
+    }
+
+
+    /// <summary>
+    /// retorna 1 si se completa la insercion
+    ///        -1 si no se pueden insertar los datos basicos de la planta
+    ///        -2 si no se puede insertar especificaciones de la planta
+    ///        -3 si no se puede insertar mantenciones de la planta
+    ///        -4 si no se puede insertar actividades de mantencion de la planta
+    ///        -5 si no se puede insertar los componentes de la planta
+    /// </summary>
+    /// <param name="c">El componente a insertar</param>
+    /// <returns></returns>
+    [WebMethod]
+    public int addPlanta(Elemento m)
+    {
+        DateTime t = toDateTime(m.puestaMarcha);
+        string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
+
+        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,nombre,codigo,encargado,puestaMarcha,descripcion) " +
+                       " VALUES('PLT','" + m.nombre + "','" + m.codigo + "','" + m.encargado + "','" + puestaMarcha + "','" + m.descripcion + "') ";
+
+        if (Ejecutar(query) == 1)//si insercion exitosa
+            if (addActividades(m.mantenciones, m.codigo) == 1)
+                if (addPlan(m.mantenciones, m.codigo, m.puestaMarcha) == 1)
+                    if (addUnion(m.subordinados, m.codigo) == 1) return 1;
+                    else return -5;
+                else return -4;
+            else return -3;
+        else return -1;
+    }
+
+
     /// <summary>
     /// retorna 1 si se completa la insercion
     ///        -1 si no se pueden insertar los datos basicos de la maquina
     ///        -2 si no se puede insertar especificaciones de la maquina
     ///        -3 si no se puede insertar mantenciones de la maquina
     ///        -4 si no se puede insertar actividades de mantencion de la maquina
-    ///        -5 si no se puede insertar los componentes de la maquina
+    ///        -5 si no se puede insertar los elemento subordinados de la maquina
     /// </summary>
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod]
     public int addMaquina(Elemento m)
     {
-        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](tipo,codigo,puestaMarcha,nombre,ubicacion,estado,condicionRecepcion,costo,horasVidaUtil,horasActuales,horasDiariasPromedio,descripcion,marca,ano,pais,modelo,serie,fabricante)" +
-                       " VALUES('" + m.tipo + "','" + m.codigo + "','" + m.puestaMarcha + "','" + m.nombre + "','" + m.ubicacion + "',''" + m.estado + "','" + m.condicionRecepcion + "','" + m.costo + "','" + m.horasVidaUtil + "','" + m.horasActuales + "','" + m.horasDiariasPromedio + "','" + m.descripcion + "','" + m.fabricante.marca + "','" + m.fabricante.ano + "','" + m.fabricante.pais + "','" + m.fabricante.modelo + "','" + m.fabricante.serie + "','" + m.fabricante.fabricante + "')";
-        
+        DateTime t = toDateTime(m.puestaMarcha);
+        string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
+
+        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,tipo,codigo,puestaMarcha,nombre,ubicacion,estado,condicionRecepcion,costo,horasVidaUtil,horasActuales,horasDiariasPromedio,descripcion,marca,ano,pais,modelo,serie,fabricante)" +
+                       " VALUES('MAQ','" + m.tipo + "','" + m.codigo + "','" + puestaMarcha + "','" + m.nombre + "','" + m.ubicacion + "','" + m.estado + "','" + m.condicionRecepcion + "','" + m.costo + "','" + m.horasVidaUtil + "','" + m.horasActuales + "','" + m.horasDiariasPromedio + "','" + m.descripcion + "','" + m.fabricante.marca + "','" + m.fabricante.ano + "','" + m.fabricante.pais + "','" + m.fabricante.modelo + "','" + m.fabricante.serie + "','" + m.fabricante.fabricante + "')";
+
         if (Ejecutar(query) == 1)//si insercion exitosa
             if (addEspecificaciones(m.especificaciones, m.codigo) == 1)//si insercion exitosa
                 if (addActividades(m.mantenciones, m.codigo) == 1)
-                    if (addActividades(m.mantenciones, m.codigo, m.puestaMarcha) == 1)
-                        
+                    if (addPlan(m.mantenciones, m.codigo, m.puestaMarcha) == 1)
+                        if (addUnion(m.subordinados,m.codigo) == 1) return 1;
+                        else return -5;
                     else return -4;
                 else return -3;
             else return -2;
         else return -1;
     }
+
+
+    /// <summary>
+    /// return 1 sí la insercion fue exitosa, 0 EOC
+    /// </summary>
+    /// <param name="especificaciones">Lista de Elementos que se desean unir como suborinados</param>
+    /// <param name="codigo">codigo del elemento al que se desea unir los elementos subordinados</param>
+    /// <returns>1 sí la insercion fue exitosa, 0 EOC</returns>
+    public int addUnion(List<Elemento> elementos, string codigo)
+    {
+        int result = 0;
+
+        foreach (Elemento e in elementos)
+        {
+            result += Ejecutar(" INSERT INTO [PracticaDb].[dbo].[Union](padre, hijo) " +
+                               " VALUES('" + codigo + "', '" + e.codigo + "') ");
+        }
+
+        if (elementos.Count == result) return 1;
+        else return 0;
+    }
+
 
     /// <summary>
     /// retorna 1 si se completa la insercion

@@ -138,7 +138,7 @@ public class Elemento
         set { hdp = value; }
         get { return hdp; }
     }
-    public List<Elemento> componentes
+    public List<Elemento> subordinados
     {
         set { elems = value; }
         get { return elems; }
