@@ -14,66 +14,70 @@
 	xmlns:ns11="estadoResultado.*">
 	
 	<mx:states>
-		<mx:State name="maquinasState">
+		<mx:State name="Maquinas">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns2:Maquinas id="maq"/>
+				<ns2:Maquinas id="maq_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Plan">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns7:Plan id="plan_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="cleanState">
 			<mx:RemoveChild target="{login}"/>
-			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns7:planComponentes/>
-			</mx:AddChild>
 		</mx:State>
-		<mx:State name="lineasState">
+		<mx:State name="Lineas">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns9:Lineas/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="plantasState">
+		<mx:State name="Plantas">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns10:Plantas/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="componentesState">
+		<mx:State name="Componentes">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns8:Componentes id="comp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="agentesExternosState">
+		<mx:State name="AgentesExternos">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns4:AgentesExternos/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="personalState">
+		<mx:State name="Personal">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns5:Personal/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="solicitudState">
+		<mx:State name="SolicitudTrabajo">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns6:SolicitudTrabajo/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="trabajoTercerosState">
+		<mx:State name="TrabajosAgentesExternos">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns4:TrabajosAgentesExternos/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="usuariosState">
+		<mx:State name="Usuarios">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns5:Usuarios/>
 			</mx:AddChild>
 		</mx:State>
+		
 		<mx:State name="EstadoResultado">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
@@ -101,7 +105,13 @@
 		<mx:State name="Detalle">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns11:Detalle id="detalle_cmp"/>
+				<ns11:Detalle id="detalle_cmp" complexClick="goState(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Especifico">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:Especifico id="especifico_cmp" complexClick="goState(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -119,17 +129,21 @@
 			
 			
 			private var httpManager:HTTPUtil = new HTTPUtil();
+			
 			[Bindable]
-			//public static var URL:String = "http://localhost:7070/Server/";
-			//public static var URL:String = "http://192.168.3.131/Server/";
-			public static var URL:String = "http://192.168.3.117/Server/";
-			//public static var URL:String = "http://200.68.44.234/Server/";
+			public static var URL:String = "http://localhost:7070/ServerApp/";		//Visual Studio
+			//public static var URL:String = "http://192.168.3.117/Server/"; 		//cliente Local
+			//public static var URL:String = "http://200.68.44.234/Server/"; 		//cliente Web
+			
 			//public static var URL:String = "http://192.168.3.130/server/";
+			//public static var URL:String = "http://192.168.3.131/Server/";	
+			//public static var URL:String = "http://192.168.3.116/Server/";
 			
 			
 			[Bindable]
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
 
+			public static var dias:ArrayCollection = new ArrayCollection(["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"]);
 						
 			private function init():void
 			{
@@ -146,7 +160,7 @@
 				currentState = event.stateDestination;
 				cerrar_btn.visible = true;
 				acordeon.visible = true;
-				acordeon.cargar(event.objeto as int);
+				acordeon.cargar(event.objeto as String);
 			}
 			private function cerrar():void
 			{
@@ -154,6 +168,13 @@
 				cerrar_btn.visible = false;	
 				acordeon.visible = false;
 				currentState = "";
+			}
+			private function goState2(event:ComplexEvent):void
+			{
+				currentState = event.stateDestination;
+				if(event.stateDestination == Componentes.nombre) comp.clean();
+				if(event.stateDestination == Maquinas.nombre) maq_cmp.clean();
+				
 			}
 			private function goState(event:ComplexEvent):void
 			{
@@ -172,19 +193,20 @@
 	            		estadoResultado_cmp.actualizarCombos();
 	            	*/
 				}
-				else if(event.stateDestination!=Grafico.nombre)
+				else if(event.stateDestination!=Grafico.nombre && estadoResultado_cmp.iniciado())
 				{
 					currentState = event.stateDestination;
 					if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(estadoResultado_cmp.getParametros().items);
 					if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(estadoResultado_cmp.getParametros().items);
 					if(event.stateDestination==Detalle.nombre)
 						if(event.stateOrigin==EstadoResultado.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,event.objeto.idItem,event.objeto.itemName,event.objeto.sucursales,event.objeto.nombreSucursales,event.objeto.selectedSucursal); 
+						else if(event.stateOrigin==Especifico.nombre) detalle_cmp.actualizar(event.objeto);
 						else detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,estadoResultado_cmp.getParametros().idItem,estadoResultado_cmp.getParametros().itemName,estadoResultado_cmp.getParametros().sucursales,estadoResultado_cmp.getParametros().nombreSucursales,estadoResultado_cmp.getParametros().selectedSucursal);
-						 
+					if(event.stateDestination==Especifico.nombre) especifico_cmp.parametros(event.objeto.idItem,event.objeto.nombreItem,event.objeto.codigoSucursal,event.objeto.nombreSucursal,event.objeto.codigoCuenta,event.objeto.ano,event.objeto.mes);				
 				}
 				else
 				{
-					if(estadoResultado_cmp.seCargo())
+					if(estadoResultado_cmp.iniciado() && estadoResultado_cmp.seCargo())
 					{
 						currentState = event.stateDestination;
 						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano.toString(),estadoResultado_cmp.getParametros().sucursal);
@@ -195,9 +217,6 @@
 						Alert.show("Aun no se cargan los datos del Estado de Resultado");
 					}
 				}
-				
-//				if(event.stateDestination == "componentesState") comp.clean();
-//				if(event.stateDestination == "maquinasState") maq.clean();
 			}
 			
 			//<mx:Style source="Estilo.css"/>	
@@ -213,7 +232,7 @@
 				<mx:LinkButton id="cerrar_btn" label="CERRAR" click="cerrar()" visible="false"/>
 			</mx:Canvas>
 			<mx:HBox id="hbox1" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
-				<ns3:Acordeon id="acordeon" complexClick="goState(event)" visible="false"/>
+				<ns3:Acordeon id="acordeon" complexClick="goState2(event)" visible="false"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>

@@ -6,6 +6,8 @@
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
+			public static const nombre:String = "TrabajosAgentesExternos";
+		
 			[Bindable]
 			private var agentesExternos_ac:ArrayCollection = new ArrayCollection(["Juan Perez","Pepito Pereira", "Adan Escobar"]);
 			[Bindable]

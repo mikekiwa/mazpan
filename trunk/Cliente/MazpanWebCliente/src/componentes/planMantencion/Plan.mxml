@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="775" height="460" 
+	backgroundColor="#cccccc" creationComplete="init()" xmlns:ns1="componentes.*">
+
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="getActividades" 		result="getActividadesResult(event)" 		fault="ErrorFaultHandler(event, 'getActividades')"/>
+		<mx:operation name="realizarActividades" 	result="realizarActividadesResult(event)" 	fault="ErrorFaultHandler(event, 'realizarActividades')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static var nombre:String = "Plan";
+			
+			[Bindable]
+			private var actividadesDelPlan_ac:ArrayCollection = new ArrayCollection();
+			
+			private var actividadesParaRealizar:Array;
+			
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function init():void
+			{
+				ElementoService.getActividades();
+			}
+			private function getActividadesResult(event:ResultEvent):void
+			{
+				var aux:Array = event.result.Tables.Plan.Rows.source as Array;
+				actividadesDelPlan_ac = new ArrayCollection();
+				
+				for(var i:int=0; i<aux.length; i++)
+            	{
+            		var obj:Object = new Object();
+            		obj.nombre = aux[i].nombre;
+            		obj.id = aux[i].id;	
+            		obj.actividad = aux[i].actividad;
+            		obj.mantencion = aux[i].mantencion;
+            		obj.frecuencia = aux[i].frecuencia;
+            		obj.codigo = aux[i].codigo;
+            		var fecha:Date = aux[i].planificada;
+            		obj.planificada = index.dias.getItemAt(fecha.day) + " " + fecha.getDate() + " " + index.meses.getItemAt(fecha.getMonth());
+            		actividadesDelPlan_ac.addItem(obj);
+            	}
+			}
+			private function realizar():void
+			{
+				actividadesParaRealizar = new Array();
+	          	for(var i:int=0;i< actividadesDelPlan_ac.length;i++)
+	          		if(actividadesDelPlan_ac[i].realizada) actividadesParaRealizar.push(actividadesDelPlan_ac[i]);
+          		
+          		if(actividadesParaRealizar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(actividadesParaRealizar.length==1) Alert.show("¿Está seguro de realizar la actividad seleccionada?","Realizar Actividad", 3, this, realizarClick);
+                	else Alert.show("¿Está seguro de realizar las "+actividadesParaRealizar.length+" actividades selecionadas?","Realizar Actividades", 3, this, realizarClick);
+            	}
+                else Alert.show("Debe seleccionar al menos una actividad para poder proceder");
+			}
+			private function realizarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		ElementoService.realizarActividades(actividadesParaRealizar);
+				}
+			}
+			private function realizarActividadesResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezdan las que quitamos (desamarramos)
+					trace("Actividad realizada exitosamente");
+				}
+				else if(event.result == -1)
+				{
+					trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+				 	trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Image x="10" y="10" width="56" height="55" source="iconos/save.png" 	id="save_img"	 click="realizar()"/>
+	<mx:Image x="74" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
+	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"/>
+	<mx:DataGrid x="0" y="78" width="100%" height="100%" dataProvider="{actividadesDelPlan_ac}">
+		<mx:columns>
+			<mx:DataGridColumn id="colse2" headerText="" width="20" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.realizada=!data.realizada}" paddingLeft="5" selected="{data.realizada}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Codigo"		dataField="nombre" 		width="100" sortable="false"/>
+			<mx:DataGridColumn headerText="Actividad"	dataField="actividad" 	width="200" sortable="false"/>
+			<mx:DataGridColumn headerText="Planificada"	dataField="planificada" width="100" sortable="false"/>
+			<mx:DataGridColumn headerText="Frecuencia" 	dataField="frecuencia" 	width="50" 	sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>

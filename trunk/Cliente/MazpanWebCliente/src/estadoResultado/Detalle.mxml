@@ -62,8 +62,17 @@
 				itemsCombo = new ITEMS(_items).getItemsContables();
 				if(itemsCombo.length>0) items_cb.selectedItem = _itemName;
 				
-				
 				Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,_idItem,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
+			}
+			public function actualizar(parametros:Object):void
+			{
+				detalle_ac = new Array();
+				tabla.height = 330;
+				this.height = 400;
+				items_cb.selectedItem = parametros.nombreItem;
+				sucursales_cb.selectedItem = parametros.nombreSucursal;
+				meses_cb.selectedIndex = parametros.mes;
+				Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,parametros.idItem, meses_cb.selectedIndex+1,ano);//detalle(idItem,mes,año)-->(int,int,int)
 			}
 			private function detalleResult(event:ResultEvent):void
             {
@@ -92,6 +101,23 @@
             		          	
             	Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,id, meses_cb.selectedIndex+1,ano);
             }
+            
+            private function goState(destino:String):void
+			{
+				var parametros:Object = new Object();
+				var id:int=888;
+				for(var i:int=0; i<items.length; i++)
+            		if(items_cb.text == items[i].itemName) id=i+1;
+				
+				parametros.idItem = id;
+				parametros.nombreItem =items_cb.text;
+				parametros.codigoSucursal = sucursales_ac[sucursales_cb.selectedIndex].Code;
+				parametros.nombreSucursal = sucursales_cb.text;
+				parametros.ano = ano;
+				parametros.mes = meses_cb.selectedIndex;
+				parametros.codigoCuenta = detalle_ac[tabla.selectedIndex].AcctCode;
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, parametros));
+			}
 		]]>
 	</mx:Script>
 	
@@ -106,7 +132,7 @@
 		<mx:Spacer width="30"/>
 		<mx:Label text="{total}" fontSize="14" fontWeight="bold"/>
 	</mx:HBox>
-	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" >
+	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" doubleClickEnabled="true" doubleClick="goState(Especifico.nombre)">
 		<mx:columns>
 			<mx:DataGridColumn headerText="" 			dataField="Segment_0" 	width="60" 	sortable="false"/>
 			<mx:DataGridColumn headerText="" 			dataField="Segment_1" 	width="30" 	sortable="false"/>

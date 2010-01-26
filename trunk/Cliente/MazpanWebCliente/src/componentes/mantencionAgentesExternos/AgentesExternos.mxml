@@ -5,6 +5,8 @@
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
+			public static const nombre:String = "AgentesExternos";
+		
 			[Bindable]
 			private var agentesExternos_ac:ArrayCollection = new ArrayCollection();
 			

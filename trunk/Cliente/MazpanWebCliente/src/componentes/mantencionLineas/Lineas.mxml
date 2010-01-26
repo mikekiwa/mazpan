@@ -29,8 +29,7 @@
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
-			[Bindable]
-			public static var nombre:String = "Lineas";
+			public static const nombre:String = "Lineas";
 		
 			[Bindable]
 			private var lineas_ac:Array = new Array();

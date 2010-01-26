@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Componentes" creationComplete="init()" xmlns:ns1="componentes.mantencionComponentes.*" verticalScrollPolicy="off">
 	
-	<mx:WebService id="ComponenteService" 		wsdl="{index.URL + 'ComponenteService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allComponentes" 	result="allComponentesResult(event)" 	fault="ErrorFaultHandler(event, 'allComponente')"/>
-		<mx:operation name="delComponente" 		result="delComponenteResult(event)" 	fault="ErrorFaultHandler(event, 'delComponente')"/>
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allElementos" 		result="allElementosResult(event)" 		fault="ErrorFaultHandler(event, 'allElementos')"/>
+		<mx:operation name="delElemento" 		result="delElementoResult(event)" 		fault="ErrorFaultHandler(event, 'delElemento')"/>
 	</mx:WebService>
 	
 	<mx:states>
@@ -29,8 +29,7 @@
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
-			[Bindable]
-			public static var nombre:String = "Componentes";
+			public static const nombre:String = "Componentes";
 			
 			[Bindable]
 			private var componentes_ac:Array = new Array();
@@ -43,17 +42,16 @@
             {
             	currentState = "";
             	if(addComponente!=null) addComponente.clean();
-            	ComponenteService.allComponentes();
+            	ElementoService.allElementos("CMP");
             }
-			
 			private function init():void
 			{
-				ComponenteService.allComponentes();
+				ElementoService.allElementos("CMP");
 			}
 			
-			private function allComponentesResult(event:ResultEvent):void
+			private function allElementosResult(event:ResultEvent):void
 			{
-				componentes_ac = event.result.Tables.Componentes.Rows.source as Array;
+				componentes_ac = event.result.Tables.Elementos.Rows.source as Array;
 			}
 			private function agregarComponenteResult(event:ComplexEvent):void
 			{
@@ -61,10 +59,10 @@
 				if(event.stateOrigin==AgregarComponente.nombre && event.objeto!=null)
 				{
 					componentes_ac.push(event.objeto);
+					componentes_dg.dataProvider = componentes_ac;
 				}
 				currentState = event.stateDestination;
 			}
-			
 			private function filtar():void
 			{
 				if(filtro.selectedItem == 'Todas')
@@ -75,23 +73,21 @@
 				{
 					input.visible = true;
 				}
-				
 				if(filtro.selectedItem == 'Nombre')
 				{
 					input.visible = true;	
 				}
 			}
-			private function delComponenteResult(event:ResultEvent):void
+			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
 				if(result == 1)
-					ComponenteService.allComponentes();
+					ElementoService.allElementos("CMP");
 				else if(result == 0)
 					Alert.show("El componente yo no existe en el sistema, intente recargar");
 				else
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 			}
-			
 		]]>
 	</mx:Script>
 	
@@ -114,6 +110,6 @@
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="add" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="del" click="if(componentes_dg.selectedIndex!=-1) ComponenteService.delComponente(componentes_dg.selectedItem.codigo)"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="del" click="if(componentes_dg.selectedIndex!=-1) ElementoService.delElemento(componentes_dg.selectedItem.codigo)"/>
 	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="edit"/>
 </mx:Panel>

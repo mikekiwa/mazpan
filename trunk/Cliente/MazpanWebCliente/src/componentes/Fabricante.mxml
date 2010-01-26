@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="380" height="256" creationComplete="init()">
+
+	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="Paises" 				result="paisesResult(event)" 				fault="ErrorFaultHandler(event, 'Paises')"/>
+	</mx:WebService>
+
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+		
+			public static const nombre:String = "Fabricante";
+		
+			[Bindable]
+			private var pais_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+            	CombosService.Paises();
+			}
+			private function paisesResult(event:ResultEvent):void
+            {
+            	pais_ac = event.result.Tables.Paises.Rows.source as Array;
+            	pais_ac.push("Otro");
+            }
+			private function actualizarPais():void
+			{
+				pais_ti.text = "";
+				if(pais_cb.text=="Otro")
+				{
+					pais_cb.visible=false;
+					pais_ti.visible=true;
+					cancelarPais_btn.visible=true;
+				} 
+				else
+				{
+					pais_cb.visible=true;
+					pais_ti.visible=false;
+					cancelarPais_btn.visible=false;
+				}
+			}
+			public function getFabricante():Object
+			{
+				var fabricante:Object = new Object();
+				fabricante.marca = marca_ti.text;
+				fabricante.ano = ano_ti.text;
+				if(pais_cb.visible) fabricante.pais = pais_cb.text;
+				else fabricante.pais = pais_ti.text;
+				fabricante.modelo = modelo_ti.text;
+				fabricante.serie = serie_ti.text;
+				fabricante.fabricante = fabricante_ti.text;
+				
+				return fabricante;
+			}
+			public function clean():void
+			{
+				marca_ti.text="";
+			 	ano_ti.text="";
+			 	pais_ti.text="";
+			 	modelo_ti.text="";
+			 	serie_ti.text="";
+			 	fabricante_ti.text="";
+			 	pais_cb.visible=true;
+				pais_ti.visible=false;
+				cancelarPais_btn.visible=false;
+			}
+		]]>
+	</mx:Script>
+
+	<mx:Label x="8.5" y="17" text="Marca"/>
+	<mx:TextInput x="108.5" y="15" width="261.5" id="marca_ti" maxChars="50"/>
+	<mx:Label x="8.5" y="55" text="Año"/>
+	<mx:TextInput x="108.5" y="53" restrict="0-9" width="81" id="ano_ti"/>
+	<mx:Label x="8.5" y="95" text="Pais"/>
+	<mx:ComboBox x="108.5" y="93" width="261.5" id="pais_cb" dataProvider="{pais_ac}" labelField="pais" change="actualizarPais()"/>
+	<mx:TextInput x="108.5" y="93" width="231.5" id="pais_ti" visible="false" maxChars="50"/>
+	<mx:Image x="348" y="93" width="22" height="22" id="cancelarPais_btn" source="iconos/cancelar.png" visible="false" click="pais_cb.selectedIndex=0; actualizarPais()"/>
+	<mx:Label x="8.5" y="140" text="Modelo"/>
+	<mx:TextInput x="108.5" y="138" width="261.5" id="modelo_ti" maxChars="50"/>
+	<mx:Label x="8.5" y="181" text="Serie"/>
+	<mx:TextInput x="108.5" y="179" width="261.5" id="serie_ti" maxChars="50"/>
+	<mx:Label x="8.5" y="220" text="Fabricante"/>
+	<mx:TextInput x="108.5" y="218" width="261.5" id="fabricante_ti" maxChars="50"/>
+</mx:Canvas>

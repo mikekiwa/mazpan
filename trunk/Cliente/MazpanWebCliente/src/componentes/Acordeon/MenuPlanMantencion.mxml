@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="120" height="200">
-
 	<mx:Metadata>
 			[Event(name="complexClick",type="eventos.ComplexEvent")]
 	</mx:Metadata>
 
 	<mx:Script>
 		<![CDATA[
-			import componentes.mantencionAgentesExternos.TrabajosAgentesExternos;
-			import componentes.mantencionAgentesExternos.AgentesExternos;
+			import componentes.planMantencion.Plan;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
 			public var description:String;
 			
 			[Bindable]
-			public var title:String="Agentes Externos";
+			public var title:String="Plan Mantencion";
 			
 			[Bindable]
-			private var nombre:String = "AgentesExternos";
+			private var nombre:String = "MenuPlanMantencion";
 			
 			private function goState(destino:String):void
 			{
@@ -27,6 +25,5 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton x="10" y="10" label="Terceros" width="100" click="goState(AgentesExternos.nombre)"/>
-	<mx:LinkButton x="10" y="40" label="Trabajos" width="100" click="goState(TrabajosAgentesExternos.nombre)"/>
+	<mx:LinkButton x="10" y="10" label="Actividades" width="100" click="goState(Plan.nombre)"/>
 </mx:Canvas>

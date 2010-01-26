@@ -43,14 +43,8 @@
 			}
 			
 			private function validarUsuarioResult(event:ResultEvent):void
-			{
-				var privilegio:String = event.result as String;
-				if(privilegio=="5") 		dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 5));
-				else if(privilegio=="6") 	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 6));
-				else if(privilegio=="7") 	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 7));
-				else if(privilegio=="8")	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 8));
-				else if(privilegio=="9")	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, 9));
-				else if(privilegio=="10")	dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, EstadoResultado.nombre, nombre, 10));
+			{	
+				if(event.result != '0') dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, event.result as String));
 				else Alert.show("Nombre de usuario o contraseña invalido");
 				username_ti.text="";
 				password_ti.text="";
