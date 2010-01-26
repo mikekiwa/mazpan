@@ -13,6 +13,7 @@
 	xmlns:ns10="componentes.mantencionPlantas.*"
 	xmlns:ns11="estadoResultado.*">
 	
+	
 	<mx:states>
 		<mx:State name="Maquinas">
 			<mx:RemoveChild target="{login}"/>
