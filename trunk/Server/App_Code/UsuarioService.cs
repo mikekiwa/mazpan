@@ -14,7 +14,7 @@ using System.Data;
 public class UsuarioService : System.Web.Services.WebService
 {
 
-    private String coneccionString = Coneccion.coneccionString;
+    private String coneccionString = Coneccion.coneccionStringSVRMASPAN;
     
     public UsuarioService ()
     { 
@@ -25,14 +25,14 @@ public class UsuarioService : System.Web.Services.WebService
     {
         SqlConnection cn = new SqlConnection(coneccionString);
         cn.Open();
-        string query = "SELECT privilegio FROM Usuario WHERE Usuario.userName='" + userName + "' AND Usuario.password='" + password + "'";
+        string query = "SELECT privilegio FROM PracticaDb.dbo.Usuario T1 WHERE T1.userName='" + userName + "' AND T1.password='" + password + "'";
         SqlCommand selectUsuarios = new SqlCommand(query, cn);
 
         SqlDataReader reader = selectUsuarios.ExecuteReader();
 
         if (reader.Read())
         {
-            return reader.GetInt32(0) + "";
+            return reader.GetString(0);
         }
 
         return "0";

@@ -14,31 +14,16 @@ using System.Web.UI.HtmlControls;
 public class Mantencion
 {
     private string i;//identificador
-    private string c;//codigo
     private string a;//actividad
     private string f;//frecuencia
-    private string m;//tipomantencion
+    private string m;//tipo mantencion
     private string p;//fecha planificada
     private string r;//fecha realizada
+    private string c;//codigo, esto es usado unicamente
 
 	public Mantencion()
 	{
 	}
-    public string id
-    {
-        set { i = value; }
-        get { return i; }
-    }
-    public string codigo
-    {
-        set { c = value; }
-        get { return c; }
-    }
-    public string frecuencia
-    {
-        set { f = value; }
-        get { return f; }
-    }
     public string actividad
     {
         set { a = value; }
@@ -49,6 +34,19 @@ public class Mantencion
         set { m = value; }
         get { return m; }
     }
+    public string frecuencia
+    {
+        set { f = value; }
+        get { return f; }
+    }
+
+
+    //Estos datos son para rescar las mantenciones de la BD
+    public string id
+    {
+        set { i = value; }
+        get { return i; }
+    }
     public string planificada
     {
         set { p = value; }
@@ -58,5 +56,10 @@ public class Mantencion
     {
         set { r = value; }
         get { return r; }
+    }
+    public string codigo
+    {
+        set { c = value; }
+        get { return c; }
     }
 }

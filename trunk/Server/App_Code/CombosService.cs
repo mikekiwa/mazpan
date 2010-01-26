@@ -14,7 +14,7 @@ using System.Data;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class CombosService : System.Web.Services.WebService
 {
-    private string coneccionString = Coneccion.coneccionString;
+    private string coneccionString = Coneccion.coneccionStringSVRMASPAN;
 
     public CombosService ()
     {
@@ -23,7 +23,7 @@ public class CombosService : System.Web.Services.WebService
     [WebMethod]
     public int agregarPais(String pais)
     {
-        String select = "SELECT COUNT(*) FROM Paises WHERE pais = '"+pais+"'";
+        String select = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[Paises] WHERE pais = '" + pais + "'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand selectUsuarios = new SqlCommand(select, selectConn);
@@ -33,7 +33,7 @@ public class CombosService : System.Web.Services.WebService
         {
             if (reader.GetInt32(0) == 0)
             {//Si dato no duplicado, no exite en la BD
-                String query = "INSERT INTO Paises([pais]) VALUES('" + pais + "')";
+                String query = "INSERT INTO [PracticaDb].[dbo].[Paises](pais) VALUES('" + pais + "')";
                 SqlConnection cn = new SqlConnection(coneccionString);
                 cn.Open();
                 SqlCommand insert = new SqlCommand(query, cn);
@@ -60,7 +60,7 @@ public class CombosService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT pais FROM Paises";
+        String query = "SELECT T1.pais, T1.nombreCorto FROM [PracticaDb].[dbo].[Paises] T1";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -79,7 +79,7 @@ public class CombosService : System.Web.Services.WebService
     [WebMethod]
     public int agregarTipoComponente(String tipo)
     {
-        String select = "SELECT COUNT(*) FROM TipoComponente WHERE tipo = '" + tipo + "'";
+        String select = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[TipoElemento] WHERE tipo = '" + tipo + "' AND codigo='CMP'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand selectUsuarios = new SqlCommand(select, selectConn);
@@ -89,7 +89,7 @@ public class CombosService : System.Web.Services.WebService
         {
             if (reader.GetInt32(0) == 0)
             {//Si dato no duplicado, no exite en la BD
-                String query = "INSERT INTO TipoComponente([tipo]) VALUES('" + tipo + "')";
+                String query = "INSERT INTO [PracticaDb].[dbo].[TipoElemento](tipo, codigo) VALUES('" + tipo + "', 'CMP')";
                 SqlConnection cn = new SqlConnection(coneccionString);
                 cn.Open();
                 SqlCommand insert = new SqlCommand(query, cn);
@@ -116,7 +116,7 @@ public class CombosService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT tipo FROM TipoComponente";
+        String query = " SELECT tipo FROM [PracticaDb].[dbo].[TipoElemento] T1 WHERE T1.codigo='CMP' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -135,7 +135,7 @@ public class CombosService : System.Web.Services.WebService
     [WebMethod]
     public int agregarTipoMaquina(String tipo)
     {
-        String select = "SELECT COUNT(*) FROM TipoMaquina WHERE tipo = '" + tipo + "'";
+        String select = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[TipoElemento] WHERE tipo = '" + tipo + "' AND codigo='MAQ'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand selectUsuarios = new SqlCommand(select, selectConn);
@@ -145,7 +145,7 @@ public class CombosService : System.Web.Services.WebService
         {
             if (reader.GetInt32(0) == 0)
             {//Si dato no duplicado, no exite en la BD
-                String query = "INSERT INTO TipoMaquina([tipo]) VALUES('" + tipo + "')";
+                String query = "INSERT INTO [PracticaDb].[dbo].[TipoElemento](tipo,codigo) VALUES('" + tipo + "', 'MAQ')";
                 SqlConnection cn = new SqlConnection(coneccionString);
                 cn.Open();
                 SqlCommand insert = new SqlCommand(query, cn);
@@ -172,7 +172,7 @@ public class CombosService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT tipo FROM TipoMaquina";
+        String query = " SELECT tipo FROM [PracticaDb].[dbo].[TipoElemento] T1 WHERE T1.codigo='MAQ' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -189,9 +189,9 @@ public class CombosService : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public int agregarTipoEspecificacion(String tipo)
+    public int agregarTipoEspecificacion(String especificacion)
     {
-        String select = "SELECT COUNT(*) FROM TipoEspecificacion WHERE tipo = '" + tipo + "'";
+        String select = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[TipoEspecificacion] WHERE tipo = '" + especificacion + "'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand selectUsuarios = new SqlCommand(select, selectConn);
@@ -201,7 +201,7 @@ public class CombosService : System.Web.Services.WebService
         {
             if (reader.GetInt32(0) == 0)
             {//Si dato no duplicado, no exite en la BD
-                String query = "INSERT INTO TipoEspecificacion([tipo]) VALUES('" + tipo + "')";
+                String query = "INSERT INTO [PracticaDb].[dbo].[TipoEspecificacion](especificacion) VALUES('" + especificacion + "')";
                 SqlConnection cn = new SqlConnection(coneccionString);
                 cn.Open();
                 SqlCommand insert = new SqlCommand(query, cn);
@@ -228,7 +228,7 @@ public class CombosService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT tipo FROM TipoEspecificacion";
+        String query = " SELECT especificacion FROM [PracticaDb].[dbo].[TipoEspecificacion] ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 

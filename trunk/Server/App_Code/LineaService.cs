@@ -170,7 +170,7 @@ public class LineaService : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public int addMaquinas(List<Maquina> maquinas, string codigo)
+    public int addMaquinas(List<Elemento> maquinas, string codigo)
     {
         String queryDelete = "DELETE FROM MaquinaLinea WHERE codigoLinea='" + codigo + "'";
         SqlConnection cndel = new SqlConnection(coneccionString);
@@ -193,7 +193,7 @@ public class LineaService : System.Web.Services.WebService
         cn.Open();
         try
         {
-            foreach (Maquina m in maquinas)
+            foreach (Elemento m in maquinas)
             {
                 String query = "INSERT INTO MaquinaLinea(codigoMaquina, codigoLinea)" +
                                " VALUES('"+m.codigo+"','"+codigo+"')";
