@@ -280,7 +280,7 @@ public class Service : System.Web.Services.WebService
         return 0;
     }
 	
-    
+    [WebMethod]
 	public DataTable PresupuestoMensual(string sucursal, int idItem, int mes, int ano)
     {
         string query = " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal) " +
@@ -289,7 +289,7 @@ public class Service : System.Web.Services.WebService
                         " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
                         " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
                         " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
-                        " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' " +
+                        " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' " +
                         " AND 		T4.id='" + idItem + "' " +
                         " AND 		Line_ID='" + mes + "' ";
         if(sucursal.CompareTo("00")!=0) query += " AND T5.Segment_1='"+sucursal+"'";

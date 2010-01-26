@@ -15,7 +15,6 @@ public class Especificacion
 {
     private string v;//valor
     private string e;//especificacion
-    private string c;//codigo
 
 	public Especificacion()
 	{
@@ -30,10 +29,5 @@ public class Especificacion
     {
         set { e = value; }
         get { return e; }
-    }
-    public string codigo
-    {
-        set { c = value; }
-        get { return c; }
     }
 }
