@@ -16,42 +16,49 @@
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,event.stateDestination,event.stateOrigin, event.objeto));
 			}
 			
-			public function cargar(privilegio:int):void
+			public function cargar(privilegio:String):void
 			{
 				accordion.removeAllChildren();
-				if(privilegio==10)
+				var niveles:Array = privilegio.split('');
+
+				if(niveles[0]=='1')
 				{
 					var menuEstadoResultado:MenuEstadoResultado = new MenuEstadoResultado();
 					menuEstadoResultado.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuEstadoResultado);
 				}
-				else
+				if(niveles[1]=='1')
 				{
-					if(privilegio==9)
-					{
-						var menuMantencion:MenuMantenciones = new MenuMantenciones();
-						menuMantencion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
-						accordion.addChild(menuMantencion);
-					}
-					if(privilegio>=8)
-					{
-						var menuPersonal:MenuPersonal = new MenuPersonal();
-						menuPersonal.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
-						accordion.addChild(menuPersonal);
-					}
-					if(privilegio>=7)
-					{
-						var menuAgentesExternos:MenuAgentesExternos = new MenuAgentesExternos();
-						menuAgentesExternos.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
-						accordion.addChild(menuAgentesExternos);
-					}
-					if(privilegio>=6)
-					{
-						var menuGeneral:MenuGerenal = new MenuGerenal();
-						menuGeneral.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
-						accordion.addChild(menuGeneral);
-					}
+					var menuGeneral:MenuGerenal = new MenuGerenal();
+					menuGeneral.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuGeneral);
 				}
+				if(niveles[2]=='1')
+				{
+					var menuAgentesExternos:MenuAgentesExternos = new MenuAgentesExternos();
+					menuAgentesExternos.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuAgentesExternos);
+				}
+				if(niveles[3]=='1')
+				{
+					var menuPersonal:MenuPersonal = new MenuPersonal();
+					menuPersonal.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuPersonal);
+				}
+				if(niveles[4]=='1')
+				{
+					var menuMantencion:MenuMantenciones = new MenuMantenciones();
+					menuMantencion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuMantencion);
+				}
+				if(niveles[5]=='1')
+				{
+					var menuPlan:MenuPlanMantencion = new MenuPlanMantencion();
+					menuPlan.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuPlan);
+				}
+				
+				
 			}
 		]]>
 	</mx:Script>

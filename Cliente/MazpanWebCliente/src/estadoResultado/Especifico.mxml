@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="800" height="400"
+	backgroundColor="#cccccc" creationComplete="init()">
+
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="especifico" result="especificoResult(event);"	fault="ErrorFaultHandler(event, 'especifico')"/>
+	</mx:WebService>
+
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import eventos.ComplexEvent;
+		
+			public static const nombre:String = "Especifico";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var labelText:String;
+			
+			[Bindable]
+			private var detalle_ac:Array;
+			
+			private var idItem:int;
+			private var	nombreItem:String;
+			private var	codigoSucursal:String;
+			private var	nombreSucursal:String;
+			private var	ano:int;
+			private var	mes:int;
+			private var codigoCuenta:String;
+			private var dias:ArrayCollection = new ArrayCollection(["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"]);
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function init():void
+			{
+				
+			}
+			public function parametros(_idItem:int,_nombreItem:String,_codigoSucursal:String,_nombreSucursal:String,_codigoCuenta:String,_ano:int,_mes:int):void
+			{
+				detalle_ac = new Array();
+				idItem = _idItem;
+				nombreItem = _nombreItem;
+				codigoSucursal = _codigoSucursal;
+				nombreSucursal = _nombreSucursal;
+				ano = _ano;
+				mes = _mes;
+				codigoCuenta = _codigoCuenta;
+				if(_codigoSucursal=="00")labelText = "Sucursal: "+nombreSucursal+"    Item: "+nombreItem+"    "+index.meses.getItemAt(mes).toString()+" "+ano;
+				else labelText = "Sucursal: "+nombreSucursal+"\tItem: "+nombreItem+"\t"+index.meses.getItemAt(mes).toString()+" "+ano;
+				Service.especifico(codigoSucursal, idItem, mes+1, ano, codigoCuenta);
+			}
+			private function especificoResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Especifico.Rows.source as Array;
+            	
+            	for(var i:int=0; i<aux.length; i++)
+            	{
+            		var obj:Object = new Object();
+            		obj.AcctName = aux[i].AcctName;	
+            		obj.Column1 = aux[i].Column1;
+            		var fecha:Date = aux[i].RefDate;
+            		obj.RefDate = dias.getItemAt(fecha.day) + " " + fecha.getDate() + " " + index.meses.getItemAt(fecha.getMonth());
+            		detalle_ac.push(obj);
+            	}
+            	tabla.height = detalle_ac.length * 22 + 25;
+            	this.height = 95 + detalle_ac.length * 22;
+            }
+			private function goState(destino:String):void
+			{
+				var parametros:Object = new Object();
+				parametros.idItem = idItem;
+				parametros.nombreItem = nombreItem;
+				parametros.codigoSucursal = codigoSucursal;
+				parametros.nombreSucursal = nombreSucursal;
+				parametros.ano = ano;
+				parametros.mes = mes;
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, parametros));
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox id="hbox" width="100%">
+		<mx:Label text="{labelText}" fontSize="14" fontWeight="bold"/>
+		<mx:Button label="Atras" click="goState(Detalle.nombre)"/>
+	</mx:HBox>
+	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" >
+		<mx:columns>
+			<mx:DataGridColumn headerText="Cuenta" 		dataField="AcctName" 	width="310" sortable="false"/>
+			<mx:DataGridColumn headerText="Valor [$]" 	dataField="Column1"  	width="190" sortable="false" textAlign="right"/>
+			<mx:DataGridColumn headerText="Fecha"		dataField="RefDate"		width="300" sortable="false" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:Panel>

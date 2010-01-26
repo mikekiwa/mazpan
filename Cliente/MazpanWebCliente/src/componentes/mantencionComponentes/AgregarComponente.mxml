@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" verticalScrollPolicy="off" creationComplete="init()">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" verticalScrollPolicy="off" 
+	creationComplete="init()" xmlns:ns1="componentes.*">
 	
 	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="TipoComponente" 		result="tipoComponenteResult(event)" 		fault="ErrorFaultHandler(event, 'TipoComponente')"/>
-		<mx:operation name="Paises" 				result="paisesResult(event)" 				fault="ErrorFaultHandler(event, 'Paises')"/>
-		<mx:operation name="TipoEspecificacion" 	result="tipoEspecificacionResult(event)" 	fault="ErrorFaultHandler(event, 'TipoEspecificacion')"/>
 	</mx:WebService>
 
-	<mx:WebService id="ComponenteService" 		wsdl="{index.URL + 'ComponenteService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="addComponente" 			result="addComponentesResult(event)" 			fault="ErrorFaultHandler(event, 'addComponente')"/>
-		<mx:operation name="addEspecificaciones"	result="addEspecificacionesResult(event)"	fault="ErrorFaultHandler(event, 'addEspecificaciones')"/>
-		<mx:operation name="addMantenciones" 		result="addMantencionesResult(event)"		fault="ErrorFaultHandler(event, 'addMantenciones')"/>
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addElemento" 			result="addElementoResult(event)" 		fault="ErrorFaultHandler(event, 'addElemento')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -36,17 +33,9 @@
 			[Bindable]
 			private var sistema_ac:ArrayCollection = new ArrayCollection(["Macánico","Eléctrico","Hidráulico","Neumático","Manual"]);
 			[Bindable]
-			private var pais_ac:ArrayCollection = new ArrayCollection();
-			[Bindable]
 			private var especificaciones_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
 			private var especificacion_ac:ArrayCollection = new ArrayCollection();
-			[Bindable]
-			private var mantenciones_ac:ArrayCollection = new ArrayCollection();
-			[Bindable]
-			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva"]);
-			[Bindable]
-			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Mensual","Anual"]);
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -67,40 +56,15 @@
             		tipoComponente_ac.addItem(aux[i].tipo);
             	}
             	tipoComponente_ac.addItem("Otro");
-            	
-            	CombosService.Paises();
             }
-			private function paisesResult(event:ResultEvent):void
-            {
-            	var aux:Array = event.result.Tables.Paises.Rows.source as Array;
-            	
-            	for(var i:int=0; i<aux.length; i++)
-            	{
-            		pais_ac.addItem(aux[i].pais);
-            	}
-            	pais_ac.addItem("Otro");
-            	
-            	CombosService.TipoEspecificacion();
-            }
-            private function tipoEspecificacionResult(event:ResultEvent):void
-            {
-            	var aux:Array = event.result.Tables.TipoEspecificacion.Rows.source as Array;
-            	
-            	for(var i:int=0; i<aux.length; i++)
-            	{
-            		especificacion_ac.addItem(aux[i].tipo);
-            	}
-            	especificacion_ac.addItem("Otro");
-            	
-            	if(codigo_ti!=null){ agregar_btn.visible=true; revisar();}
-            }
-			
 			private function onClick(event:String):void
 			{
 				if(event=="agregar")
 				{
 					agregar_btn.enabled = false;
 					componente = new Object();
+					
+					componente.superClass = "CMP";
 					
 					//Hoja 1
 					if(tipo_cb.visible) componente.tipo = tipo_cb.text;
@@ -112,15 +76,18 @@
 					componente.puestaMarcha = puestaMarcha_df.text;
 					componente.vidaUtil = vidaUtil_ti.text;
 					componente.descripcion = descripcion_ta.text;
-					//Hoja 2
-					componente.marca = marca_ti.text;
-					componente.ano = ano_ti.text;
-					if(pais_cb.visible) componente.pais = pais_cb.text;
-					else componente.pais = pais_ti.text;
-					componente.modelo = modelo_ti.text;
-					componente.fabricante = fabricante_ti.text;
 					
-					ComponenteService.addComponente(componente);
+					//Hoja 2
+					if(fabricante_cmp!=null) componente.fabricante = fabricante_cmp.getFabricante();
+					
+					//Hoja 3
+					if(datosRelevantes_cmp!=null) componente.especificaciones = datosRelevantes_cmp.getEspecificaciones();
+					
+					//Hoja 4
+					if(actividadesMantencion_cmp!=null) componente.mantenciones = actividadesMantencion_cmp.getMantenciones();
+					
+					
+					ElementoService.addElemento(componente);
 				}
 				else
 				{
@@ -137,74 +104,41 @@
 				if(puestaMarcha_df!=null) puestaMarcha_df.text = "";
 				if(vidaUtil_ti!=null) vidaUtil_ti.text="";
 				if(descripcion_ta!=null) descripcion_ta.text="";
-				if(marca_ti!=null) marca_ti.text="";
-			 	if(ano_ti!=null) ano_ti.text="";
-			 	if(pais_ti!=null) pais_ti.text="";
-			 	if(modelo_ti!=null) modelo_ti.text="";
-			 	if(fabricante_ti!=null) fabricante_ti.text="";
-			 	if(especificacion_ti!=null) especificacion_ti.text="";
-			 	if(valor_ti!=null) valor_ti.text="";
-			 	if(actividad_ti!=null) actividad_ti.text="";
-			 	if(especificacion_ti!=null) especificacion_ti.text="";
-			 	tabNavigator.selectedIndex=0;
-			 	especificacion_ac = new ArrayCollection();
-			 	mantenciones_ac = new ArrayCollection();
+				if(fabricante_cmp!=null) fabricante_cmp.clean();
+				if(datosRelevantes_cmp!=null) datosRelevantes_cmp.clean();
+				if(actividadesMantencion_cmp!=null) actividadesMantencion_cmp.clean();
+				tabNavigator.selectedIndex=0;
 			}
-			private function addComponentesResult(event:ResultEvent):void
+			private function addElementoResult(event:ResultEvent):void
             {
             	var result:int = event.result as int;
+				
 				if(result == 1)
 				{
-					ComponenteService.addEspecificaciones(especificaciones_ac, componente.codigo);
-					ComponenteService.addMantenciones(mantenciones_ac, componente.codigo, componente.puestaMarcha);
+					clean();
 					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, componente));
+				}
+				else if(result==0)
+				{
+					Alert.show("Lo siento, el codigo ya exite");
 				}
 				else if(result==-1)
 				{
-					Alert.show("Lo siento el codigo ya exite");
+					Alert.show("Lo siento, es imposible proceder por ahora");
 				}
-				else 
+				else if(result==-2)
 				{
-					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+					Alert.show("Lo siento, solo fueron guardados los datos basicos y fabricante del componente");
 				}
-				clean();
+				else if(result==-3)
+				{
+					Alert.show("Lo siento, solo fueron guardados los datos basicos, fabricante y especificaciones del componente");
+				}
+				else if(result==-4)
+				{
+					Alert.show("Lo siento, imposible crear el plan de mantencion para el componente");
+				}
             }
-            private function addEspecificacionesResult(event:ResultEvent):void
-            {
-            	trace("Especificacion result: "+event.result);
-            }
-            private function addMantencionesResult(event:ResultEvent):void
-            {
-            	trace("Mantencion result: "+event.result);
-            }
-			
-			private function agregarEspecificacion():void
-			{
-				var item:Object = new Object();
-				if(especificacion_cb.visible) item.especificacion = especificacion_cb.text;
-				else item.especificacion = especificacion_ti.text;
-				item.valor = valor_ti.text;
-				especificaciones_ac.addItem(item);
-				valor_ti.text = "";
-			}
-			
-			private function agregarActividadMantencion():void
-			{
-				var item:Object = new Object();
-				item.actividad = actividad_ti.text;
-				item.mantencion = tipoMantencion_cb.text;
-				item.frecuencia = frecuencia_cb.text;
-				mantenciones_ac.addItem(item);
-				actividad_ti.text = "";
-			}
-			
-			private function actualizarPais():void
-			{
-				pais_ti.text = "";
-				if(pais_cb.text=="Otro"){pais_cb.visible=false; pais_ti.visible=true; cancelarPais_btn.visible=true;} 
-				else{pais_cb.visible=true; pais_ti.visible=false; cancelarPais_btn.visible=false;}
-			}
-			
 			private function actualizarTipo():void
 			{
 				tipo_ti.text = "";
@@ -212,33 +146,6 @@
 				else{tipo_cb.visible=true; tipo_ti.visible=false; cancelarTipo_btn.visible=false;}
 			}
 			
-			private function actualizarEspecificacion():void
-			{
-				especificacion_ti.text = "";
-				if(especificacion_cb.text=="Otro"){especificacion_cb.visible=false; especificacion_ti.visible=true; cancelarEspecificacion_btn.visible=true;} 
-				else{especificacion_cb.visible=true; especificacion_ti.visible=false; cancelarEspecificacion_btn.visible=false;}
-			}
-			
-			private function arriba():void
-			{
-				if(mantenciones_dg.selectedIndex!=-1)
-				{
-					var itemIndex:int = mantenciones_dg.selectedIndex;
-					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
-					if( itemIndex == 0) itemIndex = mantenciones_ac.length;
-					else itemIndex = (itemIndex - 1) % (mantenciones_ac.length+1);
-					mantenciones_ac.addItemAt(item, itemIndex);
-				}
-			}
-			private function abajo():void
-			{
-				if(mantenciones_dg.selectedIndex!=-1)
-				{
-					var itemIndex:int = mantenciones_dg.selectedIndex;
-					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
-					mantenciones_ac.addItemAt(item, (itemIndex + 1) % (mantenciones_ac.length+1));
-				}
-			}
 			private function revisar():void
 			{
 				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && vidaUtil_ti.text.length>0) agregar_btn.enabled=true;
@@ -251,84 +158,36 @@
 	<mx:TabNavigator y="0" width="100%" height="420" id="tabNavigator" horizontalCenter="0" selectedIndex="1">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
 			<mx:Label x="135.5" y="41" text="Tipo Componente"/>
-			<mx:ComboBox x="268.5" y="41" id="tipo_cb" dataProvider="{tipoComponente_ac}" change="actualizarTipo()"/>
-			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50"/>
+			<mx:ComboBox x="268.5" y="41" id="tipo_cb" dataProvider="{tipoComponente_ac}" change="actualizarTipo();revisar()"/>
+			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50" focusOut="revisar()"/>
 			<mx:Image x="595.5" y="41" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
 			<mx:Label x="135.5" y="79" text="Codigo (*)"/>
 			<mx:TextInput x="268.5" y="77" id="codigo_ti" maxChars="20" focusOut="revisar()"/>
 			<mx:Label x="135.5" y="114" text="Sistema"/>
-			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}"/>
+			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}" change="revisar()"/>
 			<mx:Label x="137.5" y="150" text="Nombre"/>
-			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti"/>
+			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" focusOut="revisar()"/>
 			<mx:Label x="137.5" y="184" text="Costo"/>
-			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti"/>
+			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti" focusOut="revisar()"/>
 			<mx:Label x="135.5" y="212" text="Puesta en Marcha (*)"/>
-			<mx:DateField x="268.5" y="210" width="160" id="puestaMarcha_df" focusOut="revisar()"/>
+			<ns1:myDateField x="268.5" y="210" width="160" id="puestaMarcha_df" focusOut="revisar()"/>
 			<mx:Label x="135.5" y="242" text="Horas vida util (*)"/>
 			<mx:TextInput x="268.5" y="240" restrict="0-9" id="vidaUtil_ti" focusOut="revisar()"/>
 			<mx:Label x="135.5" y="277" text="Descripcion"/>
-			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78"/>
+			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78" focusOut="revisar()"/>
 			<mx:Label x="328" y="362" text="(*) Dato Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos  del Fabricante" width="100%" height="100%">
-			<mx:Label x="205" y="62" text="Marca"/>
-			<mx:TextInput x="305" y="60" restrict="0-9" width="263" id="marca_ti" maxChars="50"/>
-			<mx:Label x="205" y="100" text="Año"/>
-			<mx:TextInput x="305" y="98" restrict="0-9" width="81" id="ano_ti"/>
-			<mx:Label x="205" y="140" text="Pais"/>
-			<mx:ComboBox x="306.5" y="138" width="261.5" id="pais_cb" dataProvider="{pais_ac}" change="actualizarPais()"/>
-			<mx:TextInput x="305" y="138" width="233" id="pais_ti" visible="false" maxChars="50"/>
-			<mx:Image x="546" y="138" width="22" height="22" id="cancelarPais_btn" source="iconos/cancelar.png" visible="false" click="pais_cb.selectedIndex=0; actualizarPais()"/>
-			<mx:Label x="205" y="185" text="Modelo"/>
-			<mx:TextInput x="305" y="183" restrict="0-9" width="263" id="modelo_ti" maxChars="50"/>
-			<mx:Label x="205" y="228" text="Fabricante"/>
-			<mx:TextInput x="305" y="226" restrict="0-9" width="263" id="fabricante_ti" maxChars="50"/>
+			<ns1:Fabricante id="fabricante_cmp" x="196.5" y="72"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos Relevantes" width="100%" height="100%" >
-			<mx:Label x="23" y="10" text="Lista de Especificaciones" fontWeight="bold"/>
-			<mx:DataGrid x="23" y="27" width="680" height="251" id="especificaciones_dg" dataProvider="{especificaciones_ac}">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Especificacion" dataField="especificacion"/>
-					<mx:DataGridColumn headerText="Valor" dataField="valor"/>
-				</mx:columns>
-			</mx:DataGrid>
-			<mx:Image x="711" y="139" source="iconos/del.png" click="especificaciones_ac.removeItemAt(especificacion_cb.selectedIndex)" width="40" height="40"/>
-			<mx:Label x="23" y="286" text="Nueva Especificacion" fontWeight="bold"/>
-			<mx:Canvas borderStyle="solid" x="23" height="74" y="303" width="680">
-				<mx:Label x="157" y="14" text="Especificacion"/>
-				<mx:ComboBox x="262" y="10" width="259" id="especificacion_cb" dataProvider="{especificacion_ac}" change="actualizarEspecificacion()"/>
-				<mx:TextInput x="262" y="10" width="229" id="especificacion_ti" visible="false" maxChars="50"/>
-				<mx:Image x="499" y="10" width="22" height="22" id="cancelarEspecificacion_btn" source="iconos/cancelar.png" visible="false" click="especificacion_cb.selectedIndex=0; actualizarEspecificacion()"/>
-				<mx:Label x="157" y="44" text="Valor"/>
-				<mx:TextInput x="262" y="40" width="259" id="valor_ti" restrict="0-9"/>
-			</mx:Canvas>
-			<mx:Image x="711" y="318" source="iconos/add.png" click="agregarEspecificacion()" width="40" height="40"/>
+			<ns1:DatosRelevantes id="datosRelevantes_cmp"/>
 		</mx:Canvas>
 		<mx:Canvas label="Actividades de Mantencion" width="100%" height="100%">
-			<mx:Label x="24" y="10" text="Lista de Actividades de Mantencion" fontWeight="bold"/>
-			<mx:DataGrid x="24" y="24" width="677" height="231" id="mantenciones_dg" dataProvider="{mantenciones_ac}">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Actividad" 			dataField="actividad" sortable="false"/>
-					<mx:DataGridColumn headerText="Tipo de Mantencion" 	dataField="mantencion" sortable="false"/>
-					<mx:DataGridColumn headerText="Frecuencia" 			dataField="frecuencia" sortable="false"/>
-				</mx:columns>
-			</mx:DataGrid>
-			<mx:Image x="709" y="81" width="40" height="40" source="iconos/del.png" click="mantenciones_ac.removeItemAt(mantenciones_dg.selectedIndex)"/>
-			<mx:Image x="709" y="129" width="40" height="40" source="iconos/arriba.png" click="arriba()"/>
-			<mx:Image x="709" y="177" source="iconos/abajo.png" width="40" height="40" click="abajo()"/>
-			<mx:Label x="24" y="263" text="Nueva Actividad de Mantenimiento" fontStyle="normal" fontWeight="bold"/>
-			<mx:Canvas width="677" height="98" borderStyle="solid" y="279" x="24" label="Nuevas Actividades">
-				<mx:Label x="135" y="12" text="Actividad"/>
-				<mx:TextInput x="261" y="10" width="279" id="actividad_ti" maxChars="50"/>
-				<mx:Label x="135" y="40" text="Tipo de Mantencion"/>
-				<mx:ComboBox x="261" y="38" width="279" id="tipoMantencion_cb" dataProvider="{tipoMantencion_ac}"/>
-				<mx:Label x="135" y="68" text="Frecuencia"/>
-				<mx:ComboBox x="261" y="66" width="279" id="frecuencia_cb" dataProvider="{frecuencia_ac}"/>
-			</mx:Canvas>
-			<mx:Image x="709" y="306" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
+			<ns1:ActividadesMantencion id="actividadesMantencion_cmp"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
-	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false" visible="false"/>
-	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 	
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
+	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 </mx:Canvas>

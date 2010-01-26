@@ -59,6 +59,7 @@
 				if(event.stateOrigin==AgregarMaquina.nombre && event.objeto!=null)
 				{
 					maquinas_ac.push(event.objeto);
+					maquinas_dg.dataProvider = maquinas_ac;
 				}
 				currentState = event.stateDestination;
 			}

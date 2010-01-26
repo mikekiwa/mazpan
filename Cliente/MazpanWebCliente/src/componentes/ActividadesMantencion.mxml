@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="770" height="387">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+		
+			[Bindable]
+			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva"]);
+			[Bindable]
+			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Mensual","Anual"]);
+			[Bindable]
+			private var mantenciones_ac:ArrayCollection = new ArrayCollection();
+			
+			private function agregarActividadMantencion():void
+			{
+				var item:Object = new Object();
+				item.actividad = actividad_ti.text;
+				item.mantencion = tipoMantencion_cb.text;
+				item.frecuencia = frecuencia_cb.text;
+				mantenciones_ac.addItem(item);
+				actividad_ti.text="";
+			}
+			private function arriba():void
+			{
+				if(mantenciones_dg.selectedIndex!=-1)
+				{
+					var itemIndex:int = mantenciones_dg.selectedIndex;
+					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
+					if( itemIndex == 0) itemIndex = mantenciones_ac.length;
+					else itemIndex = (itemIndex - 1) % (mantenciones_ac.length+1);
+					mantenciones_ac.addItemAt(item, itemIndex);
+				}
+			}
+			private function abajo():void
+			{
+				if(mantenciones_dg.selectedIndex!=-1)
+				{
+					var itemIndex:int = mantenciones_dg.selectedIndex;
+					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
+					mantenciones_ac.addItemAt(item, (itemIndex + 1) % (mantenciones_ac.length+1));
+				}
+			}
+			public function getMantenciones():ArrayCollection
+			{
+				return mantenciones_ac;
+			}
+			public function clean():void
+			{
+				mantenciones_ac = new ArrayCollection();
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label x="26" y="10" text="Lista de Actividades de Mantención" fontWeight="bold"/>
+	<mx:DataGrid x="26" y="26" width="668" height="226" id="mantenciones_dg" dataProvider="{mantenciones_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Actividad" 			dataField="actividad" sortable="false"/>
+			<mx:DataGridColumn headerText="Tipo de Mantencion" 	dataField="mantencion" sortable="false"/>
+			<mx:DataGridColumn headerText="Frecuencia" 			dataField="frecuencia" sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="703.5" y="75" width="40" height="40" source="iconos/del.png" click="if(mantenciones_dg.selectedIndex!=-1) mantenciones_ac.removeItemAt(mantenciones_dg.selectedIndex)"/>
+	<mx:Image x="703.5" y="123" width="40" height="40" source="iconos/arriba.png" click="arriba()"/>
+	<mx:Image x="703.5" y="171" width="40" height="40" source="iconos/abajo.png" click="abajo()"/>
+	<mx:Label x="28.5" y="260" text="Nueva Actividad de Mantención" fontWeight="bold"/>
+	<mx:Canvas width="667" height="101" borderStyle="solid" y="277" x="28.5" label="Nuevas Actividades">
+		<mx:Label x="130" y="13" text="Actividad"/>
+		<mx:TextInput x="256" y="11" width="279" id="actividad_ti" maxChars="50"/>
+		<mx:Label x="130" y="41" text="Tipo de Mantencion"/>
+		<mx:ComboBox x="256" y="39" width="279" id="tipoMantencion_cb" dataProvider="{tipoMantencion_ac}"/>
+		<mx:Label x="130" y="69" text="Frecuencia"/>
+		<mx:ComboBox x="256" y="67" width="279" id="frecuencia_cb" dataProvider="{frecuencia_ac}" />
+	</mx:Canvas>
+	<mx:Image x="703.5" y="309" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
+</mx:Canvas>

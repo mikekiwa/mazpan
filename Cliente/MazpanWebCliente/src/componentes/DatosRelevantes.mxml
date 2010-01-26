@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="770" height="385" creationComplete="init()">
+	
+	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="TipoEspecificacion" 	result="tipoEspecificacionResult(event)" 	fault="ErrorFaultHandler(event, 'TipoEspecificacion')"/>
+	</mx:WebService>
+
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String = "DatosRelevantes";
+		
+			[Bindable]
+			private var especificacion_ac:Array = new Array();
+			[Bindable]
+			private var especificaciones_ac:ArrayCollection = new ArrayCollection();
+			
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+            	CombosService.TipoEspecificacion();
+			}
+			private function tipoEspecificacionResult(event:ResultEvent):void
+            {
+            	especificacion_ac = event.result.Tables.TipoEspecificacion.Rows.source as Array;
+            	especificacion_ac.push("Otro");
+            }
+			private function actualizarEspecificacion():void
+			{
+				especificacion_ti.text = "";
+				if(especificacion_cb.text=="Otro")
+				{
+					especificacion_cb.visible=false;
+					especificacion_ti.visible=true;
+					cancelarEspecificacion_btn.visible=true;
+				} 
+				else
+				{
+					especificacion_cb.visible=true;
+					especificacion_ti.visible=false;
+					cancelarEspecificacion_btn.visible=false;
+				}
+			}
+			private function agregarEspecificacion():void
+			{
+				var item:Object = new Object();
+				if(especificacion_cb.visible) item.especificacion = especificacion_cb.text;
+				else item.especificacion = especificacion_ti.text;
+				item.valor = valor_ti.text;
+				especificaciones_ac.addItem(item);
+				valor_ti.text = "";
+			}
+			public function getEspecificaciones():ArrayCollection
+			{
+				return especificaciones_ac;
+			}
+			public function clean():void
+			{
+				especificaciones_ac = new ArrayCollection();
+				valor_ti.text = "";
+				especificacion_ti.text = ""
+				especificacion_cb.visible=true;
+				especificacion_ti.visible=false;
+				cancelarEspecificacion_btn.visible=false;
+			}
+		]]>
+	</mx:Script>
+
+
+	<mx:Label x="23" y="1" text="Lista de Especificaciones" fontWeight="bold"/>
+	<mx:DataGrid x="23" y="17" width="680" height="251" id="especificaciones_dg" dataProvider="{especificaciones_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Especificacion" dataField="especificacion"/>
+			<mx:DataGridColumn headerText="Valor" dataField="valor"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Image x="711" y="120" source="iconos/del.png" click="especificaciones_ac.removeItemAt(especificacion_cb.selectedIndex)" width="40" height="40"/>
+	<mx:Label x="23" y="286" text="Nueva Especificacion" fontWeight="bold"/>
+	<mx:Canvas borderStyle="solid" x="23" height="74" y="303" width="680">
+		<mx:Label x="157" y="14" text="Especificacion"/>
+		<mx:ComboBox x="262" y="10" width="259" id="especificacion_cb" dataProvider="{especificacion_ac}" labelField="especificacion" change="actualizarEspecificacion()"/>
+		<mx:TextInput x="262" y="10" width="229" id="especificacion_ti" visible="false" maxChars="50"/>
+		<mx:Image x="499" y="10" width="22" height="22" id="cancelarEspecificacion_btn" source="iconos/cancelar.png" visible="false" click="especificacion_cb.selectedIndex=0; actualizarEspecificacion()"/>
+		<mx:Label x="157" y="44" text="Valor"/>
+		<mx:TextInput x="262" y="40" width="259" id="valor_ti" restrict="0-9"/>
+	</mx:Canvas>
+	<mx:Image x="711" y="318" source="iconos/add.png" click="agregarEspecificacion()" width="40" height="40"/>
+		
+</mx:Canvas>

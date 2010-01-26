@@ -74,6 +74,23 @@
             	sucursales_cb.enabled = true;
             	Service.getItems();
             }
+            private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+//            	revisar_btn.enabled = true;
+//            	amarre_btn.enabled = true;
+				inicializado = true;
+            	cargar_btn.enabled = true;
+            	meses_cb.enabled = true;
+            	tabla1.height = items.length * 22 + 25;
+            	tabla1.width = 1266;
+            	this.width = 1286;
+				this.height = 103 + items.length * 22;
+            }
+            public function iniciado():Boolean
+            {
+            	return inicializado;
+            }
             public function actualizarCombos():void
             {
             	meses_cb.selectedIndex = mes_seleccionado;//Esta linea es necesaria, puesto que cuando se vuelve al estado base el combo de seleccion de mes se cambiaba a ENERO
@@ -106,19 +123,6 @@
             	Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.VENTASZONAS].id, items[ITEMS.VENTASZONAS].itemName, ITEMS.VENTASZONAS,ano_var);
             	cargar_btn.label='Recargar';
             	actualizarCombos();
-            }
-            private function getItemsResult(event:ResultEvent):void
-            {
-            	items = event.result.Tables.Items.Rows.source as Array;
-//            	revisar_btn.enabled = true;
-//            	amarre_btn.enabled = true;
-				inicializado = true;
-            	cargar_btn.enabled = true;
-            	meses_cb.enabled = true;
-            	tabla1.height = items.length * 22 + 25;
-            	tabla1.width = 1266;
-            	this.width = 1286;
-				this.height = 103 + items.length * 22;
             }
             private function getFlujoResult(event:ResultEvent):void
             {

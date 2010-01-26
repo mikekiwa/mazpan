@@ -6,6 +6,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import componentes.general.SolicitudTrabajo;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
@@ -24,5 +25,5 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton x="10" y="10" label="Solicitud" width="100" click="goState('solicitudState')"/>
+	<mx:LinkButton x="10" y="10" label="Solicitud" width="100" click="goState(SolicitudTrabajo.nombre)"/>
 </mx:Canvas>
