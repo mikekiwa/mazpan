@@ -71,7 +71,7 @@
             	}
             	else
             	{
-            		if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(event.objeto.balanceCargado,event.objeto.items);
+            		if(event.stateDestination==Amarre.nombre) amarre_cmp.clean(event.objeto.balanceCargado,event.objeto.items);
             		else if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(event.objeto.balanceCargado,event.objeto.items)	
             		else if(event.stateDestination==Detalle.nombre) detalle_cmp.parametros(event.objeto.balanceCargado,event.objeto.idItem,event.objeto.itemName,event.objeto.ano,event.objeto.meses);
             		else if(event.stateDestination==Grafico.nombre) grafico_cmp.parametros(event.objeto.balanceCargado,event.objeto.items,event.objeto.meses,event.objeto.img,event.objeto.ano);	

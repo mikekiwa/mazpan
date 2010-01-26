@@ -3,11 +3,6 @@
 	verticalScrollPolicy="off" title="Lineas" creationComplete="init()"
 	xmlns:ns1="componentes.mantencionLineas.*">
 	
-	<mx:WebService id="LineaService" 		wsdl="{index.URL + 'LineaService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allLineas" 		result="allLineasResult(event)" 	fault="ErrorFaultHandler(event, 'allLineas')"/>
-		<mx:operation name="delLinea" 		result="delLineaResult(event)" 		fault="ErrorFaultHandler(event, 'delLinea')"/>
-	</mx:WebService>
-	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{canvas1}"/>
@@ -20,6 +15,11 @@
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
+	
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allElementos" 	result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
+		<mx:operation name="delElemento" 	result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
+	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
@@ -42,16 +42,15 @@
             {
             	currentState = "";
             	if(addLinea!=null) addLinea.clean();
-            	LineaService.allMaquinas();
+            	ElementoService.allElementos("LIN");
             }
-			
 			private function init():void
 			{
-				LineaService.allLineas();
+				ElementoService.allElementos("LIN");
 			}
-			private function allLineasResult(event:ResultEvent):void
+			private function allElementosResult(event:ResultEvent):void
 			{
-				lineas_ac = event.result.Tables.Lineas.Rows.source as Array;
+				lineas_ac = event.result.Tables.Elementos.Rows.source as Array;
 			}
 			private function agregarLineaResult(event:ComplexEvent):void
 			{
@@ -59,6 +58,7 @@
 				if(event.stateOrigin==AgregarLinea.nombre && event.objeto!=null)
 				{
 					lineas_ac.push(event.objeto);
+					lineas_dg.dataProvider = lineas_ac;
 				}
 				currentState = event.stateDestination;
 			}
@@ -79,11 +79,11 @@
 					input.visible = true;
 				}
 			}
-			private function delLineaResult(event:ResultEvent):void
+			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
 				if(result == 1)
-					LineaService.allMaquinas();
+					ElementoService.allElementos("LIN");
 				else if(result == 0)
 					Alert.show("La linea yo no existe en el sistema, intente recargar");
 				else
@@ -110,6 +110,6 @@
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) LineaService.delLinea(lineas_dg.selectedItem.codigo)"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) ElementoService.delElemento(lineas_dg.selectedItem.codigo)"/>
 	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>

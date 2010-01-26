@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Amarre de Cuentas" width="800" height="400" 
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Amarre de Cuentas" width="795" height="500" 
 	backgroundColor="#cccccc" creationComplete="init()">
 	
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getCuentas" 	result="getCuentasResult(event)" 		fault="ErrorFaultHandler(event, 'getCuentas')"/>
 		<mx:operation name="guardar" 		result="guardarResult(event)" 			fault="ErrorFaultHandler(event, 'guardar')"/>
+		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -36,8 +37,16 @@
             }
 			private function init():void
 			{
-				Service.getCuentas();
+				Service.getItems();
 			}
+			private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+            	itemsCombo = new ITEMS(items).getItemsContables();
+				itemsCombo.push(items[ITEMS.IMPUESTOALARENTA].itemName);
+				if(items_cb!=null) items_cb.selectedIndex=0;
+            	Service.getCuentas();
+            }
 			private function getCuentasResult(event:ResultEvent):void
 			{
 				cuentas = event.result.Tables.Cuentas.Rows.source as Array;
@@ -50,26 +59,13 @@
 					if(cuentas[i].GroupMask == 7) cuentas[i].Cajon = "Otros Ingresos";
 					if(cuentas[i].GroupMask == 8) cuentas[i].Cajon = "Otros Gastos";
 				}
-				tabla.height = (cuentas.length) * 22 + 25;
-				this.height = 95 + (cuentas.length) * 22;
 			}
-			public function parametros(_items:Array):void
+			public function clean():void
 			{
 				cuentas =  new Array();
-				tabla.height = 330;
-				this.height = 400;
-				items = _items;
-				itemsCombo = new ITEMS(items).getItemsContables();
-				itemsCombo.push(items[ITEMS.IMPUESTOALARENTA].itemName);
-				if(itemsCombo.length>0) items_cb.selectedIndex = 0;
-				
-				
-				//Esto es para que cada vez que llamen al componente se vuelvan a cargar los datos,
-				//y que no se cargen dos veces, ya que eso pasaria la primera vez que se llama al componente
-				if(inicializado) init();
-				else inicializado = true;
+				items_cb.selectedIndex = 0;
+				Service.getCuentas();
 			}
-		
 			private function guardarDatos():void
           	{
 	          	datosParaGuardar = new Array();

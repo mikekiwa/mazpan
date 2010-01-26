@@ -138,6 +138,10 @@
 				{
 					Alert.show("Lo siento, imposible crear el plan de mantencion para el componente");
 				}
+				else 
+				{
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+				}
             }
 			private function actualizarTipo():void
 			{
@@ -159,22 +163,22 @@
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
 			<mx:Label x="135.5" y="41" text="Tipo Componente"/>
 			<mx:ComboBox x="268.5" y="41" id="tipo_cb" dataProvider="{tipoComponente_ac}" change="actualizarTipo();revisar()"/>
-			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50" focusOut="revisar()"/>
+			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50" change="revisar()"/>
 			<mx:Image x="595.5" y="41" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
 			<mx:Label x="135.5" y="79" text="Codigo (*)"/>
-			<mx:TextInput x="268.5" y="77" id="codigo_ti" maxChars="20" focusOut="revisar()"/>
+			<mx:TextInput x="268.5" y="77" id="codigo_ti" maxChars="20" change="revisar()"/>
 			<mx:Label x="135.5" y="114" text="Sistema"/>
 			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}" change="revisar()"/>
 			<mx:Label x="137.5" y="150" text="Nombre"/>
-			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" focusOut="revisar()"/>
+			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" change="revisar()"/>
 			<mx:Label x="137.5" y="184" text="Costo"/>
-			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti" focusOut="revisar()"/>
+			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti" change="revisar()"/>
 			<mx:Label x="135.5" y="212" text="Puesta en Marcha (*)"/>
-			<ns1:myDateField x="268.5" y="210" width="160" id="puestaMarcha_df" focusOut="revisar()"/>
+			<ns1:myDateField x="268.5" y="210" width="160" id="puestaMarcha_df" change="revisar()"/>
 			<mx:Label x="135.5" y="242" text="Horas vida util (*)"/>
-			<mx:TextInput x="268.5" y="240" restrict="0-9" id="vidaUtil_ti" focusOut="revisar()"/>
+			<mx:TextInput x="268.5" y="240" restrict="0-9" id="vidaUtil_ti" change="revisar()"/>
 			<mx:Label x="135.5" y="277" text="Descripcion"/>
-			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78" focusOut="revisar()"/>
+			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78" change="revisar()"/>
 			<mx:Label x="328" y="362" text="(*) Dato Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos  del Fabricante" width="100%" height="100%">

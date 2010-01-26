@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Detalle de Movimiento de Cuentas" width="850" height="400"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Detalle de Movimiento de Cuentas" width="850" height="500"
 	backgroundColor="#cccccc" creationComplete="init()">
 	
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="detalle" result="detalleResult(event);"	fault="ErrorFaultHandler(event, 'detalle')"/>
+		<mx:operation name="detalle" 		result="detalleResult(event)"		fault="ErrorFaultHandler(event, 'detalle')"/>
+		<mx:operation name="getItems" 		result="getItemsResult(event)"		fault="ErrorFaultHandler(event, 'getItems')"/>
+		<mx:operation name="getSucursales" 	result="getSucursalesResult(event)"	fault="ErrorFaultHandler(event, 'getSucursales')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -20,8 +22,6 @@
 			public static const nombre:String = "Detalle";//correspondiente al estado en que se debiera colocar
 			
 			[Bindable]
-			private var labelText:String;
-			[Bindable]
 			private var total:String = "Total: 0 [M$]";; 
 			[Bindable]
 			private var detalle_ac:Array;
@@ -36,15 +36,33 @@
 			
 			private var items:Array;
 			private var ano:int;
+			private var inicializado:Boolean = false; 
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-			private function init():void
+			public function init():void
 			{
+				Service.getSucursales();
+            }
+            private function getSucursalesResult(event:ResultEvent):void
+            {
+            	sucursales_ac = event.result.Tables.Sucursales.Rows.source as Array;
+            	sucursales_cb.selectedIndex = 0;
+            	sucursales_cb.enabled = true;
+            	Service.getItems();
+            }
+			private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+            	itemsCombo = new ITEMS(items).getItemsContables();
+				if(items_cb!=null) items_cb.selectedIndex=0;
 				
-			}
+				Service.detalle(sucursales_cb.selectedItem.Code,ITEMS.VENTASZONAS+1, meses_cb.selectedIndex+1,ano_ns.value);
+				//detalle(idItem,mes,año)-->(int,int,int)
+            }
+            /*
 			public function parametros(_items:Array,_ano:int,_idItem:int,_itemName:String,_sucursales:Array,_nSucursales:Array,_selectedSucursal:int):void
 			{			
 				sucursales_ac = _sucursales;
@@ -52,8 +70,6 @@
 				sucursales_cb.selectedIndex = _selectedSucursal;
 				
 				detalle_ac = new Array();
-				tabla.height = 330;
-				this.height = 400;
 				meses_cb.selectedIndex = 0;
 				items = _items;
 				ano = _ano;
@@ -64,15 +80,23 @@
 				
 				Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,_idItem,1,ano);//detalle(idItem,mes,año)-->(int,int,int)
 			}
+			
+			*/
 			public function actualizar(parametros:Object):void
 			{
-				detalle_ac = new Array();
-				tabla.height = 330;
-				this.height = 400;
-				items_cb.selectedItem = parametros.nombreItem;
-				sucursales_cb.selectedItem = parametros.nombreSucursal;
-				meses_cb.selectedIndex = parametros.mes;
-				Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,parametros.idItem, meses_cb.selectedIndex+1,ano);//detalle(idItem,mes,año)-->(int,int,int)
+				if(inicializado)
+				{
+					detalle_ac = new Array();
+					sucursales_ac = parametros.sucursales;
+					sucursales_cb.dataProvider = sucursales_ac;
+					itemsCombo = new ITEMS(parametros.items).getItemsContables();
+					items_cb.selectedItem = parametros.itemName;
+					sucursales_cb.selectedIndex = parametros.selectedSucursal;
+					meses_cb.selectedIndex = parametros.mes;
+					ano_ns.value = parametros.ano as int;
+					
+					Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,parametros.idItem, meses_cb.selectedIndex+1,ano_ns.value);//detalle(idItem,mes,año)-->(int,int,int)
+				}
 			}
 			private function detalleResult(event:ResultEvent):void
             {
@@ -88,8 +112,7 @@
             	
             	total = "Total: "+ formato.format(r.toString()) + " [M$]";
             	
-            	tabla.height = detalle_ac.length * 22 + 25;
-            	this.height = 95 + detalle_ac.length * 22;
+            	inicializado=true;
             }
            
 			private function cambiarDetalle():void
@@ -99,7 +122,7 @@
 				for(var i:int=0; i<items.length; i++)
             		if(items_cb.text == items[i].itemName) id=i+1;
             		          	
-            	Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,id, meses_cb.selectedIndex+1,ano);
+            	Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,id, meses_cb.selectedIndex+1,ano_ns.value);
             }
             
             private function goState(destino:String):void
@@ -113,7 +136,7 @@
 				parametros.nombreItem =items_cb.text;
 				parametros.codigoSucursal = sucursales_ac[sucursales_cb.selectedIndex].Code;
 				parametros.nombreSucursal = sucursales_cb.text;
-				parametros.ano = ano;
+				parametros.ano = ano_ns.value;
 				parametros.mes = meses_cb.selectedIndex;
 				parametros.codigoCuenta = detalle_ac[tabla.selectedIndex].AcctCode;
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, parametros));
@@ -125,10 +148,10 @@
 	
 	<mx:HBox id="hbox">
 		<mx:Label x="0" y="12" text="Sucursal:"/>
-		<mx:ComboBox dataProvider="{nombreSucursales_ac}" change="cambiarDetalle()" id="sucursales_cb"  selectedIndex="0"/>
+		<mx:ComboBox dataProvider="{sucursales_ac}" labelField="ShortName" change="cambiarDetalle()" id="sucursales_cb"  selectedIndex="0"/>
 		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" change="cambiarDetalle()" selectedIndex="0"/>
 		<mx:ComboBox id="meses_cb" dataProvider="{meses_ac}" change="cambiarDetalle()" selectedIndex="0"/>
-		<mx:Label text="{labelText}" fontSize="14" fontWeight="bold"/>
+		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" id="ano_ns"/>
 		<mx:Spacer width="30"/>
 		<mx:Label text="{total}" fontSize="14" fontWeight="bold"/>
 	</mx:HBox>

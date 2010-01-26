@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Maquinas" creationComplete="init()" xmlns:ns1="componentes.mantencionMaquinas.*">
 	
-	<mx:WebService id="MaquinaService" 		wsdl="{index.URL + 'MaquinaService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allMaquinas" 		result="allMaquinasResult(event)" 	fault="ErrorFaultHandler(event, 'allMaquinas')"/>
-		<mx:operation name="delMaquina" 		result="delMaquinaResult(event)" 	fault="ErrorFaultHandler(event, 'delMaquina')"/>
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allElementos" 		result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
+		<mx:operation name="delElemento" 		result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
 	</mx:WebService>
 	
 	<mx:states>
@@ -27,8 +27,9 @@
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
-			[Bindable]
-			public static var nombre:String = "Maquinas";
+			
+		
+			public static const nombre:String = "Maquinas";
 		
 			[Bindable]
 			private var maquinas_ac:Array = new Array();
@@ -41,16 +42,16 @@
             {
             	currentState = "";
             	if(addMaquina!=null) addMaquina.clean();
-            	MaquinaService.allMaquinas();
+            	ElementoService.allElementos("MAQ");
             }
 			
 			private function init():void
 			{
-				MaquinaService.allMaquinas();
+				ElementoService.allElementos("MAQ");
 			}
-			private function allMaquinasResult(event:ResultEvent):void
+			private function allElementosResult(event:ResultEvent):void
 			{
-				maquinas_ac = event.result.Tables.Maquinas.Rows.source as Array;
+				maquinas_ac = event.result.Tables.Elementos.Rows.source as Array;
 			}
 			
 			private function agregarMaquinaResult(event:ComplexEvent):void
@@ -80,11 +81,11 @@
 					input.visible = true;	
 				}
 			}
-			private function delMaquinaResult(event:ResultEvent):void
+			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
 				if(result == 1)
-					MaquinaService.allMaquinas();
+					ElementoService.allElementos("MAQ");
 				else if(result == 0)
 					Alert.show("La maquina yo no existe en el sistema, intente recargar");
 				else
@@ -113,6 +114,6 @@
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(maquinas_dg.selectedIndex!=-1) MaquinaService.delMaquina(maquinas_dg.selectedItem.codigo)"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(maquinas_dg.selectedIndex!=-1) ElementoService.delElemento(maquinas_dg.selectedItem.codigo)"/>
 	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>
