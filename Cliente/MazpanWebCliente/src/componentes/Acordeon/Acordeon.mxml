@@ -57,6 +57,12 @@
 					menuPlan.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuPlan);
 				}
+				if(niveles[6]=='1')
+				{
+					var menuAmarre:MenuAmarre = new MenuAmarre();
+					menuAmarre.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuAmarre);
+				}
 				
 				
 			}
@@ -64,7 +70,6 @@
 	</mx:Script>
 
 	<mx:HBox  id="hbox1" width="100%" height="100%">
-		<flexlib:VAccordion id="accordion" headerLocation="below" resizeToContent="false" headerRenderer="componentes.Acordeon.Header"  width="100%" height="100%" >
-		</flexlib:VAccordion>
+		<flexlib:VAccordion id="accordion" headerLocation="below" resizeToContent="false" headerRenderer="componentes.Acordeon.Header"  width="100%" height="100%" />
 	</mx:HBox>
 </mx:Canvas>

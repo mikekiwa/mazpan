@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="800" height="400"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500"
 	backgroundColor="#cccccc" creationComplete="init()">
 
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
@@ -69,8 +69,7 @@
             		obj.RefDate = dias.getItemAt(fecha.day) + " " + fecha.getDate() + " " + index.meses.getItemAt(fecha.getMonth());
             		detalle_ac.push(obj);
             	}
-            	tabla.height = detalle_ac.length * 22 + 25;
-            	this.height = 95 + detalle_ac.length * 22;
+            	tabla.dataProvider = detalle_ac;
             }
 			private function goState(destino:String):void
 			{

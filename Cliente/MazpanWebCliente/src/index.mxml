@@ -32,13 +32,13 @@
 		<mx:State name="Lineas">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns9:Lineas/>
+				<ns9:Lineas id="lin_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Plantas">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns10:Plantas/>
+				<ns10:Plantas id="plantas_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Componentes">
@@ -81,7 +81,7 @@
 		<mx:State name="EstadoResultado">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns11:EstadoResultado id="estadoResultado_cmp" complexClick="goState(event)"/>
+				<ns11:EstadoResultado id="estadoResultado_cmp" complexClick="comunicacion(event)"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Revisar">
@@ -105,13 +105,13 @@
 		<mx:State name="Detalle">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns11:Detalle id="detalle_cmp" complexClick="goState(event)"/>
+				<ns11:Detalle id="detalle_cmp" complexClick="comunicacion(event)"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Especifico">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns11:Especifico id="especifico_cmp" complexClick="goState(event)"/>
+				<ns11:Especifico id="especifico_cmp" complexClick="comunicacion(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -119,6 +119,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.mantencionPlantas.Plantas;
+			import componentes.mantencionLineas.Lineas;
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import estadoResultado.Amarre;
@@ -171,51 +173,45 @@
 			}
 			private function goState2(event:ComplexEvent):void
 			{
-				currentState = event.stateDestination;
-				if(event.stateDestination == Componentes.nombre) comp.clean();
-				if(event.stateDestination == Maquinas.nombre) maq_cmp.clean();
-				
-			}
-			private function goState(event:ComplexEvent):void
-			{
-				if(event.stateDestination!=EstadoResultado.nombre)
-				{
-					estadoResultado_cmp.stop();
-				}
-				
-				if(event.stateDestination==EstadoResultado.nombre)
+				if(event.stateDestination!=Grafico.nombre)
 				{
 					currentState = event.stateDestination;
-					estadoResultado_cmp.defaultValues();
-					/*if(estadoResultado_cmp.seCargo())
-						estadoResultado_cmp.cargar();
-	            	else
-	            		estadoResultado_cmp.actualizarCombos();
-	            	*/
-				}
-				else if(event.stateDestination!=Grafico.nombre && estadoResultado_cmp.iniciado())
-				{
-					currentState = event.stateDestination;
-					if(event.stateDestination==Amarre.nombre) amarre_cmp.parametros(estadoResultado_cmp.getParametros().items);
-					if(event.stateDestination==Revisar.nombre) revisar_cmp.parametros(estadoResultado_cmp.getParametros().items);
-					if(event.stateDestination==Detalle.nombre)
-						if(event.stateOrigin==EstadoResultado.nombre) detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,event.objeto.idItem,event.objeto.itemName,event.objeto.sucursales,event.objeto.nombreSucursales,event.objeto.selectedSucursal); 
-						else if(event.stateOrigin==Especifico.nombre) detalle_cmp.actualizar(event.objeto);
-						else detalle_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().ano,estadoResultado_cmp.getParametros().idItem,estadoResultado_cmp.getParametros().itemName,estadoResultado_cmp.getParametros().sucursales,estadoResultado_cmp.getParametros().nombreSucursales,estadoResultado_cmp.getParametros().selectedSucursal);
-					if(event.stateDestination==Especifico.nombre) especifico_cmp.parametros(event.objeto.idItem,event.objeto.nombreItem,event.objeto.codigoSucursal,event.objeto.nombreSucursal,event.objeto.codigoCuenta,event.objeto.ano,event.objeto.mes);				
+					if(event.stateDestination == Componentes.nombre) comp.clean();
+					if(event.stateDestination == Maquinas.nombre) maq_cmp.clean();
+					if(event.stateDestination == Lineas.nombre) lin_cmp.clean();
+					if(event.stateDestination == Plantas.nombre) plantas_cmp.clean();
+					if(event.stateDestination == Amarre.nombre) amarre_cmp.clean();
+					if(event.stateDestination == Revisar.nombre) revisar_cmp.clean();
+					if(event.stateDestination == Detalle.nombre) detalle_cmp.init();
 				}
 				else
 				{
-					if(estadoResultado_cmp.iniciado() && estadoResultado_cmp.seCargo())
+					if(estadoResultado_cmp!=null && estadoResultado_cmp.iniciado() && estadoResultado_cmp.seCargo())
 					{
 						currentState = event.stateDestination;
 						grafico_cmp.parametros(estadoResultado_cmp.getParametros().items,estadoResultado_cmp.getParametros().img,estadoResultado_cmp.getParametros().ano.toString(),estadoResultado_cmp.getParametros().sucursal);
 					}
 					else
-					{//quiza lo que se puede hacer es preguntar si se desea cargar los datos y esperar a que se cargen
-					//con un listener
+					{//quiza lo que se puede hacer es preguntar si se desea cargar los datos y esperar a que se cargen con un listener
 						Alert.show("Aun no se cargan los datos del Estado de Resultado");
 					}
+				}
+			}
+			private function comunicacion(event:ComplexEvent):void
+			{
+				if(event.stateDestination==Detalle.nombre && event.stateOrigin==EstadoResultado.nombre)
+				{
+					currentState = event.stateDestination;
+					detalle_cmp.actualizar(event.objeto);
+				}
+				else if(event.stateDestination==Detalle.nombre && event.stateOrigin==Especifico.nombre)
+				{
+					currentState = event.stateDestination;
+				}
+				else if(event.stateDestination==Especifico.nombre) 
+				{
+					currentState = event.stateDestination;
+					especifico_cmp.parametros(event.objeto.idItem,event.objeto.nombreItem,event.objeto.codigoSucursal,event.objeto.nombreSucursal,event.objeto.codigoCuenta,event.objeto.ano,event.objeto.mes);
 				}
 			}
 			
@@ -224,6 +220,7 @@
 	</mx:Script>
 	
 	<mx:Style source="Estilo.css"/>
+	
 	<ns1:Login id="login" complexClick="loginResult(event)" horizontalCenter="0" verticalCenter="0"/>
 	
 	<mx:Canvas id="canvas1">

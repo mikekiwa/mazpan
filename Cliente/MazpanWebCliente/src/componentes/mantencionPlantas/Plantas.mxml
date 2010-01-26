@@ -2,11 +2,6 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" width="795" height="500" layout="absolute" title="Plantas"
 	xmlns:ns1="componentes.mantencionPlantas.*" creationComplete="init()">
 	
-	<mx:WebService id="PlantaService" 		wsdl="{index.URL + 'PlantaService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allPlantas" 	result="allPlantasResult(event)" 	fault="ErrorFaultHandler(event, 'allPlantas')"/>
-		<mx:operation name="delPlanta" 		result="delPlantaResult(event)" 	fault="ErrorFaultHandler(event, 'delPlanta')"/>
-	</mx:WebService>
-	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{canvas1}"/>
@@ -15,10 +10,15 @@
 			<mx:RemoveChild target="{image3}"/>
 			<mx:RemoveChild target="{plantas_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarPlanta x="0" y="0" complexClick="agregarPlantaResult(event)"/>
+				<ns1:AgregarPlanta id="addPlanta" x="0" y="0" complexClick="agregarPlantaResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
+	
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allElementos" 	result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
+		<mx:operation name="delElemento" 		result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
+	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
@@ -38,13 +38,19 @@
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
+            public function clean():void
+            {
+            	currentState = "";
+            	if(addPlanta!=null) addPlanta.clean();
+            	ElementoService.allElementos("PLT");
+            }
 			private function init():void
 			{
-				PlantaService.allPlantas();
+				ElementoService.allElementos("PLT");
 			}
-			private function allPlantasResult(event:ResultEvent):void
+			private function allElementosResult(event:ResultEvent):void
 			{
-				plantas_ac = event.result.Tables.Plantas.Rows.source as Array;
+				plantas_ac = event.result.Tables.Elementos.Rows.source as Array;
 			}
 			private function agregarPlantaResult(event:ComplexEvent):void
 			{
@@ -52,6 +58,7 @@
 				if(event.stateOrigin==AgregarPlanta.nombre && event.objeto!=null)
 				{
 					plantas_ac.push(event.objeto);
+					plantas_dg.dataProvider = plantas_ac;
 				}
 				currentState = event.stateDestination;
 			}
@@ -71,11 +78,11 @@
 					input.visible = true;
 				}
 			}
-			private function delPlantaResult(event:ResultEvent):void
+			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
 				if(result == 1)
-					PlantaService.allPlantas();
+					ElementoService.allElementos("PLT");
 				else if(result == 0)
 					Alert.show("La planta yo no existe en el sistema, intente recargar");
 				else
@@ -102,6 +109,6 @@
 		</mx:columns>
 	</mx:DataGrid>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(plantas_dg.selectedIndex!=-1) PlantaService.delPlanta(plantas_dg.selectedItem.codigo)"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(plantas_dg.selectedIndex!=-1) ElementoService.delElemento(plantas_dg.selectedItem.codigo)"/>
 	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>

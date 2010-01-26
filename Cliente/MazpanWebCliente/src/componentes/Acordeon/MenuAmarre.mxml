@@ -13,10 +13,10 @@
 			public var description:String;
 			
 			[Bindable]
-			public var title:String="Estado Resultado";
+			public var title:String="Amarre Cuentas";
 			
 			[Bindable]
-			private var nombre:String = "EstadoResultado";
+			private var nombre:String = "AmarreCuentas";
 			
 			private function goState(destino:String):void
 			{
@@ -25,7 +25,6 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton x="10" y="10" label="Ver" 		width="100" click="goState(EstadoResultado.nombre)"/>
-	<mx:LinkButton x="10" y="40" label="Detalles" 	width="100" click="goState(Detalle.nombre)"/>
-	<mx:LinkButton x="10" y="70" label="Gráfico" 	width="100" click="goState(Grafico.nombre)"/>
+	<mx:LinkButton x="10" y="10" label="Amarre" 	width="100" click="goState(Amarre.nombre)"/>
+	<mx:LinkButton x="10" y="40" label="Revisar" 	width="100" click="goState(Revisar.nombre)"/>
 </mx:Canvas>

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Revisar Amarre de Cuentas" width="800" height="400" 
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Revisar Amarre de Cuentas" width="795" height="500" 
 	backgroundColor="#cccccc" creationComplete="init()">
 	
 	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getCuentasItem" result="getCuentasItemResult(event)" 	fault="ErrorFaultHandler(event, 'getCuentasItem')"/>
 		<mx:operation name="quitar" 		result="quitarResult(event)" 			fault="ErrorFaultHandler(event, 'quitar')"/>
+		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -34,22 +35,17 @@
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-			private function init():void
+            private function init():void
 			{
-				if(inicializado)
-				{
-					var id:int=888;
-					for(var i:int=0; i<items.length; i++)
-	            		if(items_cb.text == items[i].itemName) id=i+1;
-	            	
-	        		if(id!=888) Service.getCuentasItem(id);
-	        		else{ items_cb.selectedIndex = 0; Service.getCuentasItem(ITEMS.VENTASZONAS+1);}
-	   			}
-	   			else
-	   			{
-	   				items_cb.selectedIndex = 0;
-					Service.getCuentasItem(ITEMS.VENTASZONAS+1);
-	   			}
+				Service.getItems();
+			}
+			private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+            	itemsCombo = new ITEMS(items).getItemsContables();
+				itemsCombo.push(items[ITEMS.IMPUESTOALARENTA].itemName);
+            
+				clean();
 			}
 			private function getCuentasItemResult(event:ResultEvent):void
             {
@@ -63,24 +59,15 @@
 					if(cuentasItem[i].GroupMask == 7) cuentasItem[i].Cajon = "Otros Ingresos";
 					if(cuentasItem[i].GroupMask == 8) cuentasItem[i].Cajon = "Otros Gastos";
 				}
-            	
+            	/*
             	tabla.height = (cuentasItem.length) * 22 + 25;
-            	this.height = 95 + (cuentasItem.length) * 22;
+            	this.height = 95 + (cuentasItem.length) * 22;*/
             }
-			public function parametros(_items:Array):void
+			public function clean():void
 			{
 				cuentasItem =  new Array();
-				tabla.height = 330;
-				this.height = 400;
-				items = _items;
-				itemsCombo = new ITEMS(items).getItemsContables();
-				itemsCombo.push(items[ITEMS.IMPUESTOALARENTA].itemName);
-				if(itemsCombo.length>0) items_cb.selectedIndex = 0;
-				
-				//Esto es para que cada vez que llamen al componente se vuelvan a cargar los datos,
-				//y que no se cargen dos veces, ya que eso pasaria la primera vez que se llama al componente
-				if(inicializado) init();
-				else inicializado = true;
+				items_cb.selectedIndex=0;
+				Service.getCuentasItem(ITEMS.VENTASZONAS+1);
 			}
 			
 			private function quitarCuentasItem():void

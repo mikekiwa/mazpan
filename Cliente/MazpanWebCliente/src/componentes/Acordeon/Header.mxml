@@ -18,7 +18,6 @@
 			private function fakeMouseClick(event:MouseEvent):void {
 				var clickEvent:MouseEvent = new MouseEvent(MouseEvent.CLICK, true, false, event.localX, event.localY);
 				dispatchEvent(clickEvent);
-				
 			}
 			
 		]]>

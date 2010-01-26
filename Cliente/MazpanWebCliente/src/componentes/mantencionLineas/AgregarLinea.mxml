@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" xmlns:ns1="componentes.*">
 	
-	<mx:WebService id="LineaService" 		wsdl="{index.URL + 'LineaService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="addLinea" 			result="addLineaResult(event)" 			fault="ErrorFaultHandler(event, 'addLinea')"/>
-		<mx:operation name="addMaquinas"		result="addMaquinasResult(event)"		fault="ErrorFaultHandler(event, 'addMaquinas')"/>
-		<mx:operation name="addMantenciones" 	result="addMantencionesResult(event)"	fault="ErrorFaultHandler(event, 'addMantenciones')"/>
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addElemento" 			result="addElementoResult(event)" 			fault="ErrorFaultHandler(event, 'addElemento')"/>
 	</mx:WebService>
-	
-	<mx:WebService id="MaquinaService" 		wsdl="{index.URL + 'MaquinaService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allMaquinas" 		result="allMaquinasResult(event)" 	fault="ErrorFaultHandler(event, 'allMaquinas')"/>
-		</mx:WebService>
 	
 	<mx:Metadata>
 		[Event(name="complexClick",type="eventos.ComplexEvent")]
@@ -17,6 +11,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.mantencionMaquinas.Maquinas;
 			import mx.rpc.events.FaultEvent;
 			import mx.rpc.events.ResultEvent;
 			import mx.controls.Alert;
@@ -26,43 +21,36 @@
 			[Bindable]
 			public static var nombre:String = "AgregarLinea";
 			
-			[Bindable]
-			private var mantenciones_ac:ArrayCollection = new ArrayCollection();
-			[Bindable]
-			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva"]);
-			[Bindable]
-			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Mensual","Anual"]);
-			[Bindable]
-			private var maquinasSistema_ac:Array = new Array();
-			[Bindable]
-			private var maquinas_ac:ArrayCollection = new ArrayCollection();
-			
 			private var linea:Object = null;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-            private function init():void
-            {
-            	MaquinaService.allMaquinas();
-            }
-            private function allMaquinasResult(event:ResultEvent):void
-			{
-				maquinasSistema_ac = event.result.Tables.Maquinas.Rows.source as Array;
-				if(codigo_ti!=null){ agregar_btn.visible=true; revisar();}
-			}
 			private function onClick(event:String):void
 			{
 				if(event=="agregar")
 				{
+					agregar_btn.enabled = false;
 					linea = new Object();
+					
+					linea.superClass = "LIN";
+					
+					//Hoja 1
 					linea.nombre = nombre_ti.text;
 					linea.codigo = codigo_ti.text;
 					linea.encargado = encargado_ti.text;
+					linea.puestaMarcha = puestaMarcha_df.text;
 					linea.descripcion = descripcion_ta.text;
 					
-					LineaService.addLinea(linea);
+					//Hoja 2
+					if(union_cmp!=null) linea.subordinados = union_cmp.getComponentesMaquina();
+					
+					//Hoja 3
+					if(actividadesMantencion_cmp!=null) linea.mantenciones = actividadesMantencion_cmp.getMantenciones();
+					
+					
+					ElementoService.addElemento(linea);
 				}
 				else
 				{
@@ -75,73 +63,27 @@
 				if(nombre_ti!=null) nombre_ti.text="";
 				if(codigo_ti!=null)codigo_ti.text="";
 				if(encargado_ti!=null) encargado_ti.text="";
+				if(puestaMarcha_df!=null) puestaMarcha_df.text = "";
 				if(descripcion_ta!=null) descripcion_ta.text="";
-				if(actividad_ti!=null) actividad_ti.text="";
-				maquinas_ac = new ArrayCollection();
-			 	mantenciones_ac = new ArrayCollection();
+				if(actividadesMantencion_cmp!=null) actividadesMantencion_cmp.clean();
+				if(union_cmp!=null) union_cmp.clean();
+				tabNavigator.selectedIndex = 0;
 			}
-			private function addLineaResult(event:ResultEvent):void
+			private function addElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
 				if(result == 1)
 				{
-					LineaService.addMaquinas(maquinas_ac, linea.codigo);
-					LineaService.addMantenciones(mantenciones_ac, linea.codigo);
 					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, linea));
 				}
-				else if(result==-1)
+				else if(result==0)
 				{
-					Alert.show("Lo siento el codigo ya exite");
+					Alert.show("Lo siento, el codigo ya exite");
 				}
 				else 
 				{
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 				}
-			}
-			private function addMaquinasResult(event:ResultEvent):void
-            {
-            	trace("Especificacion result: "+event.result);
-            }
-            private function addMantencionesResult(event:ResultEvent):void
-            {
-            	trace("Mantencion result: "+event.result);
-            }
-			private function arriba():void
-			{
-				if(mantenciones_dg.selectedIndex!=-1)
-				{
-					var itemIndex:int = mantenciones_dg.selectedIndex;
-					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
-					if( itemIndex == 0) itemIndex = mantenciones_ac.length;
-					else itemIndex = (itemIndex - 1) % (mantenciones_ac.length+1);
-					mantenciones_ac.addItemAt(item, itemIndex);
-				}
-			}
-			private function abajo():void
-			{
-				if(mantenciones_dg.selectedIndex!=-1)
-				{
-					var itemIndex:int = mantenciones_dg.selectedIndex;
-					var item:Object = mantenciones_ac.removeItemAt(itemIndex);
-					mantenciones_ac.addItemAt(item, (itemIndex + 1) % (mantenciones_ac.length+1));
-				}
-			}
-			private function agregarActividadMantencion():void
-			{
-				var item:Object = new Object();
-				item.actividad = actividad_ti.text;
-				item.mantencion = tipoMantencion_cb.text;
-				item.frecuencia = frecuencia_cb.text;
-				mantenciones_ac.addItem(item);
-				actividad_ti.text="";
-			}
-			private function agregarMaquina():void
-			{
-				if(lineasSistema_dg.selectedIndex!=-1) maquinas_ac.addItem(maquinasSistema_ac[lineasSistema_dg.selectedIndex]);
-			}
-			private function eliminarMaquina():void
-			{
-				if(lineas_dg.selectedIndex!=-1) maquinas_ac.removeItemAt(lineas_dg.selectedIndex);
 			}
 			private function revisar():void
 			{
@@ -151,67 +93,35 @@
 				else agregar_btn.enabled=false;
 //aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
 			}
+			private function cargarUnion():void
+			{
+				if(tabNavigator.selectedIndex==1) union_cmp.init("MAQ");;
+			}
+			
 		]]>
 	</mx:Script>
 	
-	<mx:TabNavigator y="0" width="100%" height="421" horizontalCenter="1">
+	<mx:TabNavigator id="tabNavigator" y="0" width="775" height="421" change="cargarUnion()">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
 			<mx:Label x="197.5" y="53" text="Nombre de la Planta "/>
-			<mx:TextInput x="361.5" y="51" id="nombre_ti" width="213" maxChars="50"/>
+			<mx:TextInput x="361.5" y="51" id="nombre_ti" width="213" maxChars="50" change="revisar()"/>
 			<mx:Label x="197.5" y="103" text="Código (*)"/>
-			<mx:TextInput x="361.5" y="99" id="codigo_ti" width="213" maxChars="20" focusOut="revisar()"/>
-			<mx:Label x="197.5" y="189" text="Puesta en Marcha (*)"/>
-			<mx:Label x="327.5" y="360" text="(*) Dato Obligatorio"/>
-			<mx:DateField x="361.5" y="187" width="160" id="puestaMarcha_df"/>
+			<mx:TextInput x="361.5" y="99" id="codigo_ti" width="213" maxChars="20" change="revisar()"/>
 			<mx:Label x="197.5" y="148" text="Encargado"/>
-			<mx:TextInput x="361.5" y="146" id="encargado_ti" width="213" maxChars="50"/>
+			<mx:TextInput x="361.5" y="146" id="encargado_ti" width="213" maxChars="50" change="revisar()"/>
+			<mx:Label x="197.5" y="189" text="Puesta en Marcha (*)"/>
+			<ns1:myDateField x="361.5" y="187" width="160" id="puestaMarcha_df" change="revisar()"/>
 			<mx:Label x="197.5" y="227" text="Descripcion"/>
-			<mx:TextArea x="361.5" y="226" width="213" height="120" id="descripcion_ta" maxChars="100"/>
+			<mx:TextArea x="361.5" y="226" width="213" height="120" id="descripcion_ta" maxChars="100" change="revisar()"/>
+			<mx:Label x="327.5" y="360" text="(*) Dato Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Máquinas" width="100%" height="100%">
-			<mx:Label x="30" y="10" text="Lista de Máquinas en el Sistema" fontWeight="bold"/>
-			<mx:DataGrid id="lineasSistema_dg" width="669" x="29" y="25" dataProvider="{maquinasSistema_ac}" height="163">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
-					<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
-					<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
-				</mx:columns>
-			</mx:DataGrid>
-			<mx:Label x="29" y="196" text="Lista de Máquinas de la Linea" fontWeight="bold"/>
-			<mx:DataGrid id="lineas_dg" width="669" x="29" y="213" dataProvider="{maquinas_ac}" height="165">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
-					<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
-					<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
-				</mx:columns>
-			</mx:DataGrid>
-			<mx:Image x="706" y="75" width="40" height="40" source="iconos/add.png" id="agregar_img" click="agregarMaquina()"/>
-			<mx:Image x="706" y="288" width="40" height="40" source="iconos/del.png" id="eliminar_img" click="eliminarMaquina()"/>
+			<ns1:Union id="union_cmp"/>
 		</mx:Canvas>
 		<mx:Canvas label="Actividades de Mantención" width="100%" height="100%">
-			<mx:Label x="26" y="10" text="Lista de Actividades de Mantención" fontWeight="bold"/>
-			<mx:DataGrid x="26" y="26" width="668" height="226" id="mantenciones_dg" dataProvider="{mantenciones_ac}">
-				<mx:columns>
-					<mx:DataGridColumn headerText="Actividad" 			dataField="actividad" sortable="false"/>
-					<mx:DataGridColumn headerText="Tipo de Mantencion" 	dataField="mantencion" sortable="false"/>
-					<mx:DataGridColumn headerText="Frecuencia" 			dataField="frecuencia" sortable="false"/>
-				</mx:columns>
-			</mx:DataGrid>
-			<mx:Image x="703.5" y="75" width="40" height="40" source="iconos/del.png" click="if(mantenciones_dg.selectedIndex!=-1) mantenciones_ac.removeItemAt(mantenciones_dg.selectedIndex)"/>
-			<mx:Image x="703.5" y="123" width="40" height="40" source="iconos/arriba.png" click="arriba()"/>
-			<mx:Image x="703.5" y="171" width="40" height="40" source="iconos/abajo.png" click="abajo()"/>
-			<mx:Label x="28.5" y="260" text="Nueva Actividad de Mantención" fontWeight="bold"/>
-			<mx:Canvas width="667" height="101" borderStyle="solid" y="277" x="28.5" label="Nuevas Actividades">
-				<mx:Label x="130" y="13" text="Actividad"/>
-				<mx:TextInput x="256" y="11" width="279" id="actividad_ti" maxChars="50"/>
-				<mx:Label x="130" y="41" text="Tipo de Mantencion"/>
-				<mx:ComboBox x="256" y="39" width="279" id="tipoMantencion_cb" dataProvider="{tipoMantencion_ac}"/>
-				<mx:Label x="130" y="69" text="Frecuencia"/>
-				<mx:ComboBox x="256" y="67" width="279" id="frecuencia_cb" dataProvider="{frecuencia_ac}"/>
-			</mx:Canvas>
-			<mx:Image x="703.5" y="309" width="40" height="40" source="iconos/add.png" click="agregarActividadMantencion()"/>
+			<ns1:ActividadesMantencion id="actividadesMantencion_cmp"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
-	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false" visible="false"/>
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
 	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 </mx:Canvas>
