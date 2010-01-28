@@ -7,8 +7,13 @@
 		<mx:operation name="realizarActividades" 	result="realizarActividadesResult(event)" 	fault="ErrorFaultHandler(event, 'realizarActividades')"/>
 	</mx:WebService>
 	
+	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="getFecha" 		result="getFechaResult(event)" 		fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	
 	<mx:Script>
 		<![CDATA[
+			import estadoResultado.FORMATO;
 			import mx.collections.ArrayCollection;
 			import mx.events.CloseEvent;
 			import mx.controls.Alert;
@@ -21,7 +26,7 @@
 			private var actividadesDelPlan_ac:ArrayCollection = new ArrayCollection();
 			
 			private var actividadesParaRealizar:Array;
-			
+			private var fecha:String = "";
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -29,6 +34,12 @@
             }
 			private function init():void
 			{
+				fecha = "";
+				CombosService.getFecha();
+			}
+			private function getFechaResult(event:ResultEvent):void
+			{
+				fecha = event.result as String;
 				ElementoService.getActividades();
 			}
 			private function getActividadesResult(event:ResultEvent):void
@@ -88,12 +99,17 @@
 				 	trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
 				}
 			}
+			private function exportar():void
+			{
+				var pdf:FORMATO = new FORMATO();
+				pdf.generar(actividadesDelPlan_ac, fecha);
+			}
 		]]>
 	</mx:Script>
 	
 	<mx:Image x="10" y="10" width="56" height="55" source="iconos/save.png" 	id="save_img"	 click="realizar()"/>
 	<mx:Image x="74" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
-	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"/>
+	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"	 click="exportar()"/>
 	<mx:DataGrid x="0" y="78" width="100%" height="100%" dataProvider="{actividadesDelPlan_ac}">
 		<mx:columns>
 			<mx:DataGridColumn id="colse2" headerText="" width="20" textAlign="center" sortable="false">
@@ -103,7 +119,7 @@
 					</mx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Codigo"		dataField="nombre" 		width="100" sortable="false"/>
+			<mx:DataGridColumn headerText="Nombre"		dataField="nombre" 		width="100" sortable="false"/>
 			<mx:DataGridColumn headerText="Actividad"	dataField="actividad" 	width="200" sortable="false"/>
 			<mx:DataGridColumn headerText="Planificada"	dataField="planificada" width="100" sortable="false"/>
 			<mx:DataGridColumn headerText="Frecuencia" 	dataField="frecuencia" 	width="50" 	sortable="false"/>

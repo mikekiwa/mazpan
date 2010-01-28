@@ -182,7 +182,7 @@
             }
 			private function generarPDF():void
 			{
-				var pdf:LAYOUT = new LAYOUT();
+				var pdf:FORMATO = new FORMATO();
 				//pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
 				pdf.generarTabla(tabla1,img,ano_var.toString(),"Estado de Resultado", sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 			}

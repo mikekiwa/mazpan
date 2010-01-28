@@ -7,7 +7,7 @@
 	xmlns:ns4="componentes.mantencionAgentesExternos.*" 
 	xmlns:ns5="componentes.mantencionSistema.*" 
 	xmlns:ns6="componentes.general.*" 
-	xmlns:ns7="componentes.planMantencion.*"
+	xmlns:ns7="componentes.planMantencion.*" 
 	xmlns:ns8="componentes.mantencionComponentes.*" 
 	xmlns:ns9="componentes.mantencionLineas.*" 
 	xmlns:ns10="componentes.mantencionPlantas.*"
@@ -134,8 +134,8 @@
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			public static var URL:String = "http://localhost:7070/ServerApp/";		//Visual Studio
-			//public static var URL:String = "http://192.168.3.117/Server/"; 		//cliente Local
+			//public static var URL:String = "http://localhost:7070/ServerApp/";		//Visual Studio
+			public static var URL:String = "http://192.168.3.117/Server/"; 		//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/"; 		//cliente Web
 			
 			//public static var URL:String = "http://192.168.3.130/server/";
