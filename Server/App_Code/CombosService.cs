@@ -10,7 +10,7 @@ using System.Data;
 /// <summary>
 /// Descripción breve de CombosService
 /// </summary>
-[WebService(Namespace = "http://tempuri.org/CombosService")]
+[WebService(Namespace = "http://tempuri.org/CombosService/")]
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class CombosService : System.Web.Services.WebService
 {
@@ -242,6 +242,30 @@ public class CombosService : System.Web.Services.WebService
         }
 
         return dt;
-    }    
+    }
+
+    [WebMethod]
+    public string getFecha()
+    {
+        DateTime hoy = DateTime.Now;
+        string h = hoy.Day + "-";
+
+        if (hoy.Month == 1) h += "Enero-";
+        else if (hoy.Month == 2) h += "Febrero-";
+        else if (hoy.Month == 3) h += "Marzo-";
+        else if (hoy.Month == 4) h += "Abril-";
+        else if (hoy.Month == 5) h += "Mayo-";
+        else if (hoy.Month == 6) h += "Junio-";
+        else if (hoy.Month == 7) h += "Julio-";
+        else if (hoy.Month == 8) h += "Agosto-";
+        else if (hoy.Month == 9) h += "Septiembre-";
+        else if (hoy.Month == 10) h += "Octubre-";
+        else if (hoy.Month == 11) h += "Noviembre-";
+        else h += "Diciembre-";
+
+        h += hoy.Year;
+
+        return h;
+    }
 }
 
