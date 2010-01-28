@@ -41,7 +41,7 @@
 			}
 			private function graficoTOPDF():void
             {
-            	var l:LAYOUT = new LAYOUT();
+            	var l:FORMATO = new FORMATO();
             	l.generarGrafico(myChart,img,ano,comboGrafico.selectedItem.toString(),sucursal);
             }
 			private function graficar(index:int):void
