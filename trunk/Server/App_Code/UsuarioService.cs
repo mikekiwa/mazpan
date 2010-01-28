@@ -9,7 +9,7 @@ using System.Data;
 /// <summary>
 /// Descripción breve de UsuarioService
 /// </summary>
-[WebService(Namespace = "http://tempuri.org/")]
+[WebService(Namespace = "http://tempuri.org/UsuarioService/")]
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class UsuarioService : System.Web.Services.WebService
 {
