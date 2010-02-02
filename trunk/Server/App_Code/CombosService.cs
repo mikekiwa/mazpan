@@ -10,7 +10,7 @@ using System.Data;
 /// <summary>
 /// Descripción breve de CombosService
 /// </summary>
-[WebService(Namespace = "http://tempuri.org/CombosService/")]
+[WebService(Namespace = "http://tempuri.org/Server/CombosService/")]
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class CombosService : System.Web.Services.WebService
 {

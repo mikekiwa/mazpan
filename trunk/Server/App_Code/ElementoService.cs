@@ -11,7 +11,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Descripción breve de ElementoService
 /// </summary>
-[WebService(Namespace = "http://tempuri.org/ElementoService/")]
+[WebService(Namespace = "http://tempuri.org/Server/ElementoService/")]
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class ElementoService : System.Web.Services.WebService
 {

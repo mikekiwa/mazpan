@@ -6,7 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 
-[WebService(Namespace = "http://tempuri.org/Service/")]
+[WebService(Namespace = "http://tempuri.org/Server/Service/")]
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class Service : System.Web.Services.WebService
 {

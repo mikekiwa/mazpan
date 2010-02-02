@@ -9,7 +9,7 @@ using System.Data;
 /// <summary>
 /// Descripción breve de UsuarioService
 /// </summary>
-[WebService(Namespace = "http://tempuri.org/UsuarioService/")]
+[WebService(Namespace = "http://tempuri.org/Server/UsuarioService/")]
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class UsuarioService : System.Web.Services.WebService
 {
@@ -36,6 +36,30 @@ public class UsuarioService : System.Web.Services.WebService
         }
 
         return "0";
+    }
+
+    [WebMethod]
+    public Personal getUsuario(Usuario u)
+    {
+        SqlConnection cn = new SqlConnection(coneccionString);
+        cn.Open();
+        string query = " SELECT T1.* FROM [PracticaDb].[dbo].Personal T1 JOIN [PracticaDb].[dbo].Usuario T2 ON T1.rut=T2.rut_persona WHERE T2.userName='" + u.user + "' AND T2.password='" + u.pass + "' ";
+        SqlCommand selectUsuarios = new SqlCommand(query, cn);
+
+        SqlDataReader reader = selectUsuarios.ExecuteReader();
+
+        Personal p = null;
+
+        if (reader.Read())
+        {
+            p = new Personal();
+            p.rut = reader.GetString(0);
+            p.nombres = reader.GetString(1);
+            p.apellidoPaterno = reader.GetString(2);
+            p.apellidoMaterno = reader.GetString(3);
+        }
+
+        return p;
     }
 }
 
