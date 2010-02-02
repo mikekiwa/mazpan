@@ -110,7 +110,7 @@
 	<mx:Image x="10" y="10" width="56" height="55" source="iconos/save.png" 	id="save_img"	 click="realizar()"/>
 	<mx:Image x="74" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
 	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"	 click="exportar()"/>
-	<mx:DataGrid x="0" y="78" width="100%" height="100%" dataProvider="{actividadesDelPlan_ac}">
+	<mx:DataGrid x="10" y="78" width="735" height="332" dataProvider="{actividadesDelPlan_ac}">
 		<mx:columns>
 			<mx:DataGridColumn id="colse2" headerText="" width="20" textAlign="center" sortable="false">
 				<mx:itemRenderer>

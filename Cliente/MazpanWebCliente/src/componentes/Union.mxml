@@ -62,7 +62,7 @@
 			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Label x="29" y="196" text="Lista de Elementos de la Maquina" fontWeight="bold"/>
+	<mx:Label x="29" y="196" text="Lista de Elementos" fontWeight="bold"/>
 	<mx:DataGrid id="componentes_dg" width="669" x="29" y="213" dataProvider="{componentes_ac}" height="165">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>

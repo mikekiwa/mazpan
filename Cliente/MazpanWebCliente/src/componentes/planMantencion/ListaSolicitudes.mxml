@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Lista de Solicitudes"
+	backgroundColor="#cccccc" creationComplete="init()">
+	
+	<mx:WebService id="SolicitudService" 		wsdl="{index.URL + 'SolicitudService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="listSolicitudes" 		result="listSolicitudesResult(event)" 	 	fault="ErrorFaultHandler(event, 'listSolicitudes')"/>
+		<mx:operation name="realizarSolicitudes"	result="realizarSolicitudesResult(event)"	fault="ErrorFaultHandler(event, 'realizarSolicitudes')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="getFecha" 		result="getFechaResult(event)" 		fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import estadoResultado.FORMATO;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "ListaSolicitudes";
+		
+			[Bindable]
+			private var solicitudes_ac:Array = new Array();
+			
+			private var solicitudesParaRealizar:Array = new Array();
+			private var fecha:String = "";
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				fecha = "";
+				solicitudes_ac = new Array();
+				CombosService.getFecha();
+			}
+			private function getFechaResult(event:ResultEvent):void
+			{
+				fecha = event.result as String;
+				SolicitudService.listSolicitudes(index.usuario);
+			}
+			private function listSolicitudesResult(event:ResultEvent):void
+			{
+				solicitudes_ac = event.result.Tables.Solicitudes.Rows.source as Array;
+			}	
+			private function exportar():void
+			{
+				var pdf:FORMATO = new FORMATO();
+				pdf.solicitudes(solicitudes_ac, fecha);
+			}
+			private function realizar():void
+			{
+				solicitudesParaRealizar = new Array();
+	          	for(var i:int=0;i< solicitudes_ac.length;i++)
+	          		if(solicitudes_ac[i].hecha) solicitudesParaRealizar.push(solicitudes_ac[i]);
+          		
+          		if(solicitudesParaRealizar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(solicitudesParaRealizar.length==1) Alert.show("¿Está seguro de realizar la actividad seleccionada?","Realizar Actividad", 3, this, realizarClick);
+                	else Alert.show("¿Está seguro de realizar las "+solicitudesParaRealizar.length+" actividades selecionadas?","Realizar Actividades", 3, this, realizarClick);
+            	}
+                else Alert.show("Debe seleccionar al menos una actividad para poder proceder");
+			}
+			private function realizarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		SolicitudService.realizarSolicitudes(solicitudesParaRealizar);
+				}
+			}
+			private function realizarSolicitudesResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezdan las que quitamos (desamarramos)
+					trace("Solicitud de Trabajo realizada exitosamente");
+				}
+				else if(event.result == -1)
+				{
+					trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+				 	trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Image x="10" y="10" width="56" height="55" source="iconos/save.png" 	id="save_img"	 click="realizar()"/>
+	<mx:Image x="74" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
+	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"	 click="exportar()"/>
+	<mx:DataGrid x="10" y="78" width="755" height="372" dataProvider="{solicitudes_ac}">
+		<mx:columns>
+			<mx:DataGridColumn id="colse2" headerText="" width="20" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.hecha=!data.hecha}" paddingLeft="5" selected="{data.hecha}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Actividad" dataField="actividad"/>
+			<mx:DataGridColumn headerText="Solicitada" dataField="solicitadaString"/>
+			<mx:DataGridColumn headerText="Plazo [días]" dataField="plazo"/>
+			<mx:DataGridColumn headerText="Fecha Límite" dataField="limiteString"/>
+			<mx:DataGridColumn headerText="Rut Técnico" dataField="rut"/>
+			<mx:DataGridColumn headerText="Especialidad" dataField="especialidad"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>

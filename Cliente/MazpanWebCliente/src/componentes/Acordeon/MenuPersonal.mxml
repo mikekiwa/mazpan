@@ -6,6 +6,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import componentes.mantencionSistema.Tecnicos;
 			import componentes.mantencionSistema.Usuarios;
 			import componentes.mantencionSistema.Personal;
 			import eventos.ComplexEvent;
@@ -28,4 +29,5 @@
 	
 	<mx:LinkButton x="10" y="10" label="Personal" width="100" click="goState(Personal.nombre)"/>
 	<mx:LinkButton x="10" y="40" label="Usuarios" width="100" click="goState(Usuarios.nombre)"/>
+	<mx:LinkButton x="10" y="70" label="Técnicos" width="100" click="goState(Tecnicos.nombre)"/>
 </mx:Canvas>

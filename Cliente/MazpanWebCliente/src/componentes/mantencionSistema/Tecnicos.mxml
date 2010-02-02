@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Personal"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Técnicos"
 	creationComplete="init()" xmlns:ns1="componentes.mantencionSistema.*">
 	
 	<mx:states>
@@ -8,29 +8,33 @@
 			<mx:RemoveChild target="{image1}"/>
 			<mx:RemoveChild target="{image2}"/>
 			<mx:RemoveChild target="{image3}"/>
-			<mx:RemoveChild target="{personal_dg}"/>
+			<mx:RemoveChild target="{tecnicos_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarPersonal id="addPersonal" x="0" y="0" complexClick="agregarPersonalResult(event)"/>
+				<ns1:AgregarTecnico id="addTecnico" x="0" y="0" complexClick="agregarTecnicoResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	
-	<mx:WebService id="PersonalService" 		wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allPersonal" 	result="allPersonalResult(event)" 	fault="ErrorFaultHandler(event, 'allPersonal')"/>
-		<mx:operation name="delPersonal" 	result="delPersonalResult(event)" 	fault="ErrorFaultHandler(event, 'delPersonal')"/>
+	<mx:WebService id="TecnicoService" 		wsdl="{index.URL + 'TecnicoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allTecnicos" 	result="allTecnicosResult(event)" 	fault="ErrorFaultHandler(event, 'allTecnicos')"/>
+		<mx:operation name="delTecnico" 	result="delTecnicoResult(event)" 	fault="ErrorFaultHandler(event, 'delTecnico')"/>
 	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
 	
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
 			import mx.rpc.events.FaultEvent;
-			import mx.rpc.events.ResultEvent;
 			import eventos.ComplexEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
 			
-			public static const nombre:String = "Personal";
+			public static const nombre:String = "Tecnicos";
 			
 			[Bindable]
-			private var personal_ac:Array = new Array;
+			private var tecnicos_ac:Array =  new Array();
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -38,16 +42,27 @@
             }
 			public function init():void
 			{
-				PersonalService.allPersonal();
+				TecnicoService.allTecnicos();
 			}
-			private function allPersonalResult(event:ResultEvent):void
+			private function allTecnicosResult(event:ResultEvent):void
 			{
-				personal_ac = event.result.Tables.Personal.Rows.source as Array;
+				tecnicos_ac = event.result.Tables.Tecnicos.Rows.source as Array;
 			}
-			private function agregarPersonalResult(event:ComplexEvent):void
+			private function agregarTecnicoResult(event:ComplexEvent):void
 			{
 				init();
 				currentState = event.stateDestination;
+			}
+			private function eliminar():void
+			{
+				if(tecnicos_dg.selectedIndex!=-1)
+					TecnicoService.delTecnico(tecnicos_dg.selectedItem);
+			}
+			private function delTecnicoResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1) init();
+				else Alert.show("Imposible eliminar Técnico, inténtelo más tarde");
 			}
 			private function eleccionFiltro():void
 			{
@@ -60,9 +75,9 @@
 				{
 					input.visible = true;
 				}
-				personal_dg.dataProvider = personal_ac.filter(filtrar);
+				tecnicos_dg.dataProvider = tecnicos_ac.filter(filtrar);
 			}
-            private function filtrar(element:*, index:int, arr:Array):Boolean 
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
 			{
 				var res:Boolean=true;
 				try
@@ -70,11 +85,11 @@
 	            	if(filtro.selectedItem == 'Nombres')
 					{
 					   	res = (element.nombres.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
-					}   			
+					}
 					if(filtro.selectedItem == 'Apellido Paterno')
 					{
 						res = (element.apellidoPaterno.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
-					}   			
+					}
 					if(filtro.selectedItem == 'Apellido Materno')
 					{
 					    res = (element.apellidoMaterno.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0)&& res;
@@ -82,6 +97,10 @@
 					if(filtro.selectedItem == 'Rut')
 					{
 					   	res = (element.rut.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0) && res;
+					}
+					if(filtro.selectedItem == 'Especialidad')
+					{
+					   	res = (element.especialidad.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0) && res;
 					}    			
 	    		}
 	    		catch(error:Error)
@@ -90,22 +109,9 @@
 	    		}
             	return res;
         	}
-			private function eliminar():void
-			{
-				 if(personal_dg.selectedIndex!=-1)
-				 	PersonalService.delPersonal(personal_dg.selectedItem);
-			}
-			private function delPersonalResult(event:ResultEvent):void
-			{
-				var resultado:int = event.result as int;
-				if(resultado==1) init();
-				else Alert.show("Imposible eliminar Personal, inténtelo más tarde");
-			}
 		]]>
 	</mx:Script>
-	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	
 	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
 		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="eleccionFiltro()"/>
 		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="eleccionFiltro()">
@@ -115,15 +121,21 @@
 				<mx:String>Nombres</mx:String>
 				<mx:String>Apellido Paterno</mx:String>
 				<mx:String>Apellido Materno</mx:String>
+				<mx:String>Especialidad</mx:String>
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>
-	<mx:DataGrid x="10" y="120" width="755" height="330" id="personal_dg" dataProvider="{personal_ac}">
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState';if(addTecnico!=null)addTecnico.init();}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	<mx:DataGrid x="10" y="120" width="755" height="330" id="tecnicos_dg" dataProvider="{tecnicos_ac}">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Rut" dataField="rut"/>
 			<mx:DataGridColumn headerText="Nombres" dataField="nombres"/>
 			<mx:DataGridColumn headerText="Apellido Paterno" dataField="apellidoPaterno"/>
 			<mx:DataGridColumn headerText="Apellido Materno" dataField="apellidoMaterno"/>
+			<mx:DataGridColumn headerText="Especialidad" dataField="especialidad"/>
 		</mx:columns>
 	</mx:DataGrid>
+	
 </mx:Panel>

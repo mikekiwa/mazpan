@@ -57,15 +57,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 		}
 
 		public function generar(array:ArrayCollection, fecha:String):void
-		{/*
-			actividad
-			codigo
-			frecuenci
-			id
-			mantencion=undfined
-			nombre
-			planificada
-		 */
+		{
 		 	var check:GridColumn = new GridColumn("",null,5);
 		 	var codigo:GridColumn = new GridColumn("Codigo Elemento", "codigo", 30, Align.CENTER, Align.LEFT);
 			var nombre:GridColumn = new GridColumn("Nombre", "nombre", 85, Align.CENTER, Align.LEFT);
@@ -92,6 +84,33 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	
           	pdf.setFontSize(22);
           	pdf.addText("Actividades de Mantecion "+fecha, 20, 20);
+          	pdf.setFontSize(10);
+          	pdf.addGrid(grid, 0, 18, false);
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "estadoResultado.pdf");
+		}
+		public function solicitudes(array:Array, fecha:String):void
+		{
+		 	var check:GridColumn = new GridColumn("",null,5);
+		 	var actividad:GridColumn = new GridColumn("Actividad", "actividad", 80, Align.CENTER, Align.LEFT);
+			var solicitada:GridColumn = new GridColumn("Solicitada", "solicitadaString", 25, Align.CENTER, Align.CENTER);
+			var plazo:GridColumn = new GridColumn("Plazo [dias]", "plazo", 25, Align.CENTER, Align.RIGHT);
+			var limite:GridColumn = new GridColumn("Fecha Límite", "limiteString", 25, Align.CENTER, Align.CENTER);
+			var prioridad:GridColumn = new GridColumn("Prioridad", "prioridad", 20, Align.CENTER, Align.CENTER);
+			var descripcion:GridColumn = new GridColumn("Descripción", "descripcion", 85, Align.CENTER, Align.LEFT);
+						
+			var columnas:Array=new Array(check,
+										 actividad,
+										 solicitada,
+										 plazo,
+										 limite,
+										 prioridad,
+										 descripcion);
+										 
+          	var grid:Grid = new Grid(array, 0, 0, new RGBColor (0x9BAFB9),new RGBColor (0xDDDDDD),new RGBColor (0), false, new RGBColor (0xCCCCCC),0,Joint.BEVEL);
+          	grid.columns=columnas;
+          	
+          	pdf.setFontSize(22);
+          	pdf.addText("Solicitudes de Trabajo "+fecha, 20, 20);
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 18, false);
           	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "estadoResultado.pdf");

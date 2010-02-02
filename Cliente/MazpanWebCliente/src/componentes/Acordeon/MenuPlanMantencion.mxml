@@ -6,6 +6,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import componentes.planMantencion.ListaSolicitudes;
 			import componentes.planMantencion.Plan;
 			import eventos.ComplexEvent;
 			
@@ -26,4 +27,5 @@
 	</mx:Script>
 	
 	<mx:LinkButton x="10" y="10" label="Actividades" width="100" click="goState(Plan.nombre)"/>
+	<mx:LinkButton x="10" y="40" label="Solicitudes" width="100" click="goState(ListaSolicitudes.nombre)"/>
 </mx:Canvas>

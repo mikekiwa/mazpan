@@ -28,8 +28,7 @@
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
-			[Bindable]
-			public static var nombre:String = "Plantas";
+			public static const nombre:String = "Plantas";
 			
 			[Bindable]
 			private var plantas_ac:Array = new Array();
@@ -68,6 +67,7 @@
 				if(filtro.selectedItem == 'Todas')
 				{
 					input.visible = false;
+					input.text = "";
 				}
 				if(filtro.selectedItem == 'Código')
 				{
@@ -77,7 +77,29 @@
 				{
 					input.visible = true;
 				}
+				plantas_dg.dataProvider = plantas_ac.filter(filtrar);
 			}
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	if(filtro.selectedItem == 'Nombre')
+					{
+					   	res = (element.nombre.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}
+					if(filtro.selectedItem == 'Código')
+					{
+						res = (element.codigo.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}
+					   			
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
 			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
