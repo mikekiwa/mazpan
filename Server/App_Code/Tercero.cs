@@ -25,6 +25,11 @@ public class Tercero
 		// TODO: Agregar aquí la lógica del constructor
 		//
 	}
+    public string id
+    {
+        set { i = value; }
+        get { return i; }
+    }
     public string nombre
     {
         set { n = value; }
