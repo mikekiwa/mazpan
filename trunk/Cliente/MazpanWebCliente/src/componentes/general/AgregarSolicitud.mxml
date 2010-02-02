@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
+	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="getUsuario" 	result="getUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'getUsuario')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="TecnicoService" 		wsdl="{index.URL + 'TecnicoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allTecnicos" 	result="allTecnicosResult(event)" 	fault="ErrorFaultHandler(event, 'allTecnicos')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="SolicitudService" 	wsdl="{index.URL + 'SolicitudService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addSolicitud" 	result="addSolicitudResult(event)" 	fault="ErrorFaultHandler(event, 'addSolicitud')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import componentes.mantencionAgentesExternos.AgentesExternos;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String = "AgregarSolicitud";
+			
+			private var user:Object = new Object();
+			
+			[Bindable]
+			private var usuario:String = "";
+			
+			[Bindable]
+			private var tecnicos_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				clean();
+				UsuarioService.getUsuario(index.usuario);
+			}
+			private function getUsuarioResult(event:ResultEvent):void
+			{
+				if(event.result != null)
+				{
+					user = event.result;
+					usuario = user.nombres + " " + user.apellidoPaterno + " " + user.apellidoMaterno;
+					TecnicoService.allTecnicos();
+				}
+				else
+				{
+					Alert.show("Imposible cargar sus datos Básicos, Póongase en cantacto con el Administrador");
+				}
+			}
+			private function allTecnicosResult(event:ResultEvent):void
+			{
+				tecnicos_ac = event.result.Tables.Tecnicos.Rows.source as Array;
+			}
+			private function verificar():void
+			{
+				if(tecnicos_dg.selectedIndex!=-1 && actividad_ti.text.length>0 && detalle_ta.text.length>0)
+				{
+					agregar_btn.enabled = true;
+				}
+				else
+				{
+					agregar_btn.enabled = false;
+				}
+			}
+			private function clean():void
+			{
+				usuario = "";
+				tecnicos_ac = new Array();
+				if(actividad_ti!=null) actividad_ti.text = "";
+				if(prioridad_cb!=null) prioridad_cb.selectedIndex = 0;
+				if(plazo_ns!=null) plazo_ns.value = 1;
+				if(detalle_ta!=null) detalle_ta.text = "";
+				agregar_btn.enabled = false;
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+			private function guardar():void
+			{
+				var s:Object = new Object();
+				s.actividad = actividad_ti.text;
+				s.prioridad = prioridad_cb.text;
+				s.plazo = plazo_ns.value.toString();
+				s.rutSolicitado = tecnicos_dg.selectedItem.rut;
+				s.rutSolicitante = user.rut;
+				s.detalle = detalle_ta.text;
+				SolicitudService.addSolicitud(s);
+			}
+			private function addSolicitudResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+				} 
+				else Alert.show("Imposible agregar Personal, inténtelo más tarde");
+			}
+		]]>
+	</mx:Script>
+	<mx:Label x="22" y="193.95" text="Actividad"/>
+	<mx:Label x="22" y="224" text="Prioridad"/>
+	<mx:Label x="22" y="254" text="Plazo"/>
+	<mx:Label x="232" y="252" text="Días"/>
+	<mx:Label x="22" y="36" text="Solicito a"/>
+	<mx:Label x="22" y="10" text="Nombre"/>
+	<mx:Label x="22" y="279" text="Detalle/Observación"/>
+	
+	<mx:Label x="166" y="10" text="{usuario}" width="599"/>
+	<mx:DataGrid x="166" y="36" width="570" id="tecnicos_dg" dataProvider="{tecnicos_ac}" height="148" change="verificar()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Nombres" dataField="nombres"/>
+			<mx:DataGridColumn headerText="Apellido Paterno" dataField="apellidoPaterno"/>
+			<mx:DataGridColumn headerText="Apellido Materno" dataField="apellidoMaterno"/>
+			<mx:DataGridColumn headerText="Especialidad" dataField="especialidad"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:TextInput id="actividad_ti" x="166" y="192" width="318" maxChars="50" change="verificar()"/>
+	<mx:ComboBox id="prioridad_cb" x="166" y="222" width="95">
+		<mx:String>Alta</mx:String>
+		<mx:String>Media</mx:String>
+		<mx:String>Baja</mx:String>
+	</mx:ComboBox>
+	<mx:NumericStepper id="plazo_ns" x="166" y="250" minimum="1" maximum="365"/>
+	<mx:TextArea id="detalle_ta" x="166" y="278" width="570" height="113" maxChars="100" change="verificar()"/>
+	<mx:Button id="agregar_btn" x="529" y="428" label="Agregar" width="75" enabled="false" click="guardar()"/>
+	<mx:Button x="612" y="428" label="Cancelar" click="atras()"/>
+</mx:Canvas>

@@ -2,60 +2,89 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" 
 	title="Lista de Agentes Externos" creationComplete="init()">
 	
-	
+	<mx:WebService id="TercerosService" 	wsdl="{index.URL + 'TercerosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allTerceros" 		result="allTercerosResult(event)" 	fault="ErrorFaultHandler(event, 'allTerceros')"/>
+		<mx:operation name="addTercero" 		result="addTerceroResult(event)" 	fault="ErrorFaultHandler(event, 'addTercero')"/>
+		<mx:operation name="delTercero" 		result="delTerceroResult(event)" 	fault="ErrorFaultHandler(event, 'delTercero')"/>
+	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
 			import eventos.ComplexEvent;
-			import mx.collections.ArrayCollection;
 		
 			public static const nombre:String = "AgentesExternos";
 		
 			[Bindable]
-			private var agentesExternos_ac:ArrayCollection = new ArrayCollection();
+			private var agentesExternos_ac:Array = new Array();
 			
-			private function init():void
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
 			{
-				var item01:Object = new Object();
-				item01.nombre = "Juan Perez";
-				item01.direccion = "Curico, Aguas negras";
-				item01.fono = "1234556";
-				item01.eMail = "email@dominio.com";
-				agentesExternos_ac.addItem(item01);
-				
-				var item02:Object = new Object();
-				item02.nombre = "Pepito Pereira";
-				item02.direccion = "Molina, sector la plaza";
-				item02.fono = "434556";
-				item02.eMail = "email@dominio.com";
-				agentesExternos_ac.addItem(item02);
+				TercerosService.allTerceros();
 			}
-			
-			private function agregarComponenteResult(event:ComplexEvent):void
+			private function allTercerosResult(event:ResultEvent):void
 			{
-/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
-				/*(event.stateOrigin==AgregarComponente.nombre && event.objeto!=null)
-				{
-					agentesExternos_ac.addItem(event.objeto);
-				}
-				currentState = event.stateDestination;*/
+				agentesExternos_ac = event.result.Tables.Terceros.Rows.source as Array;
 			}
-			
+			private function addTerceroResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1) init();
+				else Alert.show("Imposible ingresar Tercero, inténtelo más tarde");
+			}
+			private function delTerceroResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1) init();
+				else Alert.show("Imposible eliminar Tercero, inténtelo más tarde");
+			}
 			private function filtar():void
 			{
 				if(filtro.selectedItem == 'Todas')
 				{
-					input.visible = false
-				}	
-				if(filtro.selectedItem == 'Dirección')
-				{
-					input.visible = true;
+					input.visible = false;
+					input.text = "";
 				}
-				if(filtro.selectedItem == 'Nombre')
+				else
 				{
 					input.visible = true;	
 				}
+				agentesExternos_dg.dataProvider = agentesExternos_ac.filter(filtrar);
 			}
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	if(filtro.selectedItem == 'Nombre')
+					{
+					   	res = (element.nombre.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}
+					if(filtro.selectedItem == 'Dirección')
+					{
+						res = (element.direccion.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}
+					if(filtro.selectedItem == 'E-Mail')
+					{
+					    res = (element.eMail.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0)&& res;
+					}
+					if(filtro.selectedItem == 'Fono')
+					{
+					   	res = (element.fono.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0) && res;
+					} 			
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
 			private function agregar():void
 			{
 				if(email_ti.text.length!=0 && nombre_ti.text.length!=0 && direcion_ti.text.length!=0 && fono_ti.text.length!=0)
@@ -65,7 +94,7 @@
 					o.fono = fono_ti.text;
 					o.direccion = direcion_ti.text;
 					o.eMail = email_ti.text;
-					agentesExternos_ac.addItem(o);
+					TercerosService.addTercero(o);
 					email_ti.text="";
 					nombre_ti.text="";
 					direcion_ti.text="";
@@ -75,7 +104,7 @@
 			private function eliminar():void
 			{
 				if(agentesExternos_dg.selectedIndex!=-1)
-					agentesExternos_ac.removeItemAt(agentesExternos_dg.selectedIndex)
+					TercerosService.delTercero(agentesExternos_dg.selectedItem as Object);
 			}
 		]]>
 	</mx:Script>
@@ -87,6 +116,8 @@
 				<mx:String>Todas</mx:String>
 				<mx:String>Nombre</mx:String>
 				<mx:String>Dirección</mx:String>
+				<mx:String>Fono</mx:String>
+				<mx:String>E-Mail</mx:String>
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>

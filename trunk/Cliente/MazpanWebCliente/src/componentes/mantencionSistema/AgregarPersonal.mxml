@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
+	
+	<mx:WebService id="PersonalService" 	wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addPersonal" 	result="addPersonalResult(event)" fault="ErrorFaultHandler(event, 'addPersonal')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+   	
+   	<mx:Script>
+   		<![CDATA[
+   			import mx.controls.Alert;
+   			import eventos.ComplexEvent;
+   			import mx.rpc.events.ResultEvent;
+   			import mx.rpc.events.FaultEvent;
+   		
+   			public static const nombre:String = "AgregarPersonal";
+   			
+   			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				
+			}
+			private function verificar():void
+			{
+				if(nombre_ti.text.length>0 && numero_ti.text.length>4 && digito_ti.text.length>0 && apellidoPaterno_ti.text.length>0 && apellidoMaterno_ti.text.length>0)
+				{
+					guardar_btn.enabled = true;
+				}
+				else
+				{
+					guardar_btn.enabled = false;
+				}
+			}
+			private function guardar():void
+			{
+				var p:Object = new Object();
+				p.nombres = nombre_ti.text;
+				p.rut = numero_ti.text + "-" + digito_ti.text;
+				p.apellidoPaterno = apellidoPaterno_ti.text;
+				p.apellidoMaterno = apellidoMaterno_ti.text;
+				PersonalService.addPersonal(p);
+			}
+			private function addPersonalResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+					clean();
+				} 
+				else Alert.show("Imposible agregar Personal, inténtelo más tarde");
+			}
+			public function clean():void
+			{
+				if(nombre_ti!=null) 			nombre_ti.text="";
+				if(numero_ti!=null) 			numero_ti.text="";
+				if(digito_ti!=null) 			digito_ti.text="";
+				if(apellidoPaterno_ti!=null) 	apellidoPaterno_ti.text="";
+				if(apellidoMaterno_ti!=null) 	apellidoMaterno_ti.text="";
+				if(guardar_btn!=null)			guardar_btn.enabled=false;
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+   		]]>
+   	</mx:Script>
+   	<mx:Label x="163" y="76" text="Nombre:"/>
+   	<mx:Label x="163" y="121" text="Rut:"/>
+   	<mx:Label x="163" y="169" text="Apellido Paterno:"/>
+   	<mx:Label x="163" y="220" text="Apellido Materno:"/>
+   	<mx:Label x="373" y="121" text="-" width="9"/>
+   	<mx:TextInput id="nombre_ti" x="299" y="74" width="248" maxChars="50" change="verificar()"/>
+   	<mx:TextInput id="numero_ti" x="299" y="119" width="70" maxChars="8" restrict="0-9" change="verificar()"/>
+   	<mx:TextInput id="digito_ti" x="387" y="119" width="20" maxChars="1" restrict="0-9k" change="verificar()"/>
+   	<mx:TextInput id="apellidoPaterno_ti" x="299" y="167" width="248" maxChars="50" change="verificar()"/>
+   	<mx:TextInput id="apellidoMaterno_ti" x="299" y="218" width="248" maxChars="50" change="verificar()"/>
+   	<mx:Button id="guardar_btn" x="392" y="316" label="Guardar" enabled="false" click="guardar()"/>
+   	<mx:Button x="472" y="316" label="Cancelar" click="atras()"/>
+</mx:Canvas>

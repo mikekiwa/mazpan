@@ -48,28 +48,28 @@
 				<ns8:Componentes id="comp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="AgentesExternos">
-			<mx:RemoveChild target="{login}"/>
-			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns4:AgentesExternos/>
-			</mx:AddChild>
-		</mx:State>
 		<mx:State name="Personal">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns5:Personal/>
+				<ns5:Personal id="personal_cmp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="SolicitudTrabajo">
+		<mx:State name="SolicitudesTrabajo">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns6:SolicitudTrabajo/>
+				<ns6:SolicitudesTrabajo id="solicitud_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AgentesExternos">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns4:AgentesExternos id="agentesExternos_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="TrabajosAgentesExternos">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns4:TrabajosAgentesExternos/>
+				<ns4:TrabajosAgentesExternos id="trabajosAgentesExternos_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Usuarios">
@@ -115,11 +115,26 @@
 				<ns11:Especifico id="especifico_cmp" complexClick="comunicacion(event)"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="Tecnicos">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns5:Tecnicos id="tecnicos_cmp" complexClick="comunicacion(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="ListaSolicitudes">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns7:ListaSolicitudes id="listaSolicitudes_cmp" complexClick="comunicacion(event)"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.general.SolicitudesTrabajo;
+			import componentes.mantencionSistema.Personal;
+			import componentes.mantencionAgentesExternos.TrabajosAgentesExternos;
 			import componentes.mantencionPlantas.Plantas;
 			import componentes.mantencionLineas.Lineas;
 			import mx.collections.ArrayCollection;
@@ -134,8 +149,8 @@
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			//public static var URL:String = "http://localhost:7070/ServerApp/";		//Visual Studio
-			public static var URL:String = "http://192.168.3.117/Server/"; 		//cliente Local
+			public static var URL:String = "http://localhost:7070/ServerApp/";		//Visual Studio
+			//public static var URL:String = "http://192.168.3.117/Server/"; 		//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/"; 		//cliente Web
 			
 			//public static var URL:String = "http://192.168.3.130/server/";
@@ -147,6 +162,9 @@
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
 
 			public static var dias:ArrayCollection = new ArrayCollection(["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"]);
+			
+			[Bindable]
+			public static var usuario:Object = new Object();
 						
 			private function init():void
 			{
@@ -160,6 +178,7 @@
 			}
 			private function loginResult(event:ComplexEvent):void
 			{
+				usuario = login.usuario;
 				currentState = event.stateDestination;
 				cerrar_btn.visible = true;
 				acordeon.visible = true;
@@ -184,6 +203,11 @@
 					if(event.stateDestination == Amarre.nombre) amarre_cmp.clean();
 					if(event.stateDestination == Revisar.nombre) revisar_cmp.clean();
 					if(event.stateDestination == Detalle.nombre) detalle_cmp.init();
+					if(event.stateDestination == TrabajosAgentesExternos.nombre) trabajosAgentesExternos_cmp.init();
+					if(event.stateDestination == AgentesExternos.nombre) agentesExternos_cmp.init();
+					if(event.stateDestination == Personal.nombre) personal_cmp.init();
+					if(event.stateDestination == Tecnicos.nombre) tecnicos_cmp.init();
+					if(event.stateDestination == SolicitudesTrabajo.nombre) solicitud_cmp.init();
 				}
 				else
 				{

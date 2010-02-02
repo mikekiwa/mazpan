@@ -19,6 +19,7 @@
 			
 			[Bindable]
 			private var nombre:String = "Login";
+			public var usuario:Object = new Object();
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -39,7 +40,9 @@
             }
 			private function click():void
 			{
-				UsuarioService.validarUsuario(username_ti.text, password_ti.text);
+				usuario.user = username_ti.text;
+				usuario.pass = password_ti.text;
+				UsuarioService.validarUsuario(usuario.user,usuario.pass);
 			}
 			
 			private function validarUsuarioResult(event:ResultEvent):void

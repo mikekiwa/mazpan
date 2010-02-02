@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Solicitudes de Trabajo"
+	creationComplete="init()" xmlns:ns1="componentes.general.*">
+	
+	<mx:states>
+		<mx:State name="AgregarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{solicitudes_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:AgregarSolicitud id="addSolicitud_cmp" x="0" y="0" complexClick="agregarSolicitudResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:WebService id="SolicitudService" 		wsdl="{index.URL + 'SolicitudService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allSolicitudes" 	result="allSolicitudesResult(event)" 	fault="ErrorFaultHandler(event, 'allSolicitudes')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import eventos.ComplexEvent;
+		
+			public static const nombre:String = "SolicitudesTrabajo";
+		
+			[Bindable]
+			private var solicitudes_ac:Array = new Array();
+		
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				solicitudes_ac = new Array();
+				SolicitudService.allSolicitudes(index.usuario);
+			}
+			private function allSolicitudesResult(event:ResultEvent):void
+			{
+				solicitudes_ac = event.result.Tables.Solicitudes.Rows.source as Array;
+			}
+			private function agregarSolicitudResult(event:ComplexEvent):void
+			{
+				init();
+				currentState = event.stateDestination;
+			}
+			private function eleccionFiltro():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false;
+					input.text = "";
+				}
+				else
+				{
+					input.visible = true;
+				}
+				solicitudes_dg.dataProvider = solicitudes_ac.filter(filtrar);
+			}
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	if(filtro.selectedItem == 'Actividad')
+					{
+					   	res = (element.actividad.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}
+					if(filtro.selectedItem == 'Especialidad')
+					{
+					   	res = (element.especialidad.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0) && res;
+					}    			
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
+        	private function eliminar():void
+        	{
+        		
+        	}
+		]]>
+	</mx:Script>
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="eleccionFiltro()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="eleccionFiltro()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Actividad</mx:String>
+				<mx:String>Apellido Paterno</mx:String>
+				<mx:String>Apellido Materno</mx:String>
+				<mx:String>Especialidad</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState';if(addSolicitud_cmp!=null)addSolicitud_cmp.init();}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	<mx:DataGrid x="10" y="120" width="755" height="330" id="solicitudes_dg" dataProvider="{solicitudes_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Actividad" dataField="actividad"/>
+			<mx:DataGridColumn headerText="Solicitada" dataField="solicitadaString"/>
+			<mx:DataGridColumn headerText="Plazo [días]" dataField="plazo"/>
+			<mx:DataGridColumn headerText="Fecha Límite" dataField="limiteString"/>
+			<mx:DataGridColumn headerText="Rut Técnico" dataField="rut"/>
+			<mx:DataGridColumn headerText="Especialidad" dataField="especialidad"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	
+</mx:Panel>

@@ -1,59 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500"
 	creationComplete="init()" title="Trabajos de los Agentes Externos">
+	
+	<mx:WebService id="TercerosService" 	wsdl="{index.URL + 'TercerosService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allTerceros" 			result="allTercerosResult(event)" 			fault="ErrorFaultHandler(event, 'allTerceros')"/>
+		<mx:operation name="allTrabajosTerceros" 	result="allTrabajosTercerosResult(event)" 	fault="ErrorFaultHandler(event, 'allTrabajosTerceros')"/>
+		<mx:operation name="addTrabajoTercero" 		result="addTrabajoTerceroResult(event)" 	fault="ErrorFaultHandler(event, 'addTrabajoTercero')"/>
+		<mx:operation name="delTrabajoTercero" 		result="delTrabajoTerceroResult(event)" 	fault="ErrorFaultHandler(event, 'delTrabajoTercero')"/>
+	</mx:WebService>
+	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 		
 			public static const nombre:String = "TrabajosAgentesExternos";
 		
 			[Bindable]
-			private var agentesExternos_ac:ArrayCollection = new ArrayCollection(["Juan Perez","Pepito Pereira", "Adan Escobar"]);
+			private var agentesExternos_ac:Array = new Array();
 			[Bindable]
-			private var trabajoAgentesExternos_ac:ArrayCollection = new ArrayCollection();
+			private var trabajoAgentesExternos_ac:Array = new Array();
 			
-			private function init():void
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
 			{
-				var item01:Object = new Object();
-				item01.trabajo = "Pintura de galpon";
-				item01.costo = "120000";
-				item01.agenteExterno = "Juan Perez";
-				trabajoAgentesExternos_ac.addItem(item01);
-				
-				var item02:Object = new Object();
-				item02.trabajo = "Apriete de pernos";
-				item02.costo = "50000";
-				item02.agenteExterno = "Pepito Pereira";
-				trabajoAgentesExternos_ac.addItem(item02);
+				if(trabajo_ti!=null) trabajo_ti.text="";
+				if(costo_ti!=null) costo_ti.text="";
+				TercerosService.allTerceros();
 			}
-			
+			private function allTercerosResult(event:ResultEvent):void
+			{
+				agentesExternos_ac = event.result.Tables.Terceros.Rows.source as Array;
+				TercerosService.allTrabajosTerceros();
+			}
+			private function allTrabajosTercerosResult(event:ResultEvent):void
+			{
+				trabajoAgentesExternos_ac = event.result.Tables.TrabajosTerceros.Rows.source as Array;
+			}
 			private function agregarTrabajo():void
 			{
-				var job:Object = new Object();
-				job.trabajo = trabajo_ti.text;
-				job.costo = costo_ti.text;
-				job.agenteExterno = agenteExterno_cb.text;
-				trabajoAgentesExternos_ac.addItem(job);
+				if(trabajo_ti.text.length!=0 && costo_ti.text.length!=0)
+				{
+					var job:Object = new Object();
+					job.trabajo = trabajo_ti.text;
+					job.costo = costo_ti.text;
+					job.agenteExterno = agenteExterno_cb.selectedItem.id;
+					TercerosService.addTrabajoTercero(job);
+				}
 			}
-			
+			private function addTrabajoTerceroResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1) init();
+				else Alert.show("Imposible ingresar Trabajo de Tercero, inténtelo más tarde");
+			}
+			private function eliminar():void
+			{
+				if(trabajoAgentesExternos_dg.selectedIndex!=-1)
+					TercerosService.delTrabajoTercero(trabajoAgentesExternos_dg.selectedItem)
+			}
+			private function delTrabajoTerceroResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1) init();
+				else Alert.show("Imposible eliminar Trabajo de Tercero, inténtelo más tarde");
+			}
 			private function filtar():void
 			{
 				if(filtro.selectedItem == 'Todas')
 				{
-					input.visible = false
+					input.visible = false;
+					input.text = "";
 				}	
-				if(filtro.selectedItem == 'Trabajo')
-				{
-					input.visible = true;
-				}
-				
-				if(filtro.selectedItem == 'Costo')
+				else
 				{
 					input.visible = true;	
 				}
+				trabajoAgentesExternos_dg.dataProvider = trabajoAgentesExternos_ac.filter(filtrar);
 			}
-			
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	if(filtro.selectedItem == 'Trabajo')
+					{
+					   	res = (element.trabajo.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}
+					if(filtro.selectedItem == 'Tercero')
+					{
+					    res = (element.nombre.toLocaleLowerCase().search(input.text.toString().toLocaleLowerCase())>=0)&& res;
+					}   			
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
 		]]>
 	</mx:Script>
 	
@@ -63,31 +113,26 @@
 			<mx:Array>
 				<mx:String>Todas</mx:String>
 				<mx:String>Trabajo</mx:String>
-				<mx:String>Costo</mx:String>
+				<mx:String>Tercero</mx:String>
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>
-	
 	<mx:DataGrid id="trabajoAgentesExternos_dg" width="681" x="10" y="57" dataProvider="{trabajoAgentesExternos_ac}" height="306">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Trabajo"  		dataField="trabajo" 		width="400"/>
-			<mx:DataGridColumn headerText="Costo" 			dataField="costo" 			width="100"/>
-			<mx:DataGridColumn headerText="Agente Externo" 	dataField="agenteExterno" 	width="400"/>
+			<mx:DataGridColumn headerText="Trabajo"  		dataField="trabajo" 	width="400"/>
+			<mx:DataGridColumn headerText="Costo" 			dataField="costo" 		width="100"/>
+			<mx:DataGridColumn headerText="Agente Externo" 	dataField="nombre" 		width="400"/>
 		</mx:columns>
 	</mx:DataGrid>
-	
-	<mx:Image x="699" y="158" width="56" height="55" source="iconos/del.png" id="image2" click="if(trabajoAgentesExternos_dg.selectedIndex!=-1) trabajoAgentesExternos_ac.removeItemAt(trabajoAgentesExternos_dg.selectedIndex)"/>
-
+	<mx:Image x="699" y="158" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
 	<mx:Canvas x="10" y="387" width="681" height="63">
 		<mx:Label x="10" y="10" text="Trabajo"/>
 		<mx:Label x="301" y="10" text="Costo"/>
 		<mx:Label x="390" y="10" text="Agente Externo"/>
 		<mx:TextInput x="10" y="31" width="283" id="trabajo_ti"/>
 		<mx:TextInput x="301" y="31" width="81" id="costo_ti"/>
-		<mx:ComboBox x="390" y="31" width="281" id="agenteExterno_cb" dataProvider="{agentesExternos_ac}"/>
+		<mx:ComboBox x="390" y="31" width="281" id="agenteExterno_cb" dataProvider="{agentesExternos_ac}" labelField="nombre"/>
 	</mx:Canvas>
-
 	<mx:Image x="699" y="392" width="56" height="55" source="iconos/add.png" id="image3" click="agregarTrabajo()"/>
-	
 	<mx:Label x="10" y="371" text="Nuevo Agente Externo" fontWeight="bold"/>
 </mx:Panel>

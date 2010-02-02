@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460">
+	
+	<mx:WebService id="PersonalService" 		wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allPersonal" 	result="allPersonalResult(event)" 	fault="ErrorFaultHandler(event, 'allPersonal')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="TecnicoService" 		wsdl="{index.URL + 'TecnicoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addTecnico" 	result="addTecnicoResult(event)" 	fault="ErrorFaultHandler(event, 'addTecnico')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+   	
+   	<mx:Script>
+   		<![CDATA[
+   			import mx.controls.Alert;
+   			import mx.rpc.events.ResultEvent;
+   			import mx.rpc.events.FaultEvent;
+   			import eventos.ComplexEvent;
+   			
+   			public static const nombre:String = "AgregarTecnico";
+   			
+   			[Bindable]
+   			private var personal_ac:Array = new Array();
+   			
+   			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+   			public function init():void
+			{
+				clean();
+				PersonalService.allPersonal();
+			}
+			private function allPersonalResult(event:ResultEvent):void
+			{
+				personal_ac = event.result.Tables.Personal.Rows.source as Array;
+			}
+   			private function guardar():void
+			{
+				var t:Object = new Object();
+				t.especialidad = especialidad_ti.text;
+				t.persona = personal_dg.selectedItem;
+				t.rutTecnico = personal_dg.selectedItem.rut;
+				t.otro = otro_ta.text;
+				TecnicoService.addTecnico(t);
+			}
+			private function addTecnicoResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+				} 
+				else Alert.show("Imposible agregar Personal, inténtelo más tarde");
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+			public function clean():void
+			{
+				if(especialidad_ti!=null) 	especialidad_ti.text="";
+				if(otro_ta!=null) 			otro_ta.text="";
+				if(guardar_btn!=null) 		guardar_btn.enabled=false;
+				personal_ac = new Array();
+			}
+			private function verificar():void
+			{
+				if(especialidad_ti.text.length>0 && otro_ta.text.length>4 && personal_dg.selectedItem!=null)
+				{
+					guardar_btn.enabled = true;
+				}
+				else
+				{
+					guardar_btn.enabled = false;
+				}
+			}
+   		]]>
+   	</mx:Script>
+   	
+	<mx:Label x="78" y="46" text="Especialidad"/>
+	<mx:Label x="78" y="94" text="Datos Personales"/>
+	<mx:Label x="78" y="260" text="Otro"/>
+	
+	<mx:TextInput id="especialidad_ti" x="209" y="44" width="452" maxChars="50" change="verificar()"/>
+	<mx:DataGrid x="209" y="91" id="personal_dg" dataProvider="{personal_ac}" change="verificar()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Rut" dataField="rut" width="90"/>
+			<mx:DataGridColumn headerText="Nombres" dataField="nombres" width="120"/>
+			<mx:DataGridColumn headerText="Apellido Paterno" dataField="apellidoPaterno" width="120"/>
+			<mx:DataGridColumn headerText="Apellido Materno" dataField="apellidoMaterno" width="120"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:TextArea x="209" y="259" id="otro_ta" width="452" height="86" maxChars="100" change="verificar()"/>
+	<mx:Button x="509" y="400" label="Guardar" id="guardar_btn" enabled="false" click="guardar()"/>
+	<mx:Button x="589" y="400" label="Atras" width="72" click="atras()"/>
+</mx:Canvas>
