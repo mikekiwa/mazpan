@@ -25,7 +25,6 @@ public class Elemento
     private string t;//tipo
     private string sist;//sistema
     private string cost;//costo
-    private string vu;//vida util
     private string pm;//puesta en marcha
     private Fabricante f;//fabricante
     private List<Especificacion> esp;//especificaciones
@@ -82,11 +81,6 @@ public class Elemento
     {
         set { cost = value; }
         get { return cost; }
-    }
-    public string vidaUtil
-    {
-        set { vu = value; }
-        get { return vu; }
     }
     public string puestaMarcha
     {

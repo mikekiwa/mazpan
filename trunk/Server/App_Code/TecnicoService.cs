@@ -50,14 +50,14 @@ public class TecnicoService : System.Web.Services.WebService
     /// </summary>
     /// <returns>Lista de tecnicos en el sistema</returns>
     [WebMethod]
-    public DataTable allTecnicos()
+    public DataTable allTecnicos(Usuario u)
     {
         DataTable dt = new DataTable();
         dt.TableName = "Tecnicos";
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T1.*, T2.id,T2.especialidad,T2.otro FROM [PracticaDb].[dbo].Personal T1 JOIN [PracticaDb].[dbo].Tecnico T2 ON T1.rut=T2.rutTecnico ";
+        String query = " SELECT T1.*, T2.id,T2.especialidad,T2.otro FROM [PracticaDb].[dbo].Personal T1 JOIN [PracticaDb].[dbo].Tecnico T2 ON T1.rut=T2.rutTecnico WHERE T1.planta='"+u.planta+"'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -103,5 +103,20 @@ public class TecnicoService : System.Web.Services.WebService
         else return 0;
     }
 
+
+    /// <summary>
+    /// Permite editar los datos de un Técnico
+    /// retona 1 si la edicion fue exitosa, 0 EOC
+    /// </summary>
+    /// <param name="nuevo">Datos del técnico editado</param>
+    /// <param name="actual">Copia datos viejos (ó actuales) del técnico</param>
+    /// <returns>1 si la edicion fue exitosa, 0 EOC</returns>
+    [WebMethod]
+    public int editTecnico(Tecnico nuevo, Tecnico actual)
+    {
+        string query = " UPDATE [PracticaDb].[dbo].Tecnico SET especialidad='"+nuevo.especialidad+"',otro='"+nuevo.otro+"' WHERE rutTecnico='"+actual.rutTecnico+"' ";
+        if (Ejecutar(query) == 1) return 1;
+        else return 0;
+    }
 }
 
