@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460">
+	
+	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="editUsuario" 	result="editUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'editUsuario')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+   	
+   	<mx:Script>
+   		<![CDATA[
+   			import mx.messaging.channels.StreamingAMFChannel;
+   			import mx.controls.Alert;
+   			import eventos.ComplexEvent;
+   			import mx.rpc.events.ResultEvent;
+   			import mx.rpc.events.FaultEvent;
+   			
+   			public static const nombre:String = "AgregarUsuario";
+   			
+   			[Bindable]
+   			private var personal_ac:Array = new Array();
+   			
+   			[Bindable]
+   			private var usuario:Object;
+   			
+   			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function parametros(_usuario:Object):void
+            {
+            	usuario = _usuario;
+            	username.text = usuario.userName;
+            	password.text = usuario.password;
+            	var aux:String = usuario.privilegio;
+            	var arr:Array = aux.split('');
+            	if(arr[0]=='1')	p1.selected = true;
+				if(arr[1]=='1')	p2.selected = true;
+				if(arr[2]=='1')	p3.selected = true;
+				if(arr[3]=='1')	p4.selected = true;
+				if(arr[4]=='1')	p5.selected = true;
+				if(arr[5]=='1')	p6.selected = true;
+				if(arr[6]=='1')	p7.selected = true;
+				editar_btn.enabled = true;
+            }
+			private function editar():void
+			{
+				var u:Object = new Object();
+				u.user = username.text;
+				u.pass = password.text;
+				u.privilegio = privilegio();
+				UsuarioService.editUsuario(u, usuario);
+			}
+			private function editUsuarioResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+				} 
+				else Alert.show("Imposible editar Usuario, inténtelo más tarde");
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+			public function clean():void
+			{
+				personal_ac = new Array();
+				if(username!=null) username.text="";
+				if(password!=null) password.text="";
+				if(p1!=null) p1.selected = false;
+				if(p2!=null) p2.selected = false;
+				if(p3!=null) p3.selected = false;
+				if(p4!=null) p4.selected = false;
+				if(p5!=null) p5.selected = false;
+				if(p6!=null) p6.selected = false;
+				if(p7!=null) p7.selected = false;
+			}
+			private function verificar():void
+			{
+				if(username.text.length>0 && password.text.length>4 && tienePrivilegio())
+				{
+					editar_btn.enabled = true;
+				}
+				else
+				{
+					editar_btn.enabled = false;
+				}
+			}
+			private function tienePrivilegio():Boolean
+			{
+				if(	p1.selected || p2.selected || p3.selected || p4.selected || p5.selected || p6.selected || p7.selected)
+				{
+					return true;
+				}
+				return false;
+			}
+			private function privilegio():String
+			{
+				var p:String = "";
+				
+				if(p1.selected) p+="1"; else p+="0";
+				if(p2.selected) p+="1"; else p+="0";
+				if(p3.selected) p+="1"; else p+="0";
+				if(p4.selected) p+="1"; else p+="0";
+				if(p5.selected) p+="1"; else p+="0";
+				if(p6.selected) p+="1"; else p+="0";
+				if(p7.selected) p+="1"; else p+="0";
+				
+				p+="0000";
+				
+				return p;
+			}
+   		]]>
+   	</mx:Script>
+   	<mx:Label x="76" y="30" text="Rut"/>
+   	<mx:Label x="76" y="179" text="Nombre de Usuario"/>
+   	<mx:Label x="76" y="207" text="Contraseña"/>
+   	<mx:Label x="76" y="235" text="Privilegio"/>
+   	
+   	<mx:TextInput x="207" y="177" id="username" maxChars="50" change="verificar()"/>
+   	<mx:TextInput x="207" y="205" id="password" maxChars="50" change="verificar()"/>
+   	<mx:Canvas x="207" y="235" width="220" height="74" borderStyle="solid">
+   	   	<mx:CheckBox id="p1" label="Estado de Resultado" x="10" y="10" change="verificar()"/>
+   	   	<mx:CheckBox id="p2" y="40" label="Amarre de Cuentas" x="10" change="verificar()"/>
+   	</mx:Canvas>
+   	<mx:Canvas x="442" y="235" width="220" height="159" borderStyle="solid">
+   	   	<mx:CheckBox id="p3" x="10" y="10" label="General" change="verificar()"/>
+   	   	<mx:CheckBox id="p4" x="10" y="40" label="Agentes Externos" change="verificar()"/>
+   	   	<mx:CheckBox id="p5" x="10" y="70" label="Personal" change="verificar()"/>
+   	   	<mx:CheckBox id="p6" x="10" y="100" label="Mantenciones" change="verificar()"/>
+   	   	<mx:CheckBox id="p7" x="10" y="130" label="Plan de Mantencion" change="verificar()"/>
+   	</mx:Canvas>
+   	<mx:Button x="510" y="428" label="Guardar" id="editar_btn" enabled="false" click="editar()"/>
+   	<mx:Button x="590" y="428" label="Atras" width="72" click="atras()"/>
+   	<mx:Label x="76" y="63" text="Nombres"/>
+   	<mx:Label x="76" y="100" text="Apellido Paterno"/>
+   	<mx:Label x="76" y="139" text="Apellido Materno"/>
+   	<mx:Label x="207" y="30" text="{usuario.rut_persona}" width="455"/>
+   	<mx:Label x="207" y="63" text="{usuario.nombres}" width="455"/>
+   	<mx:Label x="207" y="100" text="{usuario.apellidoPaterno}" width="455"/>
+   	<mx:Label x="207" y="139" text="{usuario.apellidoMaterno}" width="455"/>
+</mx:Canvas>

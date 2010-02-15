@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Amarre  Cliente - Zona"
+	creationComplete="init()" xmlns:ns1="misClases.*">
+	
+	<mx:WebService id="VentasService" 	wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="allSociosSinSucursal" 	result="allSociosSinSucursalResult(event)" 	fault="ErrorFaultHandler(event, 'allSociosSinSucursal')"/>
+		<mx:operation name="guardar" 				result="guardarResult(event)" 				fault="ErrorFaultHandler(event, 'guardar')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import eventos.ComplexEvent;
+			
+			public static const nombre:String = "AmarreClienteZona";
+			[Bindable]
+			private var clientesSinZona:Array;
+			
+			private var datosParaGuardar:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function init():void
+			{
+				VentasService.allSociosSinSucursal();
+			}
+			private function allSociosSinSucursalResult(event:ResultEvent):void
+			{
+				clientesSinZona = event.result.Tables.Socios.Rows.source as Array;
+			}
+			private function amarrar():void
+			{
+				if(zonasCB_cmp.selectedIndex!=-1)
+				{
+					datosParaGuardar = new Array();
+		          	for(var i:int=0;i< clientesSinZona.length;i++)
+		          		if(clientesSinZona[i].amarrar) datosParaGuardar.push(clientesSinZona[i].CardCode);
+	          		
+	          		if(datosParaGuardar.length>0)
+	            	{
+	            		Alert.yesLabel = "Si";
+	                	Alert.noLabel = "No";
+	                	if(datosParaGuardar.length==1) Alert.show("¿Está seguro que desea amarrar al Cliente seleccionado?","Amarrar Cliente a "+zonasCB_cmp.text, 3, this, guardarClick);
+	                	else Alert.show("¿Está seguro que desea amarrar los "+datosParaGuardar.length+" Clientes seleccionados?","Amarrar las Clientes a "+zonasCB_cmp.text, 3, this, guardarClick);	
+	            	}
+	                else Alert.show("Debe seleccionar al menos un Cliente para poder proceder");
+	   			}
+			}
+          	private function guardarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES) VentasService.guardar(datosParaGuardar, zonasCB_cmp.selectedItem.ShortName);
+			}
+			private function guardarResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezcan las que amarramos
+					trace("Datos Guardados exitosamente");
+				}
+				else if(event.result == -1)
+				{
+				 	trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+					trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox>
+		<mx:Label x="10" y="12" text="Zonas:"/>
+		<ns1:SucursalesCB id="zonasCB_cmp" x="62" y="10"/>
+		<mx:Button x="230" y="10" label="Amarrar" click="amarrar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="38" width="775" height="422" id="tabla" dataProvider="{clientesSinZona}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingLeft="2" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.amarrar=!data.amarrar}" selected="{data.amarrar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="RUT" dataField="LicTradNum" width="90"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="CardName"/>
+			<mx:DataGridColumn headerText="" dataField="CardFName"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>

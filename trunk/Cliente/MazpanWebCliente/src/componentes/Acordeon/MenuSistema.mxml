@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="120" height="200">
+	<mx:Metadata>
+			[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+
+	<mx:Script>
+		<![CDATA[
+			import componentes.mantencionSistema.Usuarios;
+			import componentes.mantencionPlantas.Plantas;
+			import eventos.ComplexEvent;
+			
+			[Bindable]
+			public var description:String;
+			
+			[Bindable]
+			public var title:String="Sistema";
+			
+			[Bindable]
+			private var nombre:String = "Sistema";
+			
+			private function goState(destino:String):void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null)); 
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:LinkButton x="10" y="10" label="Plantas" 	width="100" click="goState(Plantas.nombre)"/>
+	<mx:LinkButton x="10" y="40" label="Usuarios" 	width="100" click="goState(Usuarios.nombre)"/>
+</mx:Canvas>

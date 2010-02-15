@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()" labelField="CardName">
+	
+	<mx:WebService id="VentasService"	wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getSociosSucursal" result="resultado(event)" fault="errores(event)"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import flash.sampler.getSetterInvocationCount;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public var datos:Array;
+			public var mostrarTodos:Boolean = true;
+			
+			public function init():void
+			{
+				cargar("Gnral");
+			}
+			public function DatosAt(i:int):Object
+			{
+				return datos[i] as Object;
+			}
+			public function cargar(sucursal:String):void
+			{
+				VentasService.getSociosSucursal(sucursal);
+			}
+			private function resultado(event:ResultEvent):void
+            {
+            	dataProvider = new Array();
+            	var aux:Array = event.result.Tables.Socios.Rows.source as Array;
+            	datos = new Array();
+            	if(aux.length>1 && mostrarTodos)
+            	{
+            		var todos:Object = new Object()
+            		todos.CardName = "Todos";
+            		todos.CardCode = "0";
+            		datos.push(todos);
+            		for(var i:int=0; i<aux.length; i++)
+            		{
+            			datos.push(aux[i]);
+            		}
+            	}
+            	else
+            	{	
+            		text = "  - - -  ";
+            		datos = aux;
+            	}
+            	dataProvider = datos;
+            }
+            private function errores(event:FaultEvent):void
+            {
+            	trace("Error en clase ClientesCB.mxml\nDetalle: "+event.fault.faultString);
+            }
+    	]]>
+	</mx:Script>
+</mx:ComboBox>

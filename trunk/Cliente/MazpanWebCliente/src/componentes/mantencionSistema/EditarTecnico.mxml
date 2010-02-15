@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460">
+
+	<mx:WebService id="TecnicoService" 		wsdl="{index.URL + 'TecnicoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="editTecnico" 	result="editTecnicoResult(event)" 	fault="ErrorFaultHandler(event, 'editTecnico')"/>
+	</mx:WebService>
+
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+   	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+   			import mx.rpc.events.ResultEvent;
+   			import mx.rpc.events.FaultEvent;
+   			import eventos.ComplexEvent;
+   			
+   			public static const nombre:String = "AgregarTecnico";
+   			
+   			[Bindable]
+   			private var personal_ac:Array = new Array();
+   			[Bindable]
+			private var tecnico:Object;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function parametros(_tenico:Object):void
+			{
+				tecnico = _tenico;
+				tecnico.rutTecnico = tecnico.rut;
+				especialidad_ti.text = tecnico.especialidad;
+				otro_ta.text = tecnico.otro;
+				editar_btn.enabled = true;
+			}
+   			private function editar():void
+			{
+				var t:Object = new Object();
+				t.especialidad = especialidad_ti.text;
+				t.otro = otro_ta.text;
+				TecnicoService.editTecnico(t, tecnico);
+			}
+			private function editTecnicoResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+				} 
+				else Alert.show("Imposible editar Técnico, inténtelo más tarde");
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+			public function clean():void
+			{
+				if(especialidad_ti!=null) 	especialidad_ti.text="";
+				if(otro_ta!=null) 			otro_ta.text="";
+				if(editar_btn!=null) 		editar_btn.enabled=false;
+				tecnico = new Object();
+			}
+			private function verificar():void
+			{
+				if(especialidad_ti.text.length>0 && otro_ta.text.length>4)
+				{
+					editar_btn.enabled = true;
+				}
+				else
+				{
+					editar_btn.enabled = false;
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:Label x="78" y="46" text="Especialidad"/>
+	<mx:Label x="78" y="94" text="Rut"/>
+	<mx:Label x="78" y="260" text="Otro"/>
+	<mx:TextInput id="especialidad_ti" x="209" y="44" width="452" maxChars="50" change="verificar()"/>
+	<mx:TextArea x="209" y="259" id="otro_ta" width="452" height="86" maxChars="100" change="verificar()"/>
+	<mx:Label x="78" y="133" text="Nombres"/>
+	<mx:Label x="78" y="174" text="Apelldo Paterno"/>
+	<mx:Label x="78" y="217" text="Apellido Materno"/>
+	<mx:Label x="209" y="94" text="{tecnico.rut}" width="452"/>
+	<mx:Label x="209" y="133" text="{tecnico.nombres}" width="452"/>
+	<mx:Label x="209" y="174" text="{tecnico.apellidoPaterno}" width="452"/>
+	<mx:Label x="209" y="217" text="{tecnico.apellidoMaterno}" width="452"/>
+	<mx:Button x="509" y="400" label="Editar" id="editar_btn" enabled="false" click="editar()" width="72"/>
+	<mx:Button x="589" y="400" label="Atras" width="72" click="atras()"/>
+	
+</mx:Canvas>
