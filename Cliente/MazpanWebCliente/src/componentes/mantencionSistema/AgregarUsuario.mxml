@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
+	
+	<mx:WebService id="PersonalService" 		wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allPersonal" 	result="allPersonalResult(event)" 	fault="ErrorFaultHandler(event, 'allPersonal')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addUsuario" 	result="addUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'addUsuario')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+   	
+   	<mx:Script>
+   		<![CDATA[
+   			import mx.controls.Alert;
+   			import eventos.ComplexEvent;
+   			import mx.rpc.events.ResultEvent;
+   			import mx.rpc.events.FaultEvent;
+   			
+   			public static const nombre:String = "AgregarUsuario";
+   			
+   			[Bindable]
+   			private var personal_ac:Array = new Array();
+   			
+   			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+   			public function init():void
+			{
+				clean();
+				PersonalService.allPersonal(index.usuario);
+			}
+			private function allPersonalResult(event:ResultEvent):void
+			{
+				personal_ac = event.result.Tables.Personal.Rows.source as Array;
+			}
+			private function guardar():void
+			{
+				var u:Object = new Object();
+				u.user = username.text;
+				u.pass = password.text;
+				u.rut_persona = personal_dg.selectedItem.rut;
+				u.privilegio = privilegio();
+				UsuarioService.addUsuario(u);
+			}
+			private function addUsuarioResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+				} 
+				else Alert.show("Imposible agregar Usuario, inténtelo más tarde");
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+			public function clean():void
+			{
+				personal_ac = new Array();
+				if(username!=null) username.text="";
+				if(password!=null) password.text="";
+				if(p1!=null) p1.selected = false;
+				if(p2!=null) p2.selected = false;
+				if(p3!=null) p3.selected = true;
+				if(p4!=null) p4.selected = false;
+				if(p5!=null) p5.selected = false;
+				if(p6!=null) p6.selected = false;
+				if(p7!=null) p7.selected = false;
+			}
+			private function verificar():void
+			{
+				if(username.text.length>0 && password.text.length>4 && personal_dg.selectedItem!=null && tienePrivilegio())
+				{
+					guardar_btn.enabled = true;
+				}
+				else
+				{
+					guardar_btn.enabled = false;
+				}
+			}
+			private function tienePrivilegio():Boolean
+			{
+				if(	p1.selected || p2.selected || p3.selected || p4.selected || p5.selected || p6.selected || p7.selected)
+				{
+					return true;
+				}
+				return false;
+			}
+			private function privilegio():String
+			{
+				var p:String = "";
+				
+				if(p1.selected) p+="1"; else p+="0";
+				if(p2.selected) p+="1"; else p+="0";
+				if(p3.selected) p+="1"; else p+="0";
+				if(p4.selected) p+="1"; else p+="0";
+				if(p5.selected) p+="1"; else p+="0";
+				if(p6.selected) p+="1"; else p+="0";
+				if(p7.selected) p+="1"; else p+="0";
+				
+				p+="0000";
+				
+				return p;
+			}
+   		]]>
+   	</mx:Script>
+   	<mx:Label x="76" y="30" text="Datos Personales"/>
+   	<mx:Label x="76" y="179" text="Nombre de Usuario"/>
+   	<mx:Label x="76" y="207" text="Contraseña"/>
+   	<mx:Label x="76" y="235" text="Privilegio"/>
+   	<mx:DataGrid x="207" y="27" id="personal_dg" dataProvider="{personal_ac}" change="verificar()" height="142">
+   		<mx:columns>
+   			<mx:DataGridColumn headerText="Rut" dataField="rut" width="90"/>
+   			<mx:DataGridColumn headerText="Nombres" dataField="nombres" width="120"/>
+   			<mx:DataGridColumn headerText="Apellido Paterno" dataField="apellidoPaterno" width="120"/>
+   			<mx:DataGridColumn headerText="Apellido Materno" dataField="apellidoMaterno" width="120"/>
+   		</mx:columns>
+   	</mx:DataGrid>
+   	<mx:TextInput x="207" y="177" id="username" maxChars="50" change="verificar()"/>
+   	<mx:TextInput x="207" y="205" id="password" maxChars="50" change="verificar()"/>
+   	<mx:Canvas x="207" y="235" width="220" height="74" borderStyle="solid">
+   	   	<mx:CheckBox id="p1" label="Estado de Resultado" x="10" y="10" change="verificar()"/>
+   	   	<mx:CheckBox id="p2" y="40" label="Amarre de Cuentas" x="10" change="verificar()"/>
+   	</mx:Canvas>
+   	<mx:Canvas x="442" y="235" width="220" height="159" borderStyle="solid">
+   	   	<mx:CheckBox id="p3" x="10" y="10" label="General" selected="true" change="verificar()"/>
+   	   	<mx:CheckBox id="p4" x="10" y="40" label="Agentes Externos" change="verificar()"/>
+   	   	<mx:CheckBox id="p5" x="10" y="70" label="Personal" change="verificar()"/>
+   	   	<mx:CheckBox id="p6" x="10" y="100" label="Mantenciones" change="verificar()"/>
+   	   	<mx:CheckBox id="p7" x="10" y="130" label="Plan de Mantencion" change="verificar()"/>
+   	</mx:Canvas>
+   	<mx:Button x="510" y="428" label="Guardar" id="guardar_btn" enabled="false" click="guardar()"/>
+   	<mx:Button x="590" y="428" label="Atras" width="72" click="atras()"/>
+</mx:Canvas>

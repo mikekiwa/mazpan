@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460">
+	
+	<mx:WebService id="PersonalService" 	wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="editPersonal" 	result="editPersonalResult(event)" fault="ErrorFaultHandler(event, 'editPersonal')"/>
+	</mx:WebService>
+	
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+   	
+   	<mx:Script>
+   		<![CDATA[
+   			import mx.controls.Alert;
+   			import eventos.ComplexEvent;
+   			import mx.rpc.events.ResultEvent;
+   			import mx.rpc.events.FaultEvent;
+   		
+   			public static const nombre:String = "EditarPersonal";
+   			
+   			private var personal:Object;
+   			
+   			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function parametros(_personal:Object):void
+            {
+            	personal = _personal;
+            	var aux:String = personal.rut
+            	var arr:Array = aux.split('-');
+            	numero_ti.text = arr[0];
+            	digito_ti.text = arr[1];
+            	nombre_ti.text = personal.nombres;
+				apellidoPaterno_ti.text = personal.apellidoPaterno;
+				apellidoMaterno_ti.text = personal.apellidoMaterno;
+				editar_btn.enabled = true;
+            }
+			private function verificar():void
+			{
+				if(nombre_ti.text.length>0 && numero_ti.text.length>4 && digito_ti.text.length>0 && apellidoPaterno_ti.text.length>0 && apellidoMaterno_ti.text.length>0)
+				{
+					editar_btn.enabled = true;
+				}
+				else
+				{
+					editar_btn.enabled = false;
+				}
+			}
+			private function editar():void
+			{
+				var p:Object = new Object();
+				p.rut = numero_ti.text + "-" + digito_ti.text;
+				p.nombres = nombre_ti.text;
+				p.apellidoPaterno = apellidoPaterno_ti.text;
+				p.apellidoMaterno = apellidoMaterno_ti.text;
+				PersonalService.editPersonal(p,personal);
+			}
+			private function editPersonalResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1)
+				{
+					atras();
+					clean();
+				} 
+				else Alert.show("Imposible editar Personal, inténtelo más tarde");
+			}
+			public function clean():void
+			{
+				if(nombre_ti!=null) 			nombre_ti.text="";
+				if(numero_ti!=null) 			numero_ti.text="";
+				if(digito_ti!=null) 			digito_ti.text="";
+				if(apellidoPaterno_ti!=null) 	apellidoPaterno_ti.text="";
+				if(apellidoMaterno_ti!=null) 	apellidoMaterno_ti.text="";
+				if(editar_btn!=null)			editar_btn.enabled=false;
+			}
+			private function atras():void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
+				clean();
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label x="163" y="115" text="Nombre:"/>
+	<mx:Label x="163" y="60" text="Rut:"/>
+	<mx:Label x="163" y="169" text="Apellido Paterno:"/>
+	<mx:Label x="163" y="220" text="Apellido Materno:"/>
+	<mx:Label x="373" y="60" text="-" width="9"/>
+	<mx:TextInput id="numero_ti" x="299" y="58" width="70" maxChars="8" restrict="0-9" change="verificar()"/>
+	<mx:TextInput id="digito_ti" x="387" y="58" width="20" maxChars="1" restrict="0-9k" change="verificar()"/>
+	<mx:TextInput id="nombre_ti" x="299" y="113" width="248" maxChars="50" change="verificar()"/>
+	<mx:TextInput id="apellidoPaterno_ti" x="299" y="167" width="248" maxChars="50" change="verificar()"/>
+	<mx:TextInput id="apellidoMaterno_ti" x="299" y="218" width="248" maxChars="50" change="verificar()"/>
+	<mx:Button id="editar_btn" x="387" y="316" label="Editar" enabled="false" click="editar()" width="75"/>
+	<mx:Button x="472" y="316" label="Cancelar" click="atras()"/>
+</mx:Canvas>

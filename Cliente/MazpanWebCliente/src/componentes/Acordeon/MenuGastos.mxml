@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="120" height="200">
+	<mx:Metadata>
+			[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+
+	<mx:Script>
+		<![CDATA[
+			import gastosVentas.PresupuestoVentas;
+			import gastosVentas.AmarreClienteZona;
+			import gastosVentas.Ventas;
+			import estadoResultado.*;
+			import eventos.ComplexEvent;
+			
+			[Bindable]
+			public var description:String;
+			
+			[Bindable]
+			public var title:String="Ventas";
+			
+			[Bindable]
+			private var nombre:String = "Ventas";
+			
+			private function goState(destino:String):void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null)); 
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:LinkButton x="10" y="10" label="Ver" 			width="100" click="goState(Ventas.nombre)"/>
+	<mx:LinkButton x="10" y="40" label="Amarre"			width="100" click="goState(AmarreClienteZona.nombre)"/>
+	<mx:LinkButton x="10" y="70" label="Presupuesto"	width="100" click="goState(PresupuestoVentas.nombre)"/>
+</mx:Canvas>

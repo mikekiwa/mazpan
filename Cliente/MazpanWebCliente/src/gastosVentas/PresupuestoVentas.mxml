@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1100" height="460" title="Presupuesto de Ventas"
+	 xmlns:mc="misClases.*" creationComplete="init()">
+	
+	<mx:WebService id="VentasService" wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getProductos" 		result="getProductosResult(event)" 			fault="ErrorFaultHandler(event, 'getProductos')"/>
+		<mx:operation name="guardarPresupuesto" result="guardarPresupuestoResult(event)" 	fault="ErrorFaultHandler(event, 'guardarPresupuesto')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String="PresupuestoVentas";
+						
+			[Bindable]
+			private var productos:Array;
+			
+			private var cliente:String;
+			
+			private var respuestasNecesarias:int = 0;
+			private var ano:int = 2009;
+			private var en:int = 1;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+			{
+			}
+			private function cambiarClientes():void
+            {
+            	clientesCB_cmp.cargar(sucursalesCB_cmp.selectedItem.ShortName);
+            }
+            private function cargar(_cliente:String,_ano:int,_en:int):void
+            {
+            	productos = new Array();
+            	cliente = _cliente;
+            	ano = _ano;
+            	en  = _en;
+            	VentasService.getProductos(cliente,ano.toString(),en);
+            }
+            private function getProductosResult(event:ResultEvent):void
+            {
+            	productos = event.result.Tables.Productos.Rows.source as Array;
+            }
+            private function filtar():void
+			{
+				tabla.dataProvider = productos.filter(filtrar);
+			}
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	res = (element.itemName.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
+        	private function guardar():void
+        	{
+        		for(var j:int=0; j<productos.length; j++)
+        		{
+        			if(productos[j].actualizado)
+        			{
+        				respuestasNecesarias++;
+        			}
+        		}
+        		for(var i:int=0; i<productos.length; i++)
+        		{
+        			if(productos[i].actualizado)
+        			{
+        			 	VentasService.guardarPresupuesto(cliente,ano,productos[i],en);
+        			}
+        		}
+        	}
+        	private function guardarPresupuestoResult(event:ResultEvent):void
+        	{
+        		respuestasNecesarias--;
+        		if(respuestasNecesarias==0) cargar(cliente,ano,en);
+        	}
+		]]>
+	</mx:Script>
+	
+	<mx:HBox x="0" y="10" width="100%">
+		<mx:Label text="Zona:"/>
+		<mc:SucursalesCB id="sucursalesCB_cmp" change="cambiarClientes()"/>
+		<mx:Label text="Socio:"/>
+		<mc:ClientesCB id="clientesCB_cmp" mostrarTodos="false"/>
+		<mx:NumericStepper minimum="1990" maximum="9999" value="2009" id="ano_ns"/>
+		<mx:ComboBox id="en_cb">
+			<mx:String>Unidades a Vender</mx:String>
+			<mx:String>Ingreso a Percivir</mx:String>
+		</mx:ComboBox>
+		<mx:Button label="Cargar" width="72" click="cargar(clientesCB_cmp.selectedItem.CardCode, ano_ns.value,en_cb.selectedIndex+1)"/>
+	</mx:HBox>
+	<mx:Label x="0" y="40" text="Buscar:"/>
+	<mx:TextInput x="54" y="38" width="204" id="input"/>
+	<mx:Button x="266" y="38" label="Filtrar" width="72" click="filtar()"/>
+	<mx:DataGrid x="0" y="66" width="100%" height="314" id="tabla" dataProvider="{productos}">
+		<mx:columns>
+			<mx:DataGridColumn id="colSel" headerText="" width="10" sortable="false" paddingLeft="3">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox selected="{data.actualizado}" enabled="false"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Producto" dataField="itemName" width="100"/>
+			<mx:DataGridColumn id="ene" headerText="Enero"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.enero}" fontSize="8" textAlign="right" focusOut="{data.enero=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="feb" headerText="Febrero"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.febrero}" fontSize="8" textAlign="right" focusOut="{data.febrero=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="mar" headerText="Marzo"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.marzo}" fontSize="8" textAlign="right" focusOut="{data.marzo=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="abr" headerText="Abril"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.abril}" fontSize="8" textAlign="right" focusOut="{data.abril=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="may" headerText="Mayo"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.mayo}" fontSize="8" textAlign="right" focusOut="{data.mayo=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="jun" headerText="Junio"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.junio}" fontSize="8" textAlign="right" focusOut="{data.junio=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="jul" headerText="Julio"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.julio}" fontSize="8" textAlign="right" focusOut="{data.julio=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="ago" headerText="Agosto"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.agosto}" fontSize="8" textAlign="right" focusOut="{data.agosto=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="sep" headerText="Septiembre"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.septiembre}" fontSize="8" textAlign="right" focusOut="{data.septiembre=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="oct" headerText="Octubre"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.octubre}" fontSize="8" textAlign="right" focusOut="{data.octubre=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="nov" headerText="Noviembre"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.noviembre}" fontSize="8" textAlign="right" focusOut="{data.noviembre=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="dic" headerText="Diciembre"  width="50" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.diciembre}" fontSize="8" textAlign="right" focusOut="{data.diciembre=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="998" y="388" label="Guardar" click="guardar()"/>
+</mx:Panel>

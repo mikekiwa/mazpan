@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()" labelField="ShortName">
+	
+	<mx:WebService id="Service" wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getSucursales" result="resultado(event)" fault="errores(event)"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public function init():void
+            {
+            	Service.getSucursales();
+            }
+            private function resultado(event:ResultEvent):void
+            {
+            	dataProvider = event.result.Tables.Sucursales.Rows.source as Array;
+            }
+            private function errores(event:FaultEvent):void
+            {
+            	trace("Error en clase SucursalesDB.mxml\nDetalle: "+event.fault.faultString);
+            }
+		]]>
+	</mx:Script>
+</mx:ComboBox>
