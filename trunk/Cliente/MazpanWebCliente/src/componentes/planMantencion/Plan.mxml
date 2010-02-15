@@ -32,7 +32,7 @@
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-			private function init():void
+			public function init():void
 			{
 				fecha = "";
 				CombosService.getFecha();
@@ -40,7 +40,7 @@
 			private function getFechaResult(event:ResultEvent):void
 			{
 				fecha = event.result as String;
-				ElementoService.getActividades();
+				ElementoService.getActividades(index.usuario);
 			}
 			private function getActividadesResult(event:ResultEvent):void
 			{

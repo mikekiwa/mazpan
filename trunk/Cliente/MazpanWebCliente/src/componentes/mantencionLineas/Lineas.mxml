@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" 
-	verticalScrollPolicy="off" title="Lineas" creationComplete="init()"
-	xmlns:ns1="componentes.mantencionLineas.*">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Lineas"
+	creationComplete="init()" xmlns:ns1="componentes.mantencionLineas.*" xmlns:ns2="componentes.*">
 	
 	<mx:states>
 		<mx:State name="AgregarState">
@@ -11,7 +10,17 @@
 			<mx:RemoveChild target="{image3}"/>
 			<mx:RemoveChild target="{lineas_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarLinea id="addLinea" x="0" y="0" complexClick="agregarLineaResult(event)"/>
+				<ns1:AgregarLinea id="addLinea" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AgregarMantencionesState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{lineas_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns2:Mantenciones  id="addMantenciones_cmp" x="0" y="0" complexClick="statesResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -19,10 +28,12 @@
 	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="allElementos" 	result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
 		<mx:operation name="delElemento" 	result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
+		<mx:operation name="getElemento"	result="getElementoResult(event)"	fault="ErrorFaultHandler(event, 'getElemento')"/>
 	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
+			import estadoResultado.FORMATO;
 			import mx.rpc.events.FaultEvent;
 			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
@@ -42,27 +53,21 @@
             {
             	currentState = "";
             	if(addLinea!=null) addLinea.clean();
-            	ElementoService.allElementos("LIN");
+            	init();
             }
 			private function init():void
 			{
-				ElementoService.allElementos("LIN");
+				ElementoService.allElementos(index.usuario,"LIN");
 			}
 			private function allElementosResult(event:ResultEvent):void
 			{
 				lineas_ac = event.result.Tables.Elementos.Rows.source as Array;
 			}
-			private function agregarLineaResult(event:ComplexEvent):void
+			private function statesResult(event:ComplexEvent):void
 			{
-/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
-				if(event.stateOrigin==AgregarLinea.nombre && event.objeto!=null)
-				{
-					lineas_ac.push(event.objeto);
-					lineas_dg.dataProvider = lineas_ac;
-				}
 				currentState = event.stateDestination;
+				init();
 			}
-			
 			private function filtar():void
 			{
 				if(filtro.selectedItem == 'Todas')
@@ -94,7 +99,6 @@
 					{
 						res = (element.codigo.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
 					}
-					   			
 	    		}
 	    		catch(error:Error)
 	    		{
@@ -105,12 +109,28 @@
 			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
-				if(result == 1)
-					ElementoService.allElementos("LIN");
-				else if(result == 0)
-					Alert.show("La linea yo no existe en el sistema, intente recargar");
-				else
-					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+				if(result == 1)			init();
+				else if(result == 0)	Alert.show("La linea yo no existe en el sistema, intente recargar");
+				else					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+			}
+			private function ver():void
+			{
+				if(lineas_dg.selectedIndex!=-1)
+					ElementoService.getElemento(lineas_dg.selectedItem);
+			}
+			private function getElementoResult(event:ResultEvent):void
+			{
+				var linea:Object = event.result as Object;
+				var datosLinea:FORMATO = new FORMATO();
+				datosLinea.vistaLinea(linea); 
+			}
+			private function mantenciones():void
+			{
+				if(lineas_dg.selectedIndex!=-1)
+				{
+					currentState='AgregarMantencionesState';
+					if(addMantenciones_cmp!=null) addMantenciones_cmp.parametros(lineas_dg.selectedItem as Object);
+				}
 			}
 		]]>
 	</mx:Script>
@@ -125,6 +145,10 @@
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) ElementoService.delElemento(lineas_dg.selectedItem.codigo)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/mantencion.png" id="mantancion" click="mantenciones()"/>
+	<mx:Image x="202" y="57" width="56" height="55" source="iconos/pdf.png" id="image1" click="ver()"/>
 	<mx:DataGrid id="lineas_dg" width="755" x="10" y="120" dataProvider="{lineas_ac}" height="330">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
@@ -132,7 +156,4 @@
 			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(lineas_dg.selectedIndex!=-1) ElementoService.delElemento(lineas_dg.selectedItem.codigo)"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>

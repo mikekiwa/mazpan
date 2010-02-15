@@ -49,17 +49,36 @@
 				{
 					user = event.result;
 					usuario = user.nombres + " " + user.apellidoPaterno + " " + user.apellidoMaterno;
-					TecnicoService.allTecnicos();
+					TecnicoService.allTecnicos(index.usuario);
 				}
 				else
 				{
-					Alert.show("Imposible cargar sus datos Básicos, Póongase en cantacto con el Administrador");
+					Alert.show("Imposible cargar sus datos Básicos, Póngase en cantacto con el Administrador");
 				}
 			}
 			private function allTecnicosResult(event:ResultEvent):void
 			{
-				tecnicos_ac = event.result.Tables.Tecnicos.Rows.source as Array;
+				var aux:Array = event.result.Tables.Tecnicos.Rows.source as Array;
+				tecnicos_ac = aux.filter(quitarUsuarioActual);
+				if(tecnicos_ac.length==0)
+				{
+					Alert.show("Lo siento no tiene un tecnico asociado");
+					atras();
+				}
 			}
+			private function quitarUsuarioActual(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	res = (element.rut.toLocaleLowerCase().search(user.rut.toLocaleLowerCase())!=0)&& res;
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
 			private function verificar():void
 			{
 				if(tecnicos_dg.selectedIndex!=-1 && actividad_ti.text.length>0 && detalle_ta.text.length>0)
@@ -92,7 +111,7 @@
 				s.actividad = actividad_ti.text;
 				s.prioridad = prioridad_cb.text;
 				s.plazo = plazo_ns.value.toString();
-				s.rutSolicitado = tecnicos_dg.selectedItem.rut;
+				s.idSolicitado = tecnicos_dg.selectedItem.id;
 				s.rutSolicitante = user.rut;
 				s.detalle = detalle_ta.text;
 				SolicitudService.addSolicitud(s);

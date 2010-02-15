@@ -1,8 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Usuario del Sistema">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Usuario del Sistema"
+	creationComplete="init()" xmlns:ns1="componentes.mantencionSistema.*">
+	
+	<mx:states>
+		<mx:State name="AgregarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{usuarios_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:AgregarUsuario id="addUsuario" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="EditarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{usuarios_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:EditarUsuario id="editUsuario" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allUsuario" 	result="allUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'allUsuario')"/>
+		<mx:operation name="delUsuario" 	result="delUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'delUsuario')"/>
+	</mx:WebService>
+	
 	<mx:Script>
 		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			
 			public static const nombre:String = "Usuarios";
+			
+			[Bindable]
+			private var usuarios_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				currentState = '';
+				if(addUsuario!=null) addUsuario.clean();
+				UsuarioService.allUsuario();
+			}
+			private function allUsuarioResult(event:ResultEvent):void
+			{
+				usuarios_ac = event.result.Tables.Usuarios.Rows.source as Array;
+			}
+			private function statesResult(event:ComplexEvent):void
+			{
+				init();
+				currentState = event.stateDestination;
+			}
+			private function eleccionFiltro():void
+			{
+				if(filtro.selectedItem == 'Todas')
+				{
+					input.visible = false;
+					input.text = "";
+				}
+				else
+				{
+					input.visible = true;
+				}
+				usuarios_dg.dataProvider = usuarios_ac.filter(filtrar);
+			}
+            private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+					if(filtro.selectedItem == 'Rut')
+					{
+					   	res = (element.rut_persona.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					} 
+	            	if(filtro.selectedItem == 'Numbre Usuario')
+					{
+					   	res = (element.userName.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+					}   		
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
+        	private function eliminar():void
+			{
+				 if(usuarios_dg.selectedIndex!=-1)
+				 	UsuarioService.delUsuario(usuarios_dg.selectedItem);
+			}
+			private function delUsuarioResult(event:ResultEvent):void
+			{
+				var resultado:int = event.result as int;
+				if(resultado==1) init();
+				else Alert.show("Imposible eliminar Usuario, inténtelo más tarde");
+			}
+			private function editar():void
+        	{
+        		if(usuarios_dg.selectedIndex!=-1)
+        		{
+        			currentState = 'EditarState';
+        			if(editUsuario!=null) editUsuario.parametros(usuarios_dg.selectedItem as Object);
+        		}
+        	}
 		]]>
 	</mx:Script>
+	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
+		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="eleccionFiltro()"/>
+		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="eleccionFiltro()">
+			<mx:Array>
+				<mx:String>Todas</mx:String>
+				<mx:String>Rut</mx:String>
+				<mx:String>Numbre Usuario</mx:String>
+			</mx:Array>
+		</mx:ComboBox>
+	</mx:Canvas>
+	
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState';if(addUsuario!=null) addUsuario.init();}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1" click="editar()"/>
+	
+	<mx:DataGrid x="10" y="120" width="755" height="330" id="usuarios_dg" dataProvider="{usuarios_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Rut" 				dataField="rut_persona"/>
+			<mx:DataGridColumn headerText="Numbre Usuario" 		dataField="userName"/>
+			<mx:DataGridColumn headerText="Contraseña"	 		dataField="password"/>
+			<mx:DataGridColumn headerText="Privilegios" 		dataField="privilegio"/>
+		</mx:columns>
+	</mx:DataGrid>
 </mx:Panel>

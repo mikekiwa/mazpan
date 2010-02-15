@@ -47,7 +47,11 @@
 			
 			private function validarUsuarioResult(event:ResultEvent):void
 			{	
-				if(event.result != '0') dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, event.result as String));
+				if(event.result != null)
+				{
+					usuario = event.result as Object;
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "cleanState", nombre, event.result.privilegio as String));
+				}
 				else Alert.show("Nombre de usuario o contraseña invalido");
 				username_ti.text="";
 				password_ti.text="";

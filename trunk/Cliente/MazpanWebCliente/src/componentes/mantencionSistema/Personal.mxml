@@ -10,7 +10,17 @@
 			<mx:RemoveChild target="{image3}"/>
 			<mx:RemoveChild target="{personal_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarPersonal id="addPersonal" x="0" y="0" complexClick="agregarPersonalResult(event)"/>
+				<ns1:AgregarPersonal id="addPersonal" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="EditarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{personal_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:EditarPersonal id="editPersonal" x="0" y="0" complexClick="statesResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -38,13 +48,16 @@
             }
 			public function init():void
 			{
-				PersonalService.allPersonal();
+				personal_ac = new Array();
+				currentState = '';
+				if(addPersonal!=null) addPersonal.clean();
+				PersonalService.allPersonal(index.usuario);
 			}
 			private function allPersonalResult(event:ResultEvent):void
 			{
 				personal_ac = event.result.Tables.Personal.Rows.source as Array;
 			}
-			private function agregarPersonalResult(event:ComplexEvent):void
+			private function statesResult(event:ComplexEvent):void
 			{
 				init();
 				currentState = event.stateDestination;
@@ -92,7 +105,7 @@
         	}
 			private function eliminar():void
 			{
-				 if(personal_dg.selectedIndex!=-1)
+				if(personal_dg.selectedIndex!=-1)
 				 	PersonalService.delPersonal(personal_dg.selectedItem);
 			}
 			private function delPersonalResult(event:ResultEvent):void
@@ -101,11 +114,19 @@
 				if(resultado==1) init();
 				else Alert.show("Imposible eliminar Personal, inténtelo más tarde");
 			}
+			private function editar():void
+			{
+				if(personal_dg.selectedIndex!=-1)
+				{
+					currentState = 'EditarState';
+					if(editPersonal!=null) editPersonal.parametros(personal_dg.selectedItem as Object);
+				}
+			}
 		]]>
 	</mx:Script>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
 	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1" click="editar()"/>
 	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
 		<mx:TextInput 	x="175" 	y="10" id="input" 	width="250" visible="false" change="eleccionFiltro()"/>
 		<mx:ComboBox 	x="10" 		y="10" id="filtro" change="eleccionFiltro()">

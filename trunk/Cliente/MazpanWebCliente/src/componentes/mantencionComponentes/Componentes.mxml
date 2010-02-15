@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Componentes" creationComplete="init()" xmlns:ns1="componentes.mantencionComponentes.*" verticalScrollPolicy="off">
-	
-	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allElementos" 		result="allElementosResult(event)" 		fault="ErrorFaultHandler(event, 'allElementos')"/>
-		<mx:operation name="delElemento" 		result="delElementoResult(event)" 		fault="ErrorFaultHandler(event, 'delElemento')"/>
-	</mx:WebService>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Componentes" 
+	creationComplete="init()" xmlns:ns1="componentes.mantencionComponentes.*" xmlns:ns2="componentes.*">
 	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{componentes_dg}"/>
 			<mx:RemoveChild target="{del}"/>
-			<mx:RemoveChild target="{edit}"/>
+			<mx:RemoveChild target="{mostrar}"/>
 			<mx:RemoveChild target="{input}"/>
 			<mx:RemoveChild target="{filtro}"/>
 			<mx:RemoveChild target="{add}"/>
 			<mx:RemoveChild target="{canvas1}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarComponente  id="addComponente" x="0" y="0" complexClick="agregarComponenteResult(event)"/>
+				<ns1:AgregarComponente  id="addComponente" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AgregarMantencionesState">
+			<mx:RemoveChild target="{componentes_dg}"/>
+			<mx:RemoveChild target="{del}"/>
+			<mx:RemoveChild target="{mostrar}"/>
+			<mx:RemoveChild target="{input}"/>
+			<mx:RemoveChild target="{filtro}"/>
+			<mx:RemoveChild target="{add}"/>
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:AddChild position="lastChild">
+				<ns2:Mantenciones  id="addMantenciones_cmp" x="0" y="0" complexClick="statesResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
 	
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allElementos" 		result="allElementosResult(event)" 		fault="ErrorFaultHandler(event, 'allElementos')"/>
+		<mx:operation name="delElemento" 		result="delElementoResult(event)" 		fault="ErrorFaultHandler(event, 'delElemento')"/>
+		<mx:operation name="getElemento"		result="getElementoResult(event)"		fault="ErrorFaultHandler(event, 'getElemento')"/>
+	</mx:WebService>
+	
 	<mx:Script>
 		<![CDATA[
+			import estadoResultado.FORMATO;
 			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
@@ -42,26 +57,20 @@
             {
             	currentState = "";
             	if(addComponente!=null) addComponente.clean();
-            	ElementoService.allElementos("CMP");
+            	init();
             }
 			private function init():void
 			{
-				ElementoService.allElementos("CMP");
+				ElementoService.allElementos(index.usuario,"CMP");
 			}
-			
 			private function allElementosResult(event:ResultEvent):void
 			{
 				componentes_ac = event.result.Tables.Elementos.Rows.source as Array;
 			}
-			private function agregarComponenteResult(event:ComplexEvent):void
+			private function statesResult(event:ComplexEvent):void
 			{
-/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
-				if(event.stateOrigin==AgregarComponente.nombre && event.objeto!=null)
-				{
-					componentes_ac.push(event.objeto);
-					componentes_dg.dataProvider = componentes_ac;
-				}
 				currentState = event.stateDestination;
+				init();
 			}
 			private function filtar():void
 			{
@@ -89,7 +98,6 @@
 					{
 						res = (element.codigo.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
 					}
-					   			
 	    		}
 	    		catch(error:Error)
 	    		{
@@ -100,12 +108,28 @@
 			private function delElementoResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
-				if(result == 1)
-					ElementoService.allElementos("CMP");
-				else if(result == 0)
-					Alert.show("El componente yo no existe en el sistema, intente recargar");
-				else
-					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+				if(result == 1)			init();
+				else if(result == 0)	Alert.show("El componente yo no existe en el sistema, intente recargar");
+				else					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+			}
+			private function ver():void
+			{
+				if(componentes_dg.selectedIndex!=-1)
+					ElementoService.getElemento(componentes_dg.selectedItem);
+			}
+			private function getElementoResult(event:ResultEvent):void
+			{
+				var component:Object = event.result as Object;
+				var datosComponente:FORMATO = new FORMATO();
+				datosComponente.vistaComponente(component); 
+			}
+			private function mantenciones():void
+			{
+				if(componentes_dg.selectedIndex!=-1)
+				{
+					currentState='AgregarMantencionesState';
+					if(addMantenciones_cmp!=null) addMantenciones_cmp.parametros(componentes_dg.selectedItem as Object);
+				}
 			}
 		]]>
 	</mx:Script>
@@ -120,7 +144,10 @@
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>
-	
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="add" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="del" click="if(componentes_dg.selectedIndex!=-1) ElementoService.delElemento(componentes_dg.selectedItem.codigo)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/mantencion.png" id="mantancion" click="mantenciones()"/>
+	<mx:Image x="202" y="57" width="56" height="55" source="iconos/pdf.png" id="mostrar" click="ver()"/>
 	<mx:DataGrid id="componentes_dg" width="755" x="10" y="120" dataProvider="{componentes_ac}" height="330">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
@@ -128,7 +155,4 @@
 			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="add" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="del" click="if(componentes_dg.selectedIndex!=-1) ElementoService.delElemento(componentes_dg.selectedItem.codigo)"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="edit"/>
 </mx:Panel>

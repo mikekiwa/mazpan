@@ -44,7 +44,7 @@
 				p.rut = numero_ti.text + "-" + digito_ti.text;
 				p.apellidoPaterno = apellidoPaterno_ti.text;
 				p.apellidoMaterno = apellidoMaterno_ti.text;
-				PersonalService.addPersonal(p);
+				PersonalService.addPersonal(index.usuario,p);
 			}
 			private function addPersonalResult(event:ResultEvent):void
 			{
@@ -72,16 +72,17 @@
 			}
    		]]>
    	</mx:Script>
-   	<mx:Label x="163" y="76" text="Nombre:"/>
-   	<mx:Label x="163" y="121" text="Rut:"/>
-   	<mx:Label x="163" y="169" text="Apellido Paterno:"/>
+   	
+   	<mx:Label x="163" y="115" text="Nombre:"/>
+	<mx:Label x="163" y="60" text="Rut:"/>
+	<mx:Label x="163" y="169" text="Apellido Paterno:"/>
    	<mx:Label x="163" y="220" text="Apellido Materno:"/>
-   	<mx:Label x="373" y="121" text="-" width="9"/>
-   	<mx:TextInput id="nombre_ti" x="299" y="74" width="248" maxChars="50" change="verificar()"/>
-   	<mx:TextInput id="numero_ti" x="299" y="119" width="70" maxChars="8" restrict="0-9" change="verificar()"/>
-   	<mx:TextInput id="digito_ti" x="387" y="119" width="20" maxChars="1" restrict="0-9k" change="verificar()"/>
-   	<mx:TextInput id="apellidoPaterno_ti" x="299" y="167" width="248" maxChars="50" change="verificar()"/>
+   	<mx:Label x="373" y="60" text="-" width="9"/>
+	<mx:TextInput id="numero_ti" x="299" y="58" width="70" maxChars="8" restrict="0-9" change="verificar()"/>
+	<mx:TextInput id="digito_ti" x="387" y="58" width="20" maxChars="1" restrict="0-9k" change="verificar()"/>
+	<mx:TextInput id="nombre_ti" x="299" y="113" width="248" maxChars="50" change="verificar()"/>
+	<mx:TextInput id="apellidoPaterno_ti" x="299" y="167" width="248" maxChars="50" change="verificar()"/>
    	<mx:TextInput id="apellidoMaterno_ti" x="299" y="218" width="248" maxChars="50" change="verificar()"/>
-   	<mx:Button id="guardar_btn" x="392" y="316" label="Guardar" enabled="false" click="guardar()"/>
+   	<mx:Button id="guardar_btn" x="389" y="316" label="Guardar" enabled="false" click="guardar()" width="75"/>
    	<mx:Button x="472" y="316" label="Cancelar" click="atras()"/>
 </mx:Canvas>

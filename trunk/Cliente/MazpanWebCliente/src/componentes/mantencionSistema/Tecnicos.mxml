@@ -10,7 +10,17 @@
 			<mx:RemoveChild target="{image3}"/>
 			<mx:RemoveChild target="{tecnicos_dg}"/>
 			<mx:AddChild position="lastChild">
-				<ns1:AgregarTecnico id="addTecnico" x="0" y="0" complexClick="agregarTecnicoResult(event)"/>
+				<ns1:AgregarTecnico id="addTecnico" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="EditarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{tecnicos_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:EditarTecnico id="editTecnico" x="0" y="0" complexClick="statesResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -42,13 +52,16 @@
             }
 			public function init():void
 			{
-				TecnicoService.allTecnicos();
+				tecnicos_ac = new Array();
+				currentState = '';
+				if(addTecnico!=null) addTecnico.clean();
+				TecnicoService.allTecnicos(index.usuario);
 			}
 			private function allTecnicosResult(event:ResultEvent):void
 			{
 				tecnicos_ac = event.result.Tables.Tecnicos.Rows.source as Array;
 			}
-			private function agregarTecnicoResult(event:ComplexEvent):void
+			private function statesResult(event:ComplexEvent):void
 			{
 				init();
 				currentState = event.stateDestination;
@@ -109,6 +122,14 @@
 	    		}
             	return res;
         	}
+        	private function editar():void
+        	{
+        		if(tecnicos_dg.selectedIndex!=-1)
+        		{
+        			currentState = 'EditarState';
+        			if(editTecnico!=null) editTecnico.parametros(tecnicos_dg.selectedItem as Object);
+        		}
+        	}
 		]]>
 	</mx:Script>
 	
@@ -127,7 +148,7 @@
 	</mx:Canvas>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState';if(addTecnico!=null)addTecnico.init();}"/>
 	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1" click="editar()"/>
 	<mx:DataGrid x="10" y="120" width="755" height="330" id="tecnicos_dg" dataProvider="{tecnicos_ac}">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Rut" dataField="rut"/>

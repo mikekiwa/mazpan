@@ -32,8 +32,6 @@
 			[Bindable]
 			private var recepcion_ac:ArrayCollection = new ArrayCollection(["Nueva","Usada"]);
 			
-			private var maquina:Object = null;
-			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
@@ -58,7 +56,7 @@
 				if(event=="agregar")
 				{
 					agregar_btn.enabled = false;
-					maquina = new Object();
+					var maquina:Object = new Object();
 					
 					maquina.superClass = "MAQ";
 					
@@ -91,7 +89,7 @@
 					
 					
 					
-					ElementoService.addElemento(maquina);
+					ElementoService.addElemento(index.usuario, maquina);
 				}
 				else
 				{
@@ -106,7 +104,7 @@
 				if(tipo_ti!=null) tipo_ti.text = "";
 				if(puestaMarcha_df!=null) puestaMarcha_df.text = "";
 				if(ubicacion_ti!=null) ubicacion_ti.text="";
-				if(codigo_ti!=null) codigo_ti.text=""; 
+				if(costo_ti!=null) costo_ti.text=""; 
 				if(vidaUtil_ti!=null) vidaUtil_ti.text="";
 				if(horasActuales_ti!=null) horasActuales_ti.text=""; 
 				if(horasPromedio_ti!=null) horasPromedio_ti.text=""; 
@@ -122,7 +120,7 @@
 				var result:int = event.result as int;
 				if(result == 1)
 				{
-					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, maquina));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
 				else if(result==-1)
 				{
@@ -141,9 +139,8 @@
 			}
 			private function revisar():void
 			{
-				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && vidaUtil_ti.text.length>0) agregar_btn.enabled=true;
+				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && vidaUtil_ti.text.length>0 && nombre_ti.text.length>0 && ubicacion_ti.text.length>0 && costo_ti.text.length>0 && horasActuales_ti.text.length>0 && horasPromedio_ti.text.length>0 && descripcion_ta.text.length>0) agregar_btn.enabled=true;
 				else agregar_btn.enabled=false;
-//aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
 			}
 			private function cargarUnion():void
 			{
@@ -151,36 +148,36 @@
 			}
 		]]>
 	</mx:Script>
-	<mx:TabNavigator id="tabNavigator" width="100%" height="420" horizontalCenter="0" fontWeight="normal" selectedIndex="1" change="cargarUnion()">
+	<mx:TabNavigator id="tabNavigator" width="100%" height="420" horizontalCenter="0" fontWeight="normal" change="cargarUnion()">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%" fontWeight="normal" fontStyle="normal">
 			<mx:Label x="53" y="10" text="Tipo Maquina"/>
 			<mx:ComboBox x="186" y="10" id="tipo_cb" dataProvider="{tipoMaquina_ac}" change="actualizarTipo(); revisar()"/>
 			<mx:TextInput x="186" y="10" width="319" id="tipo_ti" visible="false" maxChars="50" change="revisar()"/>
 			<mx:Image x="512" y="10" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
-			<mx:Label x="53" y="38" text="Codigo (*)"/>
+			<mx:Label x="53" y="38" text="Codigo"/>
 			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20" change="revisar()"/>
-			<mx:Label x="53" y="66" text="Puesta en Marcha (*)"/>
+			<mx:Label x="53" y="66" text="Puesta en Marcha"/>
 			<ns1:myDateField x="186" y="64" width="175" id="puestaMarcha_df" change="revisar()"/>
-			<mx:Label x="55" y="94" text="Nombre"/>
+			<mx:Label x="53" y="94" text="Nombre"/>
 			<mx:TextInput x="186" y="92" width="319" id="nombre_ti" maxChars="50" change="revisar()"/>
-			<mx:Label x="55" y="122" text="Ubicacion"/>
+			<mx:Label x="53" y="122" text="Ubicacion"/>
 			<mx:TextInput x="186" y="120" width="319" id="ubicacion_ti" maxChars="50" change="revisar()"/>
-			<mx:Label x="55" y="150" text="Estado"/>
+			<mx:Label x="53" y="150" text="Estado"/>
 			<mx:ComboBox x="186" y="148" id="estado_cb" dataProvider="{estado_ac}" change="revisar()"/>
 			<mx:Label x="443" y="150" text="Condicion de Recepcion"/>
 			<mx:ComboBox x="587" y="148" width="162" id="recepcion_cb" dataProvider="{recepcion_ac}" change="revisar()"/>
-			<mx:Label x="55" y="178" text="Costo"/>
+			<mx:Label x="53" y="178" text="Costo"/>
 			<mx:TextInput x="186" y="176" id="costo_ti" restrict="0-9" change="revisar()"/>
-			<mx:Label x="473" y="178" text="Horas vida util (*)"/>
+			<mx:Label x="443" y="178" text="Horas vida util"/>
 			<mx:TextInput x="587" y="176" restrict="0-9" id="vidaUtil_ti" width="162" change="revisar()"/>
 			<mx:Label x="53" y="206" text="Horas Actuales"/>
 			<mx:TextInput x="186" y="204" restrict="0-9" id="horasActuales_ti" width="160" change="revisar()"/>
 			<mx:Label x="443" y="208" text="Horas Diarias Promedio"/>
 			<mx:TextInput x="587" y="206" restrict="0-9" id="horasPromedio_ti" width="137" change="revisar()"/>
 			<mx:Image x="726" y="206" width="22" height="22" source="iconos/refresh.png" id="refrescar_btn"/>
-			<mx:Label x="53" y="232" text="Descripcion"/>
+			<mx:Label x="53" y="235" text="Descripcion"/>
 			<mx:TextArea x="186" y="234" width="565" maxChars="100" id="descripcion_ta" height="83" change="revisar()"/>
-			<mx:Label x="327.5" y="360" text="(*) Dato Obligatorio"/>
+			<mx:Label x="284.5" y="359" text="(*) Todos los datos son Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos del Fabricante" width="100%" height="100%">
 			<ns1:Fabricante id="fabricante_cmp" x="185" y="78"/>
