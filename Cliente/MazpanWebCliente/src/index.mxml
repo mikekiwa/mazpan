@@ -11,7 +11,8 @@
 	xmlns:ns8="componentes.mantencionComponentes.*" 
 	xmlns:ns9="componentes.mantencionLineas.*" 
 	xmlns:ns10="componentes.mantencionPlantas.*"
-	xmlns:ns11="estadoResultado.*">
+	xmlns:ns11="estadoResultado.*" 
+	xmlns:ns12="gastosVentas.*">
 	
 	<mx:states>
 		<mx:State name="Maquinas">
@@ -74,7 +75,7 @@
 		<mx:State name="Usuarios">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns5:Usuarios/>
+				<ns5:Usuarios id="usuarios_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		
@@ -126,36 +127,49 @@
 				<ns7:ListaSolicitudes id="listaSolicitudes_cmp" complexClick="comunicacion(event)"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="Ventas">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns12:Ventas id="ventas_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="AmarreClienteZona">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns12:AmarreClienteZona id="amarreClienteSector_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="PresupuestoVentas">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns12:PresupuestoVentas id="presupuestoVentas_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.Acordeon.MenuMantenciones;
 			import componentes.general.SolicitudesTrabajo;
 			import componentes.mantencionSistema.Personal;
 			import componentes.mantencionAgentesExternos.TrabajosAgentesExternos;
 			import componentes.mantencionPlantas.Plantas;
 			import componentes.mantencionLineas.Lineas;
-			import mx.collections.ArrayCollection;
-			import mx.controls.Alert;
+			import componentes.mantencionComponentes.Componentes;
 			import estadoResultado.Amarre;
 			import estadoResultado.HTTPUtil;
-			import componentes.mantencionComponentes.Componentes;
-			import componentes.Acordeon.MenuMantenciones;
 			import eventos.ComplexEvent;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
 			
 			
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			public static var URL:String = "http://localhost:7070/ServerApp/";		//Visual Studio
-			//public static var URL:String = "http://192.168.3.117/Server/"; 		//cliente Local
-			//public static var URL:String = "http://200.68.44.234/Server/"; 		//cliente Web
-			
-			//public static var URL:String = "http://192.168.3.130/server/";
-			//public static var URL:String = "http://192.168.3.131/Server/";	
-			//public static var URL:String = "http://192.168.3.116/Server/";
-			
+			public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
+			//public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
+			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
@@ -207,6 +221,9 @@
 					if(event.stateDestination == Personal.nombre) personal_cmp.init();
 					if(event.stateDestination == Tecnicos.nombre) tecnicos_cmp.init();
 					if(event.stateDestination == SolicitudesTrabajo.nombre) solicitud_cmp.init();
+					if(event.stateDestination == Usuarios.nombre) usuarios_cmp.init();
+					if(event.stateDestination == Plan.nombre) plan_cmp.init();
+					if(event.stateDestination == ListaSolicitudes.nombre) listaSolicitudes_cmp.init();
 				}
 				else
 				{

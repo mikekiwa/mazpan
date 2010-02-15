@@ -51,8 +51,8 @@
 			{
 				cuentas = event.result.Tables.Cuentas.Rows.source as Array;
 				for(var i:int=0; i<cuentas.length; i++)
-				{//Con esto a cada una de las cuenta se le asigna el cajon correspondiente en SAP,
-				 //esto porque el cajon es solo un label en SAP
+				{	//Con esto a cada una de las cuenta se le asigna el cajon correspondiente en SAP,
+				 	//esto porque el cajon es solo un label en SAP
 					if(cuentas[i].GroupMask == 4) cuentas[i].Cajon = "Ingresos Operacionales";
 					if(cuentas[i].GroupMask == 5) cuentas[i].Cajon = "Costos Operacionales";
 					if(cuentas[i].GroupMask == 6) cuentas[i].Cajon = "Gastos Operacionales";

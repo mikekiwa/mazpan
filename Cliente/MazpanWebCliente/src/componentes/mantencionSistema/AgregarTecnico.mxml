@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
 	
 	<mx:WebService id="PersonalService" 		wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="allPersonal" 	result="allPersonalResult(event)" 	fault="ErrorFaultHandler(event, 'allPersonal')"/>
@@ -32,7 +32,7 @@
    			public function init():void
 			{
 				clean();
-				PersonalService.allPersonal();
+				PersonalService.allPersonal(index.usuario);
 			}
 			private function allPersonalResult(event:ResultEvent):void
 			{

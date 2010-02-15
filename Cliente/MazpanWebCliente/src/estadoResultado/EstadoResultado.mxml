@@ -46,6 +46,7 @@
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            	defaultValues();
             }
             private function init():void
             {

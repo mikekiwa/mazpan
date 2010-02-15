@@ -15,8 +15,8 @@
 		</mx:State>
 	</mx:states>
 	
-	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allElementos" 	result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
+	<mx:WebService id="PlantaService" 		wsdl="{index.URL + 'PlantaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allPlantas" 	result="allPlantasResult(event)" 	fault="ErrorFaultHandler(event, 'allPlantas')"/>
 		<mx:operation name="delElemento" 		result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
 	</mx:WebService>
 	
@@ -41,27 +41,21 @@
             {
             	currentState = "";
             	if(addPlanta!=null) addPlanta.clean();
-            	ElementoService.allElementos("PLT");
+            	PlantaService.allPlantas();
             }
 			private function init():void
 			{
-				ElementoService.allElementos("PLT");
+				PlantaService.allPlantas();
 			}
-			private function allElementosResult(event:ResultEvent):void
+			private function allPlantasResult(event:ResultEvent):void
 			{
-				plantas_ac = event.result.Tables.Elementos.Rows.source as Array;
+				plantas_ac = event.result.Tables.Plantas.Rows.source as Array;
 			}
 			private function agregarPlantaResult(event:ComplexEvent):void
 			{
-/*Aqui se cambia la igualdad correspondiente, en este caso nombre del componente para agregar componentes*/
-				if(event.stateOrigin==AgregarPlanta.nombre && event.objeto!=null)
-				{
-					plantas_ac.push(event.objeto);
-					plantas_dg.dataProvider = plantas_ac;
-				}
 				currentState = event.stateDestination;
+				init();
 			}
-			
 			private function filtar():void
 			{
 				if(filtro.selectedItem == 'Todas')
@@ -104,7 +98,7 @@
 			{
 				var result:int = event.result as int;
 				if(result == 1)
-					ElementoService.allElementos("PLT");
+					PlantaService.allPlantas();
 				else if(result == 0)
 					Alert.show("La planta yo no existe en el sistema, intente recargar");
 				else
@@ -123,6 +117,9 @@
 			</mx:Array>
 		</mx:ComboBox>
 	</mx:Canvas>
+	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
+	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(plantas_dg.selectedIndex!=-1) PlantaService.delElemento(plantas_dg.selectedItem.codigo)"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/pdf.png" id="image1"/>
 	<mx:DataGrid id="plantas_dg" width="755" x="10" y="120" dataProvider="{plantas_ac}" height="330">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
@@ -130,7 +127,4 @@
 			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="300"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
-	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(plantas_dg.selectedIndex!=-1) ElementoService.delElemento(plantas_dg.selectedItem.codigo)"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
 </mx:Panel>

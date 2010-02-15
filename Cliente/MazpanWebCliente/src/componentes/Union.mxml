@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.mantencionSistema.Usuarios;
 			import mx.rpc.events.FaultEvent;
 			import mx.collections.ArrayCollection;
 			import mx.rpc.events.ResultEvent;
@@ -27,7 +28,7 @@
 			public function init(superClass:String="CMP"):void
 			{
 				this.superClass = superClass;
-				ElementoService.allElementos(this.superClass);	
+				ElementoService.allElementos(index.usuario,this.superClass);	
 			}
 			private function allElementosResult(event:ResultEvent):void
 			{
@@ -41,7 +42,6 @@
 			{
 				if(componentes_dg.selectedIndex!=-1) componentes_ac.removeItemAt(componentes_dg.selectedIndex);
 			}
-			
 			public function getComponentesMaquina():ArrayCollection
 			{
 				return componentes_ac;

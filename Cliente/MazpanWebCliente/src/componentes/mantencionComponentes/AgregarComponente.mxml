@@ -26,8 +26,6 @@
 			[Bindable]
 			public static var nombre:String = "AgregarComponente";
 			
-			private var componente:Object = null;
-			
 			[Bindable]
 			private var tipoComponente_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
@@ -62,7 +60,7 @@
 				if(event=="agregar")
 				{
 					agregar_btn.enabled = false;
-					componente = new Object();
+					var componente:Object = new Object();
 					
 					componente.superClass = "CMP";
 					
@@ -87,7 +85,7 @@
 					if(actividadesMantencion_cmp!=null) componente.mantenciones = actividadesMantencion_cmp.getMantenciones();
 					
 					
-					ElementoService.addElemento(componente);
+					ElementoService.addElemento(index.usuario, componente);
 				}
 				else
 				{
@@ -116,7 +114,7 @@
 				if(result == 1)
 				{
 					clean();
-					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, componente));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
 				else if(result==0)
 				{

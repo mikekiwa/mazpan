@@ -17,6 +17,7 @@
 	
 	<mx:WebService id="SolicitudService" 		wsdl="{index.URL + 'SolicitudService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="allSolicitudes" 	result="allSolicitudesResult(event)" 	fault="ErrorFaultHandler(event, 'allSolicitudes')"/>
+		<mx:operation name="delSolicitud" 		result="delSolicitudResult(event)" 		fault="ErrorFaultHandler(event, 'delSolicitud')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -25,6 +26,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 			import eventos.ComplexEvent;
@@ -87,8 +89,16 @@
         	}
         	private function eliminar():void
         	{
-        		
+        		if(solicitudes_dg.selectedIndex!=-1)
+	        		SolicitudService.delSolicitud(solicitudes_dg.selectedItem);
         	}
+        	private function delSolicitudResult(event:ResultEvent):void
+        	{
+        		var result:int = event.result as int;
+				if(result == 1)			init();
+				else if(result == 0)	Alert.show("La Solicitud yo no existe en el sistema, intente recargar");
+				else					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+			} 
 		]]>
 	</mx:Script>
 	<mx:Canvas x="10" y="10" width="496" height="39" cornerRadius="6" borderStyle="solid" id="canvas1">
@@ -105,7 +115,7 @@
 	</mx:Canvas>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState';if(addSolicitud_cmp!=null)addSolicitud_cmp.init();}"/>
 	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="eliminar()"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="image1" visible="false"/>
 	<mx:DataGrid x="10" y="120" width="755" height="330" id="solicitudes_dg" dataProvider="{solicitudes_ac}">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Actividad" dataField="actividad"/>

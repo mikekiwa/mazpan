@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" xmlns:ns1="componentes.*">
 	
-	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="addElemento" 	result="addElementoResult(event)" fault="ErrorFaultHandler(event, 'addElemento')"/>
+	<mx:WebService id="PlantaService" 		wsdl="{index.URL + 'PlantaService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="addPlanta" 	result="addPlantaResult(event)" fault="ErrorFaultHandler(event, 'addPlanta')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -26,7 +26,6 @@
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-			
 			private function onClick(event:String):void
 			{
 				if(event=="agregar")
@@ -34,23 +33,13 @@
 					agregar_btn.enabled = false;
 					planta = new Object();
 					
-					planta.superClass = "PLT";
-					
-					//Hoja 1
 					planta.nombre = nombre_ti.text;
 					planta.codigo = codigo_ti.text;
 					planta.encargado = encargado_ti.text;
 					planta.puestaMarcha = puestaMarcha_df.text;
 					planta.descripcion = descripcion_ta.text;
 					
-					//Hoja 2
-					if(union_cmp!=null) planta.subordinados = union_cmp.getComponentesMaquina();
-					
-					//Hoja 3
-					if(actividadesMantencion_cmp!=null) planta.mantenciones = actividadesMantencion_cmp.getMantenciones();
-					
-					
-					ElementoService.addElemento(planta);
+					PlantaService.addPlanta(planta);
 				}
 				else
 				{
@@ -60,21 +49,19 @@
 			}
 			public function clean():void
 			{
-				if(nombre_ti!=null) nombre_ti.text="";
-				if(codigo_ti!=null)codigo_ti.text="";
-				if(encargado_ti!=null) encargado_ti.text="";
-				if(puestaMarcha_df!=null) puestaMarcha_df.text = "";
-				if(descripcion_ta!=null) descripcion_ta.text="";
-				if(actividadesMantencion_cmp!=null) actividadesMantencion_cmp.clean();
-				if(union_cmp!=null) union_cmp.clean();
-				tabNavigator.selectedIndex = 0;
+				if(nombre_ti!=null) 		nombre_ti.text="";
+				if(codigo_ti!=null)			codigo_ti.text="";
+				if(encargado_ti!=null) 		encargado_ti.text="";
+				if(puestaMarcha_df!=null) 	puestaMarcha_df.text = "";
+				if(descripcion_ta!=null) 	descripcion_ta.text="";
+				if(agregar_btn!=null)		agregar_btn.enabled=false;
 			}
-			private function addElementoResult(event:ResultEvent):void
+			private function addPlantaResult(event:ResultEvent):void
 			{
 				var result:int = event.result as int;
 				if(result == 1)
 				{
-					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, planta));
+					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
 				else if(result==0)
 				{
@@ -87,40 +74,25 @@
 			}
 			private function revisar():void
 			{
-				//if(codigo_ti.length>0) agregar_btn.enabled=true;
-//No se cual de estas dos lines es la que corresponde, revisar
-				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0) agregar_btn.enabled=true;
+				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && nombre_ti.text.length>0 && encargado_ti.text.length>0 && descripcion_ta.text.length>0) agregar_btn.enabled=true;
 				else agregar_btn.enabled=false;
 //aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
-			}
-			private function cargarUnion():void
-			{
-				if(tabNavigator.selectedIndex==1) union_cmp.init("LIN");;
 			}
 		]]>
 	</mx:Script>
 	
-	<mx:TabNavigator y="0" width="100%" height="421" id="tabNavigator" change="cargarUnion()">
-		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
-			<mx:Label x="197.5" y="47" text="Nombre de la Planta"/>
-			<mx:TextInput x="361.5" y="45" id="nombre_ti" width="213" maxChars="50" change="revisar()"/>
-			<mx:Label x="197.5" y="94" text="Código (*)"/>
-			<mx:TextInput x="361.5" y="90" id="codigo_ti" width="213" maxChars="20" change="revisar()"/>
-			<mx:Label x="197.5" y="137" text="Encargado"/>
-			<mx:TextInput x="361.5" y="135" id="encargado_ti" width="213" maxChars="50" change="revisar()"/>
-			<mx:Label x="197.5" y="179" text="Puesta en Marcha (*)"/>
-			<ns1:myDateField x="361.5" y="177" width="160" id="puestaMarcha_df" change="revisar()"/>
-			<mx:Label x="197.5" y="219" text="Descripcion"/>
-			<mx:TextArea x="361.5" y="218" width="213" height="120" id="descripcion_ta" maxChars="100" change="revisar()"/>
-			<mx:Label x="327.5" y="360" text="(*) Dato Obligatorio"/>
-		</mx:Canvas>
-		<mx:Canvas label="Lineas" width="100%" height="100%">
-			<ns1:Union id="union_cmp"/>
-		</mx:Canvas>
-		<mx:Canvas label="Actividades de Mantención" width="100%" height="100%">
-			<ns1:ActividadesMantencion id="actividadesMantencion_cmp"/>
-		</mx:Canvas>
-	</mx:TabNavigator>
-	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
-	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
+	<mx:Label x="177.5" y="42" text="Código"/>
+	<mx:TextInput x="341.5" y="38" id="codigo_ti" width="213" maxChars="20" change="revisar()"/>
+	<mx:Label x="177.5" y="86" text="Nombre de la Planta"/>
+	<mx:TextInput x="341.5" y="84" id="nombre_ti" width="213" maxChars="50" change="revisar()"/>
+	<mx:Label x="177.5" y="133" text="Encargado"/>
+	<mx:TextInput x="341.5" y="131" id="encargado_ti" width="213" maxChars="50" change="revisar()"/>
+	<mx:Label x="177.5" y="175" text="Puesta en Marcha"/>
+	<ns1:myDateField x="341.5" y="173" width="160" id="puestaMarcha_df" change="revisar()"/>
+	<mx:Label x="177.5" y="215" text="Descripcion"/>
+	<mx:TextArea x="341.5" y="214" width="213" height="120" id="descripcion_ta" maxChars="100" change="revisar()"/>
+	<mx:Label x="341.5" y="356" text="(*) Todos los datos son obligatorios"/>
+	<mx:Button x="399.5" y="412" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
+	<mx:Button x="479.5" y="412" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
+	
 </mx:Canvas>
