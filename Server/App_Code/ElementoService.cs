@@ -66,35 +66,34 @@ public class ElementoService : System.Web.Services.WebService
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod(Description="Permite agregar un elemento")]
-    public int addElemento(Elemento e)
+    public int addElemento(Usuario u, Elemento e)
     {
         if(!existe(e.codigo))
         {
-            if (e.superClass.CompareTo("CMP") == 0) return addComponente(e);
-            if (e.superClass.CompareTo("MAQ") == 0) return addMaquina(e);
-            if (e.superClass.CompareTo("LIN") == 0) return addLinea(e);
-            if (e.superClass.CompareTo("PLT") == 0) return addPlanta(e);
+            if (e.superClass.CompareTo("CMP") == 0) return addComponente(u,e);
+            if (e.superClass.CompareTo("MAQ") == 0) return addMaquina(u,e);
+            if (e.superClass.CompareTo("LIN") == 0) return addLinea(u,e);
             return 2;
         }
 
         return 0;//EOC
     }
     
-    
+
     /// <summary>
     /// retorna una tabla con los elementos requeridos
     /// </summary>
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod(Description = "Permite obtener todos los elementos de la super clase especificada")]
-    public DataTable allElementos(string superClass)
+    public DataTable allElementos(Usuario u, string superClass)
     {
         DataTable dt = new DataTable();
         dt.TableName = "Elementos";
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = "SELECT * FROM [PracticaDb].[dbo].[Elemento] WHERE super='"+superClass+"'";
+        String query = " SELECT * FROM [PracticaDb].[dbo].[Elemento] WHERE super='"+superClass+"' AND planta='"+u.planta+"' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -181,43 +180,13 @@ public class ElementoService : System.Web.Services.WebService
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod]
-    public int addLinea(Elemento m)
+    public int addLinea(Usuario u, Elemento m)
     {
         DateTime t = toDateTime(m.puestaMarcha);
         string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
 
-        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,nombre,codigo,encargado,puestaMarcha,descripcion) " +
-                       " VALUES('LIN','" + m.nombre + "','" + m.codigo + "','" + m.encargado + "','" + puestaMarcha + "','" + m.descripcion + "') ";
-
-        if (Ejecutar(query) == 1)//si insercion exitosa
-            if (addActividades(m.mantenciones, m.codigo) == 1)
-                if (addPlan(m.mantenciones, m.codigo, m.puestaMarcha) == 1)
-                    if (addUnion(m.subordinados, m.codigo) == 1) return 1;
-                    else return -5;
-                else return -4;
-            else return -3;
-        else return -1;
-    }
-
-
-    /// <summary>
-    /// retorna 1 si se completa la insercion
-    ///        -1 si no se pueden insertar los datos basicos de la planta
-    ///        -2 si no se puede insertar especificaciones de la planta
-    ///        -3 si no se puede insertar mantenciones de la planta
-    ///        -4 si no se puede insertar actividades de mantencion de la planta
-    ///        -5 si no se puede insertar los componentes de la planta
-    /// </summary>
-    /// <param name="c">El componente a insertar</param>
-    /// <returns></returns>
-    [WebMethod]
-    public int addPlanta(Elemento m)
-    {
-        DateTime t = toDateTime(m.puestaMarcha);
-        string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
-
-        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,nombre,codigo,encargado,puestaMarcha,descripcion) " +
-                       " VALUES('PLT','" + m.nombre + "','" + m.codigo + "','" + m.encargado + "','" + puestaMarcha + "','" + m.descripcion + "') ";
+        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,nombre,codigo,encargado,puestaMarcha,descripcion,planta) " +
+                       " VALUES('LIN','" + m.nombre + "','" + m.codigo + "','" + m.encargado + "','" + puestaMarcha + "','" + m.descripcion + "','"+u.planta+"') ";
 
         if (Ejecutar(query) == 1)//si insercion exitosa
             if (addActividades(m.mantenciones, m.codigo) == 1)
@@ -241,13 +210,13 @@ public class ElementoService : System.Web.Services.WebService
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod]
-    public int addMaquina(Elemento m)
+    public int addMaquina(Usuario u,Elemento m)
     {
         DateTime t = toDateTime(m.puestaMarcha);
         string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
 
-        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,tipo,codigo,puestaMarcha,nombre,ubicacion,estado,condicionRecepcion,costo,horasVidaUtil,horasActuales,horasDiariasPromedio,descripcion,marca,ano,pais,modelo,serie,fabricante)" +
-                       " VALUES('MAQ','" + m.tipo + "','" + m.codigo + "','" + puestaMarcha + "','" + m.nombre + "','" + m.ubicacion + "','" + m.estado + "','" + m.condicionRecepcion + "','" + m.costo + "','" + m.horasVidaUtil + "','" + m.horasActuales + "','" + m.horasDiariasPromedio + "','" + m.descripcion + "','" + m.fabricante.marca + "','" + m.fabricante.ano + "','" + m.fabricante.pais + "','" + m.fabricante.modelo + "','" + m.fabricante.serie + "','" + m.fabricante.fabricante + "')";
+        String query = " INSERT INTO [PracticaDb].[dbo].[Elemento](super,tipo,codigo,puestaMarcha,nombre,ubicacion,estado,condicionRecepcion,costo,horasVidaUtil,horasActuales,horasDiariasPromedio,descripcion,marca,ano,pais,modelo,serie,fabricante,planta)" +
+                       " VALUES('MAQ','" + m.tipo + "','" + m.codigo + "','" + puestaMarcha + "','" + m.nombre + "','" + m.ubicacion + "','" + m.estado + "','" + m.condicionRecepcion + "','" + m.costo + "','" + m.horasVidaUtil + "','" + m.horasActuales + "','" + m.horasDiariasPromedio + "','" + m.descripcion + "','" + m.fabricante.marca + "','" + m.fabricante.ano + "','" + m.fabricante.pais + "','" + m.fabricante.modelo + "','" + m.fabricante.serie + "','" + m.fabricante.fabricante + "','"+u.planta+"')";
 
         if (Ejecutar(query) == 1)//si insercion exitosa
             if (addEspecificaciones(m.especificaciones, m.codigo) == 1)//si insercion exitosa
@@ -293,14 +262,13 @@ public class ElementoService : System.Web.Services.WebService
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod]
-    public int addComponente(Elemento c)
+    public int addComponente(Usuario u,Elemento c)
     {
-
         DateTime t = toDateTime(c.puestaMarcha);
         string puestaMarcha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
 
-        string query = " INSERT INTO [PracticaDb].[dbo].[Elemento]([super],[tipo],[codigo],[sistema],[nombre],[costo],[vidaUtil],[descripcion],[marca],[ano],[pais],[modelo],[fabricante],[puestaMarcha])" +
-                       " VALUES('CMP','" + c.tipo + "','" + c.codigo + "','" + c.sistema + "','" + c.nombre + "','" + c.costo + "','" + c.vidaUtil + "','" + c.descripcion + "','" + c.fabricante.marca + "','" + c.fabricante.ano + "','" + c.fabricante.pais + "','" + c.fabricante.modelo + "','" + c.fabricante.fabricante + "','" + puestaMarcha + "')";
+        string query = " INSERT INTO [PracticaDb].[dbo].[Elemento]([super],[tipo],[codigo],[sistema],[nombre],[costo],[horasVidaUtil],[descripcion],[marca],[ano],[pais],[modelo],[serie],[fabricante],[puestaMarcha],[planta])" +
+                       " VALUES('CMP','" + c.tipo + "','" + c.codigo + "','" + c.sistema + "','" + c.nombre + "','" + c.costo + "','" + c.horasVidaUtil + "','" + c.descripcion + "','" + c.fabricante.marca + "','" + c.fabricante.ano + "','" + c.fabricante.pais + "','" + c.fabricante.modelo + "','"+c.fabricante.serie+"','" + c.fabricante.fabricante + "','" + puestaMarcha + "','"+u.planta+"')";
 
         if (Ejecutar(query) == 1)//si insercion exitosa
             if (addEspecificaciones(c.especificaciones, c.codigo) == 1)//si insercion exitosa
@@ -391,7 +359,7 @@ public class ElementoService : System.Web.Services.WebService
 
 
     [WebMethod]
-    public DataTable getActividades()
+    public DataTable getActividades(Usuario u)
     {
         DataTable dt = new DataTable();
         dt.TableName = "Plan";
@@ -405,7 +373,7 @@ public class ElementoService : System.Web.Services.WebService
         string query = " SELECT	T1.nombre, T2.actividad, T2.id, T2.planificada, T2.frecuencia, T2.codigo "+
                        " FROM	PracticaDb.dbo.Elemento		    T1 "+
                        " JOIN	PracticaDb.dbo.[Plan]			T2	on T1.codigo=T2.codigo  "+
-                       " WHERE	T2.realizada<T2.planificada		AND T2.planificada<='" + fecha + "'";
+                       " WHERE	T2.realizada<T2.planificada		AND T2.planificada<='" + fecha + "'     AND T1.planta='"+u.planta+"'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -463,6 +431,128 @@ public class ElementoService : System.Web.Services.WebService
 
         if(actividades.Count == result) return 1;
         else return -1;
+    }
+
+
+    [WebMethod]
+    public Elemento getElemento(Elemento e)
+    {
+        SqlConnection cn = new SqlConnection(coneccionString);
+        cn.Open();
+        string query = " SELECT codigo,super,convert(varchar(50),puestaMarcha,105),nombre,encargado,ubicacion,estado,condicionRecepcion,costo,horasVidaUtil,horasActuales,horasDiariasPromedio,descripcion,marca,ano,pais,modelo,serie,fabricante,tipo,sistema " +
+                       " FROM [PracticaDb].[dbo].Elemento Where codigo='" + e.codigo + "'";
+        SqlCommand selectUsuarios = new SqlCommand(query, cn);
+
+        SqlDataReader reader = selectUsuarios.ExecuteReader();
+
+        Elemento salida = null; ;
+        Fabricante f = null;
+
+        if (reader.Read())
+        {
+            salida = new Elemento();
+            f = new Fabricante();
+
+            if (!reader.IsDBNull(0)) salida.codigo = reader.GetString(0); else salida.codigo = null;
+            if (!reader.IsDBNull(1)) salida.superClass = reader.GetString(1); else salida.superClass = null;
+            if (!reader.IsDBNull(2)) salida.puestaMarcha = reader.GetString(2); else salida.puestaMarcha = null;
+            if (!reader.IsDBNull(3)) salida.nombre = reader.GetString(3); else salida.nombre = null;
+            if (!reader.IsDBNull(4)) salida.encargado = reader.GetString(4); else salida.encargado = null;
+            if (!reader.IsDBNull(5)) salida.ubicacion = reader.GetString(5); else salida.ubicacion = null;
+            if (!reader.IsDBNull(6)) salida.estado = reader.GetString(6); else salida.estado = null;
+            if (!reader.IsDBNull(7)) salida.condicionRecepcion = reader.GetString(7); else salida.condicionRecepcion = null;
+            if (!reader.IsDBNull(8)) salida.costo = reader.GetInt32(8).ToString(); else salida.costo = null;
+            if (!reader.IsDBNull(9)) salida.horasVidaUtil = reader.GetInt32(9).ToString(); else salida.horasVidaUtil = null;
+            if (!reader.IsDBNull(10)) salida.horasActuales = reader.GetInt32(10).ToString(); else salida.horasActuales = null;
+            if (!reader.IsDBNull(11)) salida.horasDiariasPromedio = reader.GetInt32(11).ToString(); else salida.horasDiariasPromedio = null;
+            if (!reader.IsDBNull(12)) salida.descripcion = reader.GetString(12); else salida.descripcion = null;
+            if (!reader.IsDBNull(13)) f.marca = reader.GetString(13); else f.marca = null;
+            if (!reader.IsDBNull(14)) f.ano = reader.GetInt32(14).ToString(); else f.ano = null;
+            if (!reader.IsDBNull(15)) f.pais = reader.GetString(15); else f.pais = null;
+            if (!reader.IsDBNull(16)) f.modelo = reader.GetString(16); else f.modelo = null;
+            if (!reader.IsDBNull(17)) f.serie = reader.GetString(17); else f.serie = null;
+            if (!reader.IsDBNull(18)) f.fabricante = reader.GetString(18); else f.fabricante = null;
+            if (!reader.IsDBNull(19)) salida.tipo = reader.GetString(19); else salida.tipo = null;
+            if (!reader.IsDBNull(20)) salida.sistema = reader.GetString(20); else salida.sistema = null;
+            salida.fabricante = f;
+            salida.mantenciones = getMantenciones(e);
+            salida.especificaciones = getEspecificaciones(e);
+            salida.subordinados = getSubordinados(e);
+        }
+
+        return salida;
+    }
+
+    private List<Elemento> getSubordinados(Elemento e)
+    {
+        SqlConnection cn = new SqlConnection(coneccionString);
+        cn.Open();
+        string query = " SELECT T3.codigo, T3.nombre,T3.descripcion,T3.super FROM [PracticaDb].[dbo].Elemento T1 JOIN [PracticaDb].[dbo].[Union] T2 ON T1.codigo=T2.padre JOIN [PracticaDb].[dbo].Elemento T3 ON T2.hijo=T3.codigo WHERE T2.padre='" + e.codigo + "'";
+        SqlCommand selectUsuarios = new SqlCommand(query, cn);
+
+        SqlDataReader reader = selectUsuarios.ExecuteReader();
+
+        List<Elemento> salida = new List<Elemento>();
+
+        while (reader.Read())
+        {
+            Elemento elemento = new Elemento();
+
+            if (!reader.IsDBNull(0)) elemento.codigo = reader.GetString(0); else elemento.codigo = null;
+            if (!reader.IsDBNull(1)) elemento.nombre = reader.GetString(1); else elemento.nombre = null;
+            if (!reader.IsDBNull(2)) elemento.descripcion = reader.GetString(2); else elemento.descripcion = null;
+            if (!reader.IsDBNull(3)) elemento.superClass = reader.GetString(3); else elemento.superClass = null;
+            salida.Add(elemento);
+        }
+        cn.Close();
+        return salida;
+    }
+ 
+    private List<Especificacion> getEspecificaciones(Elemento e)
+    {
+        SqlConnection cn = new SqlConnection(coneccionString);
+        cn.Open();
+        string query = "SELECT * FROM [PracticaDb].[dbo].Especificaciones WHERE codigo='" + e.codigo + "'";
+        SqlCommand selectUsuarios = new SqlCommand(query, cn);
+
+        SqlDataReader reader = selectUsuarios.ExecuteReader();
+
+        List<Especificacion> salida = new List<Especificacion>();
+        
+        while (reader.Read())
+        {
+            Especificacion espeficacion = new Especificacion();
+            if (!reader.IsDBNull(1)) espeficacion.especificacion = reader.GetString(1); else espeficacion.especificacion = null;
+            if (!reader.IsDBNull(2)) espeficacion.valor = reader.GetString(2); else espeficacion.valor = null;
+
+            salida.Add(espeficacion);
+        }
+        cn.Close();
+        return salida;
+    }
+
+    private List<Mantencion> getMantenciones(Elemento e)
+    {
+        SqlConnection cn = new SqlConnection(coneccionString);
+        cn.Open();
+        string query = "SELECT * FROM [PracticaDb].[dbo].Actividades WHERE codigo='" + e.codigo + "'";
+        SqlCommand selectUsuarios = new SqlCommand(query, cn);
+
+        SqlDataReader reader = selectUsuarios.ExecuteReader();
+
+        List<Mantencion> salida = new List<Mantencion>();
+
+        while (reader.Read())
+        {
+            Mantencion actividad = new Mantencion();
+            if (!reader.IsDBNull(1)) actividad.actividad = reader.GetString(1); else actividad.actividad = null;
+            if (!reader.IsDBNull(3)) actividad.mantencion = reader.GetString(3); else actividad.mantencion = null;
+            if (!reader.IsDBNull(4)) actividad.frecuencia = reader.GetString(4); else actividad.frecuencia = null;
+
+            salida.Add(actividad);
+        }
+        cn.Close();
+        return salida;
     }
 }
 

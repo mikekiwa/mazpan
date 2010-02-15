@@ -11,11 +11,11 @@ public class Personal
     private string n;//nombres
     private string ap;//apellidoPaterno
     private string am;//apellidoMaterno
+    private string p;//planta
 
 	public Personal()
 	{
 	}
-
 
     public string rut
     {
@@ -36,5 +36,10 @@ public class Personal
     {
         set { am = value; }
         get { return am; }
+    }
+    public string planta
+    {
+        set { p = value; }
+        get { return p; }
     }
 }

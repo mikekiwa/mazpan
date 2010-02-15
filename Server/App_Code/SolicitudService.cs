@@ -56,7 +56,7 @@ public class SolicitudService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T2.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.rutSolicitado=T4.rutTecnico WHERE T3.userName='" + u.user + "' AND T3.password='" + u.pass + "' AND T1.realizada<T1.solicitada ";
+        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T2.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.idSolicitado=T4.id WHERE T3.userName='" + u.user + "' AND T3.password='" + u.pass + "' AND T1.realizada<T1.solicitada ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -77,14 +77,14 @@ public class SolicitudService : System.Web.Services.WebService
     /// </summary>
     /// <returns>Lista de solicitudes de trabajos en el sistema</returns>
     [WebMethod]
-    public DataTable listSolicitudes()
+    public DataTable listSolicitudes(Usuario u)
     {
         DataTable dt = new DataTable();
         dt.TableName = "Solicitudes";
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T2.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.rutSolicitado=T4.rutTecnico WHERE T1.realizada<T1.solicitada ";
+        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T2.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.idSolicitado=T4.id WHERE T1.realizada<T1.solicitada AND T2.planta='"+u.planta+"'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -129,7 +129,7 @@ public class SolicitudService : System.Web.Services.WebService
         DateTime limit = hoy.AddDays(int.Parse(s.plazo));
         s.limite = limit.Year + "-" + limit.Month + "-" + limit.Day;
 
-        string query = " INSERT INTO [PracticaDb].[dbo].Solicitudes (solicitada,prioridad,actividad,plazo,detalle,rutSolicitante,rutSolicitado,limite,realizada) VALUES ('"+s.solicitada+"','"+s.prioridad+"','"+s.actividad+"','"+s.plazo+"','"+s.detalle+"','"+s.rutSolicitante+"','"+s.rutSolicitado+"','"+s.limite+"','') ";
+        string query = " INSERT INTO [PracticaDb].[dbo].Solicitudes (solicitada,prioridad,actividad,plazo,detalle,rutSolicitante,idSolicitado,limite,realizada) VALUES ('"+s.solicitada+"','"+s.prioridad+"','"+s.actividad+"','"+s.plazo+"','"+s.detalle+"','"+s.rutSolicitante+"','"+s.idSolicitado+"','"+s.limite+"','') ";
         if (Ejecutar(query) == 1) return 1;
         else return 0;
     }

@@ -49,14 +49,14 @@ public class PersonalService : System.Web.Services.WebService
     /// </summary>
     /// <returns>Lista de personal en el sistema</returns>
     [WebMethod]
-    public DataTable allPersonal()
+    public DataTable allPersonal(Usuario u)
     {
         DataTable dt = new DataTable();
         dt.TableName = "Personal";
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT * FROM [PracticaDb].[dbo].Personal ";
+        String query = " SELECT * FROM [PracticaDb].[dbo].Personal WHERE planta='"+u.planta+"' AND rut!='00000000-0'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -72,6 +72,7 @@ public class PersonalService : System.Web.Services.WebService
         return dt;
     }
 
+
     /// <summary>
     /// Permite eliminar personal.
     /// retorna 1 sí la eliminación fue exitosa, 0 EOC
@@ -86,6 +87,7 @@ public class PersonalService : System.Web.Services.WebService
         else return 0;
     }
 
+
     /// <summary>
     /// Permite insertar un nuevo personal
     /// retorna 1 sí la insercion fue exitosa, 0 EOC
@@ -93,12 +95,27 @@ public class PersonalService : System.Web.Services.WebService
     /// <param name="t">El personal que se desea agregar</param>
     /// <returns>1 sí la insercion fue exitosa, 0 EOC</returns>
     [WebMethod]
-    public int addPersonal(Personal p)
+    public int addPersonal(Usuario u,Personal p)
     {
-        string query = " INSERT INTO [PracticaDb].[dbo].Personal (rut,nombres,apellidoPaterno,apellidoMaterno) VALUES ('" + p.rut + "','" + p.nombres + "','" + p.apellidoPaterno + "','" + p.apellidoMaterno + "') ";
+        string query = " INSERT INTO [PracticaDb].[dbo].Personal (rut,nombres,apellidoPaterno,apellidoMaterno,planta) VALUES ('" + p.rut + "','" + p.nombres + "','" + p.apellidoPaterno + "','" + p.apellidoMaterno + "','"+u.planta+"') ";
         if (Ejecutar(query) == 1) return 1;
         else return 0;
     }
 
+
+    /// <summary>
+    /// Permite editar los datos del Personal
+    /// retona 1 si la edicion fue exitosa, 0 EOC
+    /// </summary>
+    /// <param name="nuevo">Datos del personal editado</param>
+    /// <param name="actual">Copia datos viejos (ó actuales) del personal</param>
+    /// <returns>1 si la edicion fue exitosa, 0 EOC</returns>
+    [WebMethod]
+    public int editPersonal(Personal nuevo, Personal actual)
+    {
+        string query = " UPDATE [PracticaDb].[dbo].Personal SET rut='"+nuevo.rut+"', nombres='"+nuevo.nombres+"',apellidoPaterno='"+nuevo.apellidoPaterno+"',apellidoMaterno='"+nuevo.apellidoMaterno+"' WHERE rut='"+actual.rut+"' ";
+        if (Ejecutar(query) == 1) return 1;
+        else return 0;
+    }
 }
 

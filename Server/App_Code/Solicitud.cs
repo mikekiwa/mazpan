@@ -57,7 +57,7 @@ public class Solicitud
         set { d = value; }
         get { return d; }
     }
-    public string rutSolicitado
+    public string idSolicitado
     {
         set { rs2 = value; }
         get { return rs2; }
