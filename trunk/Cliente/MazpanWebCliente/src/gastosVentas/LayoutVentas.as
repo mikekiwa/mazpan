@@ -42,19 +42,15 @@ package gastosVentas
 	          		
           	for(var i:int=0; i<array.length; i++)
           	{
-          		//leer fila titulo o nombre de socio
-          		//leer lineas de item vendidos
-          		//leer sub total
-          		//leer total
           		if(array[i].tipo==0)//titulo o nombre socio
           		{
           			pdf.addCell(85, 5,array[i].itemname, 1);
           	 	}
-          	 	else if(array[i].tipo==1)
+          	 	else if(array[i].tipo==1)//campos de repeticion
           	 	{
           	 		aux.push(array[i]);
           	 	}
-          	 	else if(array[i].tipo==2)
+          	 	else if(array[i].tipo==2)//campo de subtotal de cliente
           	 	{
           	 		pdf.writeText(5,"\n");
           	 		aux.push(array[i]);
@@ -64,7 +60,7 @@ package gastosVentas
           	 		aux = new Array();
           	 		pdf.writeText(8,"\n");
           	 	}
-          	 	else if(array[i].tipo==3)
+          	 	else if(array[i].tipo==3)//campo de total de documento
           	 	{
           	 		pdf.addCell(85,5,array[i].itemname,	1);
           	 		pdf.addCell(30,	5,array[i].anterior,	1,	0,	Align.RIGHT);
