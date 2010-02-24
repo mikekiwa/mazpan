@@ -16,6 +16,7 @@ public class Tablas
     private string cn;
     private string cc;
     private int m;//mes
+    private int a;//ano
 
 	public Tablas()
 	{
@@ -62,5 +63,10 @@ public class Tablas
     {
         set { m = value; }
         get { return m; }
+    }
+    public int ano
+    {
+        set { a = value; }
+        get { return a; }
     }
 }
