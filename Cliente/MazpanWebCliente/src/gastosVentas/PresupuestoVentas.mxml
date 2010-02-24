@@ -15,7 +15,7 @@
 			public static const nombre:String="PresupuestoVentas";
 						
 			[Bindable]
-			private var productos:Array;
+			private var productos:Array = new Array;
 			
 			private var cliente:String;
 			
@@ -29,6 +29,13 @@
             }
             public function init():void
 			{
+				productos = new Array;
+				if(sucursalesCB_cmp!=null) sucursalesCB_cmp.init();
+            	if(clientesCB_cmp!=null) clientesCB_cmp.init();
+            	if(ano_ns!=null) ano_ns.value = 2009;
+            	if(en_cb!=null) en_cb.selectedIndex = 0;
+            	if(input!=null) input.text = "";
+            	if(guardar_btn!=null) guardar_btn.enabled = false;
 			}
 			private function cambiarClientes():void
             {
@@ -45,6 +52,7 @@
             private function getProductosResult(event:ResultEvent):void
             {
             	productos = event.result.Tables.Productos.Rows.source as Array;
+            	guardar_btn.enabled = true;
             }
             private function filtar():void
 			{
@@ -199,5 +207,5 @@
 			</mx:DataGridColumn>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button x="998" y="388" label="Guardar" click="guardar()"/>
+	<mx:Button id="guardar_btn" x="998" y="388" label="Guardar" click="guardar()" enabled="false"/>
 </mx:Panel>

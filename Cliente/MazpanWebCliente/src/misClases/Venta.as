@@ -9,7 +9,7 @@ package misClases
 		public var presupuesto:String;
 		public var desviacion:String;
 		
-		public function Venta(_itemName:String,_tipo:int=0,_quantity:String='',_anterior:String='',_presupuesto:String='0',_desviacion:String='')
+		public function Venta(_itemName:String,_tipo:int=0,_anterior:String='',_quantity:String='',_presupuesto:String='',_desviacion:String='')
 		{
 			itemname = _itemName;
 			tipo = _tipo;

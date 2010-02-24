@@ -6,6 +6,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import gastosVentas.RevisarAmarreClienteZona;
 			import gastosVentas.PresupuestoVentas;
 			import gastosVentas.AmarreClienteZona;
 			import gastosVentas.Ventas;
@@ -30,5 +31,6 @@
 	
 	<mx:LinkButton x="10" y="10" label="Ver" 			width="100" click="goState(Ventas.nombre)"/>
 	<mx:LinkButton x="10" y="40" label="Amarre"			width="100" click="goState(AmarreClienteZona.nombre)"/>
-	<mx:LinkButton x="10" y="70" label="Presupuesto"	width="100" click="goState(PresupuestoVentas.nombre)"/>
+	<mx:LinkButton x="10" y="70" label="Revisar"		width="100" click="goState(RevisarAmarreClienteZona.nombre)"/>
+	<mx:LinkButton x="10" y="100" label="Presupuesto"	width="100" click="goState(PresupuestoVentas.nombre)"/>
 </mx:Canvas>

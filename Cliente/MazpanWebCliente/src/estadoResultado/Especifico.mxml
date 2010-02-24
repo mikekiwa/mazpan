@@ -88,12 +88,13 @@
 		<mx:Label text="{labelText}" fontSize="14" fontWeight="bold"/>
 		<mx:Button label="Atras" click="goState(Detalle.nombre)"/>
 	</mx:HBox>
-	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" >
+	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="404" >
 		<mx:columns>
 			<mx:DataGridColumn headerText="Cuenta" 		dataField="AcctName" 	width="310" sortable="false"/>
 			<mx:DataGridColumn headerText="Valor [$]" 	dataField="Column1"  	width="190" sortable="false" textAlign="right"/>
 			<mx:DataGridColumn headerText="Fecha"		dataField="RefDate"		width="300" sortable="false" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
+	<mx:Label x="514" y="442" text="* Cuentas Sin Infomación Han sido Omitidas "/>
 	
 </mx:Panel>

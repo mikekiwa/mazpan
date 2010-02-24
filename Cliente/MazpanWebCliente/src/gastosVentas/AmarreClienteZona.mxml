@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Amarre  Cliente - Zona"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Amarre Cliente - Zona"
 	creationComplete="init()" xmlns:ns1="misClases.*">
 	
 	<mx:WebService id="VentasService" 	wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true">
@@ -21,7 +21,7 @@
 			
 			public static const nombre:String = "AmarreClienteZona";
 			[Bindable]
-			private var clientesSinZona:Array;
+			private var clientesSinZona:Array = new Array;
 			
 			private var datosParaGuardar:Array;
 			
@@ -29,8 +29,9 @@
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-			private function init():void
+			public function init():void
 			{
+				clientesSinZona = new Array;
 				VentasService.allSociosSinSucursal();
 			}
 			private function allSociosSinSucursalResult(event:ResultEvent):void
@@ -92,8 +93,8 @@
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
 			<mx:DataGridColumn headerText="RUT" dataField="LicTradNum" width="90"/>
-			<mx:DataGridColumn headerText="Nombre" dataField="CardName"/>
-			<mx:DataGridColumn headerText="" dataField="CardFName"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="CardName" width="435"/>
+			<mx:DataGridColumn headerText="Ciudad" dataField="City" width="200" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
 </mx:Panel>

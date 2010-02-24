@@ -5,12 +5,13 @@ package estadoResultado
 	import flash.display.DisplayObject;
 	
 	import mx.collections.ArrayCollection;
-	import mx.messaging.SubscriptionInfo;
 	
 	import org.alivepdf.colors.RGBColor;
 	import org.alivepdf.data.Grid;
 	import org.alivepdf.data.GridColumn;
 	import org.alivepdf.drawing.Joint;
+	import org.alivepdf.fonts.CoreFont;
+	import org.alivepdf.fonts.FontFamily;
 	import org.alivepdf.layout.Align;
 	import org.alivepdf.layout.Orientation;
 	import org.alivepdf.layout.Size;
@@ -45,17 +46,102 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 			pdf.addText(item+" año "+ano,90,20);
 			pdf.addText(sucursal, 110,30);
 			pdf.addImage(grafico,null,10,30,250,160);
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "Grafico.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"Grafico.pdf");
 		}
 		
-		public function generarTabla(tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
+		public function generarTabla(arreglo:Array,tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
 		{
 			pdf.addImage(img,null,0,0);
 			pdf.setFontSize(25);
+			pdf.setMargins(5,7,5,7);
 			pdf.addText(titulo+" año "+ano,90,20);
-			pdf.addText(sucursal, 110,30);
-			pdf.addImage(tabla,null,10+(11-meses)*20,30,(tabla.width*260)/1266,160);
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "Tabla.pdf");
+			pdf.addText(sucursal,110,30);
+			
+			pdf.setFontSize(8);
+			var deltaX:int =(11-meses)*7;
+			pdf.setXY(deltaX,30);
+			pdf.writeText(2,"\n");
+			pdf.addCell(deltaX, 5);
+			pdf.addCell(45, 5,"Cuenta", 1);
+			pdf.addCell(14, 5,"ENE", 1,0,Align.CENTER);
+			if(meses>=1) pdf.addCell(14, 5,"FEB", 1,0,Align.CENTER);
+			if(meses>=2) pdf.addCell(14, 5,"MAR", 1,0,Align.CENTER);
+			if(meses>=3) pdf.addCell(14, 5,"ABR", 1,0,Align.CENTER);
+			if(meses>=4) pdf.addCell(14, 5,"MAY", 1,0,Align.CENTER);
+			if(meses>=5) pdf.addCell(14, 5,"JUN", 1,0,Align.CENTER);
+			if(meses>=6) pdf.addCell(14, 5,"JUL", 1,0,Align.CENTER);
+			if(meses>=7) pdf.addCell(14, 5,"AGO", 1,0,Align.CENTER);
+			if(meses>=8) pdf.addCell(14, 5,"SEP", 1,0,Align.CENTER);
+			if(meses>=9) pdf.addCell(14, 5,"OCT", 1,0,Align.CENTER);
+			if(meses>=10) pdf.addCell(14, 5,"NOV", 1,0,Align.CENTER);
+			if(meses>=11) pdf.addCell(14, 5,"DIC", 1,0,Align.CENTER);
+			pdf.addCell(14, 5,"P. MES", 1,0,Align.CENTER);
+			pdf.addCell(14, 5,"ACUM",1,0,Align.CENTER);
+			pdf.addCell(17, 5,"PPTO", 1,0,Align.CENTER);
+			pdf.addCell(13, 5,"DESV %", 1,0,Align.CENTER);
+			pdf.writeText(5,"\n");
+          	//pdf.addImage(tabla,null,5+(11-meses)*20,30,(tabla.width*270)/1266,169);
+          	
+          	for(var i:int=0; i<arreglo.length; i++)
+			{
+				pdf.addCell(deltaX, 5);
+				if(i!=0 && i!=5 && i!=6 && i!=13 && i!=14 && i!=15 && i!=25 && i!=26 && i!=30 && i!=32)
+				{
+					pdf.addCell(45, 5,arreglo[i].itemName, 1);
+					pdf.addCell(14, 5,arreglo[i].ENE, 1,0,Align.RIGHT);
+					if(meses>=1) pdf.addCell(14, 5,arreglo[i].FEB, 1,0,Align.RIGHT);
+					if(meses>=2) pdf.addCell(14, 5,arreglo[i].MAR, 1,0,Align.RIGHT);
+					if(meses>=3) pdf.addCell(14, 5,arreglo[i].ABR, 1,0,Align.RIGHT);
+					if(meses>=4) pdf.addCell(14, 5,arreglo[i].MAY, 1,0,Align.RIGHT);
+					if(meses>=5) pdf.addCell(14, 5,arreglo[i].JUN, 1,0,Align.RIGHT);
+					if(meses>=6) pdf.addCell(14, 5,arreglo[i].JUL, 1,0,Align.RIGHT);
+					if(meses>=7) pdf.addCell(14, 5,arreglo[i].AGO, 1,0,Align.RIGHT);
+					if(meses>=8) pdf.addCell(14, 5,arreglo[i].SEP, 1,0,Align.RIGHT);
+					if(meses>=9) pdf.addCell(14, 5,arreglo[i].OCT, 1,0,Align.RIGHT);
+					if(meses>=10) pdf.addCell(14, 5,arreglo[i].NOV, 1,0,Align.RIGHT);
+					if(meses>=11) pdf.addCell(14, 5,arreglo[i].DIC, 1,0,Align.RIGHT);
+					pdf.addCell(14, 5,arreglo[i].MES, 1,0,Align.RIGHT);
+					pdf.addCell(14, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
+					pdf.addCell(17, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
+					pdf.addCell(13, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					
+				}
+				else if(i!=0 && i!=6 && i!=15)
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+					pdf.addCell(45, 5,arreglo[i].itemName, 1);
+					pdf.addCell(14, 5,arreglo[i].ENE, 1,0,Align.RIGHT);
+					if(meses>=1) pdf.addCell(14, 5,arreglo[i].FEB, 1,0,Align.RIGHT);
+					if(meses>=2) pdf.addCell(14, 5,arreglo[i].MAR, 1,0,Align.RIGHT);
+					if(meses>=3) pdf.addCell(14, 5,arreglo[i].ABR, 1,0,Align.RIGHT);
+					if(meses>=4) pdf.addCell(14, 5,arreglo[i].MAY, 1,0,Align.RIGHT);
+					if(meses>=5) pdf.addCell(14, 5,arreglo[i].JUN, 1,0,Align.RIGHT);
+					if(meses>=6) pdf.addCell(14, 5,arreglo[i].JUL, 1,0,Align.RIGHT);
+					if(meses>=7) pdf.addCell(14, 5,arreglo[i].AGO, 1,0,Align.RIGHT);
+					if(meses>=8) pdf.addCell(14, 5,arreglo[i].SEP, 1,0,Align.RIGHT);
+					if(meses>=9) pdf.addCell(14, 5,arreglo[i].OCT, 1,0,Align.RIGHT);
+					if(meses>=10) pdf.addCell(14, 5,arreglo[i].NOV, 1,0,Align.RIGHT);
+					if(meses>=11) pdf.addCell(14, 5,arreglo[i].DIC, 1,0,Align.RIGHT);
+					pdf.addCell(14, 5,arreglo[i].MES, 1,0,Align.RIGHT);
+					pdf.addCell(14, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
+					pdf.addCell(17, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
+					pdf.addCell(13, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+				}
+				else
+				{
+					pdf.writeText(1,"\n");
+					pdf.addCell(deltaX, 5);
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+					pdf.addCell(45, 5,arreglo[i].itemName, 1);
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+				}
+				
+				pdf.writeText(5,"\n");
+			}
+			
+			
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"Tabla.pdf");
 		}
 
 		public function generar(array:ArrayCollection, fecha:String):void
@@ -66,7 +152,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 			var actividad:GridColumn = new GridColumn("Actividad", "actividad", 85, Align.CENTER, Align.LEFT);
 			var frecuencia:GridColumn = new GridColumn("Frecuencia", "frecuencia", 20, Align.CENTER, Align.LEFT);
 			var planificada:GridColumn = new GridColumn("Planificada", "planificada", 40, Align.CENTER, Align.LEFT);
-						
+			
 			var columnas:Array=new Array(check,
 										 codigo,
 										 nombre,
@@ -88,7 +174,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	pdf.addText("Actividades de Mantecion "+fecha, 20, 20);
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 18, false);
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "estadoResultado.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "estadoResultado.pdf");
 		}
 		public function solicitudes(array:Array, fecha:String):void
 		{
@@ -115,7 +201,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	pdf.addText("Solicitudes de Trabajo "+fecha, 20, 20);
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 18, false);
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "estadoResultado.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"estadoResultado.pdf");
 		}
 		public function vistaComponente(componente:Object):void
 		{
@@ -188,7 +274,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           		pdf.addGrid(manten);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "inline", "DatosComponente.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosComponente.pdf");
 		}
 		public function vistaMaquina(maquina:Object):void
 		{
@@ -279,7 +365,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           		pdf.addGrid(union);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "inline", "DatosComponente.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosComponente.pdf");
 		}
 		public function vistaLinea(linea:Object):void
 		{
@@ -338,7 +424,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           		pdf.addGrid(union);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", "inline", "DatosComponente.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosComponente.pdf");
 		}
 	}
 }

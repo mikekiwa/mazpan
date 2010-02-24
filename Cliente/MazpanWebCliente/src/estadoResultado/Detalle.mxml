@@ -155,7 +155,7 @@
 		<mx:Spacer width="30"/>
 		<mx:Label text="{total}" fontSize="14" fontWeight="bold"/>
 	</mx:HBox>
-	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="100%" doubleClickEnabled="true" doubleClick="goState(Especifico.nombre)">
+	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="403" doubleClickEnabled="true" doubleClick="goState(Especifico.nombre)">
 		<mx:columns>
 			<mx:DataGridColumn headerText="" 			dataField="Segment_0" 	width="60" 	sortable="false"/>
 			<mx:DataGridColumn headerText="" 			dataField="Segment_1" 	width="30" 	sortable="false"/>
@@ -166,4 +166,5 @@
 			<mx:DataGridColumn headerText="Valor [$]" 	dataField="Column1"  	width="190" sortable="false" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
+	<mx:Label x="569" y="441" text="* Cuentas Sin Infomación Han sido Omitidas "/>
 </mx:Panel>

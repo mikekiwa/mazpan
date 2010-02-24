@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" xmlns:ns1="componentes.*">
 	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="addMantenciones" result="addMantencionesResult(event)" fault="ErrorFaultHandler(event, 'addMantenciones')"/>
+	</mx:WebService>
+	
 	<mx:Metadata>
 		[Event(name="complexClick",type="eventos.ComplexEvent")]
    	</mx:Metadata>
    	
 	<mx:Script>
 		<![CDATA[
+			import mx.charts.DateTimeAxis;
+			import mx.controls.Alert;
+			import mx.messaging.config.ServerConfig;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
 			import eventos.ComplexEvent;
 		
 			public static const nombre:String = "Mantenciones";
@@ -14,6 +23,10 @@
 			[Bindable]
 			private var elemento:Object;
 			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
 			public function parametros(_elemento:Object):void
 			{
 				clean();
@@ -28,16 +41,46 @@
 			{
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,'',nombre,null));
 			}
+			private function guardar():void
+			{
+				elemento.mantenciones = actividadesMantencion_cmp.getMantenciones();
+				var aux:Date = elemento.puestaMarcha;
+				elemento.puestaMarcha = aux.date+"/"+aux.month+"/"+aux.fullYear;
+				ElementoService.addMantenciones(elemento);
+			}
+			private function addMantencionesResult(event:ResultEvent):void
+			{
+				var result:int = event.result as int;
+				
+				if(result==1)
+				{
+					clean();
+					atras();
+				}
+				else if(result==-3)
+				{
+					Alert.show("Lo siento, crear las actividades del plan de mantencion del componente");
+				}
+				else if(result==-4)
+				{
+					Alert.show("Lo siento, imposible crear el plan de mantencion para el componente");
+				}
+				else
+				{
+					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
+				}
+			}
 		]]>
 	</mx:Script>
 	
-	<ns1:ActividadesMantencion id="actividadesMantencion_cmp" x="2.5" y="33"/>
-	<mx:HBox x="10" y="10" width="765">
-		<mx:Label text="Elemento" fontWeight="bold" fontSize="12"/>
+	
+	<mx:HBox x="29" y="10" width="736">
+		<mx:Label text="Elemento:" fontWeight="bold" fontSize="12"/>
 		<mx:Label text="{elemento.nombre}" fontWeight="bold" fontSize="12"/>
 		<mx:Spacer width="10"/>
 		<mx:Label text="{elemento.codigo}" fontWeight="bold" fontSize="12"/>
 	</mx:HBox>
-	<mx:Button x="607" y="428" label="Guardar" width="75"/>
+	<ns1:ActividadesMantencion id="actividadesMantencion_cmp" x="2.5" y="33"/>
+	<mx:Button x="607" y="428" label="Guardar" width="75" click="guardar()"/>
 	<mx:Button x="690" y="428" label="Cancelar" click="atras()"/>
 </mx:Canvas>

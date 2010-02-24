@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1100" height="500" title="Revisar Detalle de Presupuesto"
+	 xmlns:misClases="misClases.*">
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getPresupuesto"	result="getPresupuestoResult(event)" fault="ErrorFaultHandler(event, 'getPresupuesto')"/>
+	</mx:WebService>
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import misClases.Presupuesto;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String = "RevisarPresupuesto";
+			
+			[Bindable]
+			private var presupuesto_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			private function cargar():void
+			{
+				presupuesto_ac = new Array;
+				Service.getPresupuesto(sucursales_cmp.selectedItem.Code, items_cmp.getID(), ano_ns.value);
+			}
+			private function getPresupuestoResult(event:ResultEvent):void
+			{
+				var aux:Array = event.result.Tables.Presupuesto.Rows.source as Array;
+				for(var i:int=0; i<aux.length; i+=12)
+				{
+					presupuesto_ac.push(new Presupuesto(aux[i].ItemName,aux[i].AcctName,
+													   	aux[i].Column1-aux[i].Column2,
+													   	aux[i+1].Column1-aux[i+1].Column2,
+													  	aux[i+2].Column1-aux[i+2].Column2,
+													   	aux[i+3].Column1-aux[i+3].Column2,
+													   	aux[i+4].Column1-aux[i+4].Column2,
+													   	aux[i+5].Column1-aux[i+5].Column2,
+													   	aux[i+6].Column1-aux[i+6].Column2,
+													   	aux[i+7].Column1-aux[i+7].Column2,
+													   	aux[i+8].Column1-aux[i+8].Column2,
+													   	aux[i+9].Column1-aux[i+9].Column2,
+													   	aux[i+10].Column1-aux[i+10].Column2,
+													   	aux[i+11].Column1-aux[i+11].Column2));
+				}
+				presupuesto_dg.dataProvider = presupuesto_ac;
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:HBox id="hbox">
+		<mx:Label x="0" y="12" text="Sucursal:"/>
+		<misClases:SucursalesCB id="sucursales_cmp"/>
+		<misClases:ItemsCB id="items_cmp"/>
+		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" id="ano_ns"/>
+		<mx:Button label="Cargar" width="72" click="cargar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="31" width="1080" height="429" dataProvider="{presupuesto_ac}" id="presupuesto_dg">
+		<mx:columns>
+			<mx:DataGridColumn headerText="CUENTA" dataField="acctName" width="100"/>
+			<mx:DataGridColumn headerText="ENE" dataField="ene" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="FEB" dataField="feb" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="MAR" dataField="mar" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="ABR" dataField="abr" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="MAY" dataField="may" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="JUN" dataField="jun" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="JUL" dataField="jul" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="AGO" dataField="ago" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="SEP" dataField="sep" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="OCT" dataField="oct" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="NOV" dataField="nov" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="DIC" dataField="dic" textAlign="right" width="50"/>
+			<mx:DataGridColumn headerText="TOTAL" dataField="total" textAlign="right" width="50"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:Panel>

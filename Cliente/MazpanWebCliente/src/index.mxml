@@ -136,7 +136,7 @@
 		<mx:State name="AmarreClienteZona">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns12:AmarreClienteZona id="amarreClienteSector_cmp"/>
+				<ns12:AmarreClienteZona id="amarreClienteZona_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="PresupuestoVentas">
@@ -145,11 +145,24 @@
 				<ns12:PresupuestoVentas id="presupuestoVentas_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="RevisarPresupuesto">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:RevisarPresupuesto/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="RevisarAmarreClienteZona">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns12:RevisarAmarreClienteZona id="revisarAmarreClienteZona_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
 	<mx:Script>
 		<![CDATA[
+			import misClases.HTTPUtil;
 			import componentes.Acordeon.MenuMantenciones;
 			import componentes.general.SolicitudesTrabajo;
 			import componentes.mantencionSistema.Personal;
@@ -158,7 +171,6 @@
 			import componentes.mantencionLineas.Lineas;
 			import componentes.mantencionComponentes.Componentes;
 			import estadoResultado.Amarre;
-			import estadoResultado.HTTPUtil;
 			import eventos.ComplexEvent;
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
@@ -167,8 +179,8 @@
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			//public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
+			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
+			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]
@@ -224,6 +236,10 @@
 					if(event.stateDestination == Usuarios.nombre) usuarios_cmp.init();
 					if(event.stateDestination == Plan.nombre) plan_cmp.init();
 					if(event.stateDestination == ListaSolicitudes.nombre) listaSolicitudes_cmp.init();
+					if(event.stateDestination == Ventas.nombre) ventas_cmp.init();
+					if(event.stateDestination == PresupuestoVentas.nombre) presupuestoVentas_cmp.init();
+					if(event.stateDestination == AmarreClienteZona.nombre) amarreClienteZona_cmp.init();
+					if(event.stateDestination == RevisarAmarreClienteZona.nombre) revisarAmarreClienteZona_cmp.init();
 				}
 				else
 				{

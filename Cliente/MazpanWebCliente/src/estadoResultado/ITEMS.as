@@ -280,12 +280,12 @@ package estadoResultado
 			var dic:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].DIC)) as Number;
 			datos[IMPUESTOALARENTA].DIC = formato.format(Math.round(dic));
 			
-			/*var mes:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MES)) as Number;
+			var mes:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].MES)) as Number;
 			datos[IMPUESTOALARENTA].MES = formato.format(Math.round(mes));
 			
 			var ppto:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].PPTO)) as Number;
 			datos[IMPUESTOALARENTA].PPTO = formato.format(Math.round(ppto));
-			*/
+			
 		}
 		public function CALCULAR_OTROS(numColumns:int):void
 		{
