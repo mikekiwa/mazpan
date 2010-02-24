@@ -357,6 +357,14 @@ public class ElementoService : System.Web.Services.WebService
         else return 0;
     }
 
+    [WebMethod]
+    public int addMantenciones(Elemento c)
+    {
+        if (addActividades(c.mantenciones, c.codigo) == 1)
+            if (addPlan(c.mantenciones, c.codigo, c.puestaMarcha) == 1) return 1;
+            else return -4;
+        else return -3;
+    }
 
     [WebMethod]
     public DataTable getActividades(Usuario u)

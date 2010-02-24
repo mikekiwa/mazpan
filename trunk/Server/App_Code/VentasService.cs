@@ -74,7 +74,7 @@ public class VentasService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT CardCode,CardName,LicTradNum,CardFName FROM [Maspan].[dbo].[OCRD] WHERE CardCode NOT IN (SELECT CardCode FROM [Maspan].[dbo].[OASC] T1 JOIN [PracticaDb].[dbo].[AmarreClienteSector] T2 ON T1.ShortName=T2.sucursal JOIN [Maspan].[dbo].[OCRD] T3 ON T3.CardCode=T2.cliente WHERE SegmentId='1') ";
+        String query = " SELECT CardCode,CardName,LicTradNum,CardFName,City FROM [Maspan].[dbo].[OCRD] WHERE CardCode NOT IN (SELECT CardCode FROM [Maspan].[dbo].[OASC] T1 JOIN [PracticaDb].[dbo].[AmarreClienteSector] T2 ON T1.ShortName=T2.sucursal JOIN [Maspan].[dbo].[OCRD] T3 ON T3.CardCode=T2.cliente WHERE SegmentId='1') ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -89,7 +89,43 @@ public class VentasService : System.Web.Services.WebService
 
         return dt;
     }
- 
+    
+    [WebMethod]
+    public DataTable allSociosConSucursal()
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = "Socios";
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+        String query = " SELECT CardCode,CardName,LicTradNum,CardFName,T1.ShortName,City FROM [Maspan].[dbo].[OASC] T1 JOIN [PracticaDb].[dbo].[AmarreClienteSector] T2 ON T1.ShortName=T2.sucursal JOIN [Maspan].[dbo].[OCRD] T3 ON T3.CardCode=T2.cliente WHERE SegmentId='1' ";
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
+    [WebMethod]
+    public int quitar(List<ClienteZona> clientesZonas)
+    {
+        int result=0;
+        foreach (ClienteZona cz in clientesZonas)
+        {
+            result += Ejecutar("DELETE [PracticaDb].[dbo].[AmarreClienteSector] WHERE sucursal='"+cz.ShortName+"' AND cliente='"+cz.CardCode+"'");
+        }
+        if (result == clientesZonas.Count) return 1;
+        else return 0;
+    }
+
     [WebMethod]
     public int guardar(List<string> codigosClientes,string codigoZona)
     {
@@ -161,23 +197,23 @@ public class VentasService : System.Web.Services.WebService
 
         SqlConnection cn1 = new SqlConnection(coneccionString);
         SqlDataAdapter da1 = new SqlDataAdapter();
-        String query1 = " SELECT itemname,sum(T1.quantity) quantity FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='"+inicio+"' AND T1.docdate<'"+termino+"' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname";
+        String query1 = " SELECT itemname,sum(T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
 
         SqlConnection cn2 = new SqlConnection(coneccionString);
         SqlDataAdapter da2 = new SqlDataAdapter();
-        String query2 = " SELECT itemname,sum(T1.quantity*-1) quantity FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='"+inicio+"' AND T1.docdate<'"+termino+"' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname ";
+        String query2 = " SELECT itemname,sum(T1.quantity*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
 
         SqlConnection cn3 = new SqlConnection(coneccionString);
         SqlDataAdapter da3 = new SqlDataAdapter();
-        String query3 = " SELECT itemname,sum(T1.quantity) quantity FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname";
+        String query3 = " SELECT itemname,sum(T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
 
         SqlConnection cn4 = new SqlConnection(coneccionString);
         SqlDataAdapter da4 = new SqlDataAdapter();
-        String query4 = " SELECT itemname,sum(T1.quantity*-1) quantity FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname ";
+        String query4 = " SELECT itemname,sum(T1.quantity*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
 
         SqlConnection cn5 = new SqlConnection(coneccionString);
         SqlDataAdapter da5 = new SqlDataAdapter();
-        String query5 = " SELECT T1.*,T2.itemcode, T2.itemname FROM [PracticaDb].[dbo].[Presupuesto] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.articulo=T2.itemCode WHERE T1.cliente='"+codigoCliente+"' AND T1.ano='"+ano+"' AND tipo='1' ";
+        String query5 = " SELECT T1.*,T2.itemcode, T2.itemname,T2.QryGroup1, T2.QryGroup2 FROM [PracticaDb].[dbo].[Presupuesto] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.articulo=T2.itemCode WHERE T1.cliente='" + codigoCliente + "' AND T1.ano='" + ano + "' AND tipo='1' ";
 
         da1.SelectCommand = new SqlCommand(query1, cn1);
         da2.SelectCommand = new SqlCommand(query2, cn2);
@@ -200,6 +236,7 @@ public class VentasService : System.Web.Services.WebService
             sal.CardCode = codigoCliente;
             sal.CardName = cliente;
             sal.mes = mes;
+            sal.ano = ano;
         }
         finally
         {
@@ -237,23 +274,23 @@ public class VentasService : System.Web.Services.WebService
 
         SqlConnection cn1 = new SqlConnection(coneccionString);
         SqlDataAdapter da1 = new SqlDataAdapter();
-        String query1 = " SELECT itemname,sum(T1.price) quantity FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname";
+        String query1 = " SELECT itemname,sum(T1.price) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn2 = new SqlConnection(coneccionString);
         SqlDataAdapter da2 = new SqlDataAdapter();
-        String query2 = " SELECT itemname,sum(T1.price*-1) quantity FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname ";
+        String query2 = " SELECT itemname,sum(T1.price*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn3 = new SqlConnection(coneccionString);
         SqlDataAdapter da3 = new SqlDataAdapter();
-        String query3 = " SELECT itemname,sum(T1.price) quantity FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname";
+        String query3 = " SELECT itemname,sum(T1.price) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn4 = new SqlConnection(coneccionString);
         SqlDataAdapter da4 = new SqlDataAdapter();
-        String query4 = " SELECT itemname,sum(T1.price*-1) quantity FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname ";
+        String query4 = " SELECT itemname,sum(T1.price*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn5 = new SqlConnection(coneccionString);
         SqlDataAdapter da5 = new SqlDataAdapter();
-        String query5 = " SELECT T1.*,T2.itemcode, T2.itemname FROM [PracticaDb].[dbo].[Presupuesto] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.articulo=T2.itemCode WHERE T1.cliente='" + codigoCliente + "' AND T1.ano='" + ano + "' AND tipo='2' ";
+        String query5 = " SELECT T1.*,T2.itemcode, T2.itemname,T2.QryGroup1,T2.QryGroup2 FROM [PracticaDb].[dbo].[Presupuesto] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.articulo=T2.itemCode WHERE T1.cliente='" + codigoCliente + "' AND T1.ano='" + ano + "' AND tipo='2' ";
 
         da1.SelectCommand = new SqlCommand(query1, cn1);
         da2.SelectCommand = new SqlCommand(query2, cn2);
@@ -276,6 +313,7 @@ public class VentasService : System.Web.Services.WebService
             sal.CardCode = codigoCliente;
             sal.CardName = cliente;
             sal.mes = mes;
+            sal.ano = ano;
         }
         finally
         {
@@ -293,7 +331,7 @@ public class VentasService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT itemCode, itemName, T2.* FROM [Maspan].[dbo].[OITM] T1 LEFT JOIN [PracticaDb].[dbo].[Presupuesto] T2 ON T1.itemCode=T2.articulo AND cliente='"+cliente+"' AND ano='"+ano+"' AND tipo='"+en+"' WHERE itmsgrpcod='102' ORDER BY itemName ";
+        String query = " SELECT itemCode, itemName, T2.* FROM [Maspan].[dbo].[OITM] T1 LEFT JOIN [PracticaDb].[dbo].[Presupuesto] T2 ON T1.itemCode=T2.articulo AND cliente='" + cliente + "' AND ano='" + ano + "' AND tipo='" + en + "' WHERE itmsgrpcod='102' AND (T1.QryGroup1='Y' OR T1.QryGroup2='Y') ORDER BY itemName ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -316,8 +354,6 @@ public class VentasService : System.Web.Services.WebService
         string query = " SELECT count (*) FROM [PracticaDb].[dbo].[Presupuesto] WHERE articulo='"+articulo+"' AND cliente='"+cliente+"' AND ano='"+ano+"' AND tipo='"+tipo+"' ";
         SqlCommand selectUsuarios = new SqlCommand(query, cn);
         SqlDataReader reader = selectUsuarios.ExecuteReader();
-
-        Usuario u = null;
 
         if (reader.Read())
         {
