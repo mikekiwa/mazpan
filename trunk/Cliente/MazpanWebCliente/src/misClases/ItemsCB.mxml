@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()">
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getItems" 		result="getItemsResult(event)"		fault="ErrorFaultHandler(event, 'getItems')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import estadoResultado.ITEMS;
+			
+			private var items:Array;
+			[Bindable]
+			private var itemsCombo:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase ItemsCB.mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				Service.getItems();
+			}
+			private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+            	dataProvider = new ITEMS(items).getItemsContables();
+			    selectedIndex=0;
+            }
+            public function getID():int
+            {
+            	var id:int = 888;
+            	for(var i:int=0; i<items.length; i++)
+            		if(text == items[i].itemName) return items[i].id;
+            	return id; 
+            }
+		]]>
+	</mx:Script>
+</mx:ComboBox>

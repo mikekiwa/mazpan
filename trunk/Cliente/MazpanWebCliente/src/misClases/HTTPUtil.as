@@ -1,4 +1,4 @@
-package estadoResultado
+package misClases
 {
 	public class HTTPUtil
 	{

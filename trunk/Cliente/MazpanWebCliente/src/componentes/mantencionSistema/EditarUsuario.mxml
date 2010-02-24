@@ -43,6 +43,7 @@
 				if(arr[4]=='1')	p5.selected = true;
 				if(arr[5]=='1')	p6.selected = true;
 				if(arr[6]=='1')	p7.selected = true;
+				if(arr[7]=='1')	p8.selected = true;
 				editar_btn.enabled = true;
             }
 			private function editar():void
@@ -79,6 +80,7 @@
 				if(p5!=null) p5.selected = false;
 				if(p6!=null) p6.selected = false;
 				if(p7!=null) p7.selected = false;
+				if(p8!=null) p8.selected = false;
 			}
 			private function verificar():void
 			{
@@ -93,7 +95,7 @@
 			}
 			private function tienePrivilegio():Boolean
 			{
-				if(	p1.selected || p2.selected || p3.selected || p4.selected || p5.selected || p6.selected || p7.selected)
+				if(	p1.selected || p2.selected || p3.selected || p4.selected || p5.selected || p6.selected || p7.selected || p8.selected)
 				{
 					return true;
 				}
@@ -110,8 +112,9 @@
 				if(p5.selected) p+="1"; else p+="0";
 				if(p6.selected) p+="1"; else p+="0";
 				if(p7.selected) p+="1"; else p+="0";
+				if(p8.selected) p+="1"; else p+="0";
 				
-				p+="0000";
+				p+="000";
 				
 				return p;
 			}
@@ -127,6 +130,9 @@
    	<mx:Canvas x="207" y="235" width="220" height="74" borderStyle="solid">
    	   	<mx:CheckBox id="p1" label="Estado de Resultado" x="10" y="10" change="verificar()"/>
    	   	<mx:CheckBox id="p2" y="40" label="Amarre de Cuentas" x="10" change="verificar()"/>
+   	</mx:Canvas>
+   	<mx:Canvas x="207" y="317" width="220" height="43" borderStyle="solid">
+   	   	<mx:CheckBox x="10" y="10" label="Ventas" id="p8" change="verificar()"/>
    	</mx:Canvas>
    	<mx:Canvas x="442" y="235" width="220" height="159" borderStyle="solid">
    	   	<mx:CheckBox id="p3" x="10" y="10" label="General" change="verificar()"/>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Revisar Amarre Cliente - Zona" 
+	creationComplete="init()" xmlns:ns1="misClases.*">
+	
+	<mx:WebService id="VentasService" 	wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="allSociosConSucursal" 	result="allSociosConSucursalResult(event)" 	fault="ErrorFaultHandler(event, 'allSociosConSucursal')"/>
+		<mx:operation name="quitar" 				result="quitarResult(event)" 				fault="ErrorFaultHandler(event, 'quitar')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import eventos.ComplexEvent;
+			
+			public static const nombre:String = "RevisarAmarreClienteZona";
+			
+			[Bindable]
+			private var clientesConZona:Array;
+			
+			private var datosParaQuitar:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+			{
+				clientesConZona = new Array;
+				VentasService.allSociosConSucursal();
+			}
+			private function allSociosConSucursalResult(event:ResultEvent):void
+			{
+				clientesConZona = event.result.Tables.Socios.Rows.source as Array;
+			}
+			private function quitar():void
+			{
+				datosParaQuitar = new Array();
+	          	for(var i:int=0;i<clientesConZona.length;i++)
+	          		if(clientesConZona[i].quitar) datosParaQuitar.push(clientesConZona[i]);
+          		
+          		if(datosParaQuitar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(datosParaQuitar.length==1) Alert.show("¿Está seguro que desea quitar al Cliente seleccionado de la zona?","Quitar Cliente de Zona", 3, this, quitarClick);
+                	else Alert.show("¿Está seguro que desea quitar los "+datosParaQuitar.length+" Clientes seleccionados de las zonas?","Quitar Clientes de Zonas", 3, this, quitarClick);	
+            	}
+                else Alert.show("Debe seleccionar al menos un Cliente para poder proceder");
+			}
+			private function quitarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES) VentasService.quitar(datosParaQuitar);
+			}
+			private function quitarResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();//Cargo nuevamente las cuentas para ver si aparecen mas y para que desaparezcan las que des-amarramos
+					trace("Datos quitados exitosamente");
+				}
+				else if(event.result == -1)
+				{
+				 	trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+					trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:DataGrid x="0" y="0" width="775" height="420" dataProvider="{clientesConZona}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingLeft="2" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.quitar=!data.quitar}" selected="{data.quitar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Nombre" dataField="CardName" width="510"/>
+			<mx:DataGridColumn headerText="Ciudad" dataField="City" width="200" sortable="false"/>
+			<mx:DataGridColumn headerText="Zona" dataField="ShortName" width="115"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="693" y="428" label="Quitar" width="72" click="quitar()"/>
+</mx:Panel>

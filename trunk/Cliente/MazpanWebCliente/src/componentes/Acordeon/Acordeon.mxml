@@ -67,7 +67,7 @@
 				}
 				if(niveles[7]=='1')
 				{
-					var menuVentas:MenuGastos = new MenuGastos();
+					var menuVentas:MenuVentas = new MenuVentas();
 					menuVentas.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuVentas);
 				}

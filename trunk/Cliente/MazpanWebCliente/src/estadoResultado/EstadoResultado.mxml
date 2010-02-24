@@ -2,7 +2,7 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Estado de Resultado" width="820" height="400" 
 	backgroundColor="#cccccc" creationComplete="init()" xmlns:estadoResultado="estadoResultado.*">
 
-	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true" requestTimeout="60">
 		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
 		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
 		<mx:operation name="getSucursales" 	result="getSucursalesResult(event)"		fault="ErrorFaultHandler(event, 'getSucursales')"/>
@@ -39,7 +39,6 @@
 			private var mes_seleccionado:int = 11;
 			private var inicializado:Boolean = false;
 			private var balanceCargado:Boolean = false;
-			private var parar:Boolean = false;
 
 			public static var formato:NumberFormatter = new NumberFormatter();
 
@@ -57,10 +56,7 @@
 				formato.decimalSeparatorFrom=",";
 				formato.decimalSeparatorTo=",";
             	
-//            	revisar_btn.enabled = false;
-//            	amarre_btn.enabled = false;
             	generar_btn.enabled = false;
-//            	grafico_btn.enabled = false;
             	
             	Service.getSucursales();
             }
@@ -78,8 +74,6 @@
             private function getItemsResult(event:ResultEvent):void
             {
             	items = event.result.Tables.Items.Rows.source as Array;
-//            	revisar_btn.enabled = true;
-//            	amarre_btn.enabled = true;
 				inicializado = true;
             	cargar_btn.enabled = true;
             	meses_cb.enabled = true;
@@ -99,16 +93,11 @@
             public function defaultValues():void
             {
             	var defaults:ITEMS = new ITEMS(items);defaults.default_values();
-            	parar = false;
             	sucursales_cb.enabled = true;
             	meses_cb.enabled = true;
             	cargar_btn.enabled = true;
             	cargar_btn.label = "Cargar";
             	balanceCargado = false;
-            }
-            public function stop():void
-            {
-            	parar = true;
             }
             public function cargar():void
             {
@@ -118,44 +107,228 @@
             	generar_btn.enabled = false;
             	cargar_btn.enabled = false;
             	meses_cb.enabled = false;
-//            	grafico_btn.enabled = false;
 				var defaults:ITEMS = new ITEMS(items);defaults.default_values();
             	ano_var = ano.value;
-            	Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.VENTASZONAS].id, items[ITEMS.VENTASZONAS].itemName, ITEMS.VENTASZONAS,ano_var);
+            	Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,ano_var);
             	cargar_btn.label='Recargar';
             	actualizarCombos();
             }
             private function getFlujoResult(event:ResultEvent):void
             {
-            	items[event.result.orden].ENE = event.result.meses.source[0];
-            	items[event.result.orden].FEB = event.result.meses.source[1];
-            	items[event.result.orden].MAR = event.result.meses.source[2];
-            	items[event.result.orden].ABR = event.result.meses.source[3];
-            	items[event.result.orden].MAY = event.result.meses.source[4];
-            	items[event.result.orden].JUN = event.result.meses.source[5];
-            	items[event.result.orden].JUL = event.result.meses.source[6];
-            	items[event.result.orden].AGO = event.result.meses.source[7];
-            	items[event.result.orden].SEP = event.result.meses.source[8];
-            	items[event.result.orden].OCT = event.result.meses.source[9];
-            	items[event.result.orden].NOV = event.result.meses.source[10];
-            	items[event.result.orden].DIC = event.result.meses.source[11];
-	            items[event.result.orden].PPTOMENSUAL = event.result.pptoMensual;
-	            items[event.result.orden].MES = event.result.pptoMensual.source[mes_seleccionado];
-	            
-	            items[event.result.orden].PPTO=0;
-	            for(var i:int=0;i<=mes_seleccionado;i++)
-	            {
-		            items[event.result.orden].PPTO += items[event.result.orden].PPTOMENSUAL[i];
-		        }
-				
-            	if(!parar)
+            	var flujoEne:Array = event.result.FLUJOENE.Tables.MES.Rows.source as Array;
+            	var flujoFeb:Array = event.result.FLUJOFEB.Tables.MES.Rows.source as Array;
+            	var flujoMar:Array = event.result.FLUJOMAR.Tables.MES.Rows.source as Array;
+            	var flujoAbr:Array = event.result.FLUJOABR.Tables.MES.Rows.source as Array;
+            	var flujoMay:Array = event.result.FLUJOMAY.Tables.MES.Rows.source as Array;
+            	var flujoJun:Array = event.result.FLUJOJUN.Tables.MES.Rows.source as Array;
+            	var flujoJul:Array = event.result.FLUJOJUL.Tables.MES.Rows.source as Array;
+            	var flujoAgo:Array = event.result.FLUJOAGO.Tables.MES.Rows.source as Array;
+            	var flujoSep:Array = event.result.FLUJOSEP.Tables.MES.Rows.source as Array;
+            	var flujoOct:Array = event.result.FLUJOOCT.Tables.MES.Rows.source as Array;
+            	var flujoNov:Array = event.result.FLUJONOV.Tables.MES.Rows.source as Array;
+            	var flujoDic:Array = event.result.FLUJODIC.Tables.MES.Rows.source as Array;
+            	
+            	var pptoEne:Array = event.result.PPTOENE.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoFeb:Array = event.result.PPTOFEB.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoMar:Array = event.result.PPTOMAR.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoAbr:Array = event.result.PPTOABR.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoMay:Array = event.result.PPTOMAY.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoJun:Array = event.result.PPTOJUN.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoJul:Array = event.result.PPTOJUL.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoAgo:Array = event.result.PPTOAGO.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoSep:Array = event.result.PPTOSEP.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoOct:Array = event.result.PPTOOCT.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoNov:Array = event.result.PPTONOV.Tables.PresupuestoMensual.Rows.source as Array;
+            	var pptoDic:Array = event.result.PPTODIC.Tables.PresupuestoMensual.Rows.source as Array;
+            	
+            	var i:int;
+            	var j:int;
+            	var aux:Array = new ITEMS(items).getItemsContables();
+            	for(i=0; i<items.length; i++)
             	{
-	            	if(ITEMS.next(event.result.orden)!=ITEMS.MAXVALUE)
-	            	{
-	            		Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,items[ITEMS.next(event.result.orden)].id, items[ITEMS.next(event.result.orden)].itemName, ITEMS.next(event.result.orden),ano_var);
-	            	}
-	            	else
-	            	{
+            		
+            		items[i].PPTOMENSUAL = [0,0,0,0,0,0,0,0,0,0,0,0];
+            		var seguir:Boolean = false;
+            		for(j=0; j<aux.length; j++)
+            		{
+            			if(aux[j]==items[i].itemName) seguir = true;
+            		}
+            		if(seguir)
+            		{
+            			items[i].ENE = 0;
+            			items[i].FEB = 0;
+            			items[i].MAR = 0;
+            			items[i].ABR = 0;
+            			items[i].MAY = 0;
+            			items[i].JUN = 0;
+            			items[i].JUL = 0;
+            			items[i].AGO = 0;
+            			items[i].SEP = 0;
+            			items[i].OCT = 0;
+            			items[i].NOV = 0;
+            			items[i].DIC = 0;
+            			items[i].PPTO = 0;
+            			items[i].MES = 0;
+            			
+	            		for(j=0; j<flujoEne.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoEne[j].itemName) items[i].ENE = int(flujoEne[j].Column1);
+	            		}
+	            		for(j=0; j<flujoFeb.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoFeb[j].itemName) items[i].FEB = int(flujoFeb[j].Column1);
+	            		}
+	            		for(j=0; j<flujoMar.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoMar[j].itemName) items[i].MAR = int(flujoMar[j].Column1);
+	            		}
+	            		for(j=0; j<flujoAbr.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoAbr[j].itemName) items[i].ABR = int(flujoAbr[j].Column1);
+	            		}
+	            		for(j=0; j<flujoMay.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoMay[j].itemName) items[i].MAY = int(flujoMay[j].Column1);
+	            		}
+	            		for(j=0; j<flujoJun.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoJun[j].itemName) items[i].JUN = int(flujoJun[j].Column1);
+	            		}
+	            		for(j=0; j<flujoJul.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoJul[j].itemName) items[i].JUL = int(flujoJul[j].Column1);
+	            		}
+	            		for(j=0; j<flujoAgo.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoAgo[j].itemName) items[i].AGO = int(flujoAgo[j].Column1);
+	            		}
+	            		for(j=0; j<flujoSep.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoSep[j].itemName) items[i].SEP = int(flujoSep[j].Column1);
+	            		}
+	            		for(j=0; j<flujoOct.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoOct[j].itemName) items[i].OCT = int(flujoOct[j].Column1);
+	            		}
+	            		for(j=0; j<flujoNov.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoNov[j].itemName) items[i].NOV = int(flujoNov[j].Column1);
+	            		}
+	            		for(j=0; j<flujoDic.length; j++)
+	            		{
+	            			if(items[i].itemName==flujoDic[j].itemName) items[i].DIC = int(flujoDic[j].Column1);
+	            		}
+	/////////////////////////////////////////////////////////////////////////            		
+	            		//PPTOMENSUAL
+	            		for(j=0; j<pptoEne.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoEne[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[0] = int(pptoEne[j].Column1);
+	            				if(meses_cb.selectedIndex==0) items[i].MES = int(pptoEne[j].Column1);
+	            				items[i].PPTO += int(pptoEne[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoFeb.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoFeb[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[1] = int(pptoFeb[j].Column1);
+	            				if(meses_cb.selectedIndex==1) items[i].MES = int(pptoFeb[j].Column1);
+	            				if(meses_cb.selectedIndex>=1) items[i].PPTO += int(pptoFeb[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoMar.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoMar[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[2] = int(pptoMar[j].Column1);
+	            				if(meses_cb.selectedIndex==2) items[i].MES = int(pptoMar[j].Column1);
+	            				if(meses_cb.selectedIndex>=2) items[i].PPTO += int(pptoMar[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoAbr.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoAbr[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[3] = int(pptoAbr[j].Column1);
+	            				if(meses_cb.selectedIndex==3) items[i].MES = int(pptoAbr[j].Column1);
+	            				if(meses_cb.selectedIndex>=3) items[i].PPTO += int(pptoAbr[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoMay.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoMay[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[4] = int(pptoMay[j].Column1);
+	            				if(meses_cb.selectedIndex==4) items[i].MES = int(pptoMay[j].Column1);
+	            				if(meses_cb.selectedIndex>=4) items[i].PPTO += int(pptoMay[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoJun.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoJun[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[5] = int(pptoJun[j].Column1);
+	            				if(meses_cb.selectedIndex==5) items[i].MES = int(pptoJun[j].Column1);
+	            				if(meses_cb.selectedIndex>=5) items[i].PPTO += int(pptoJun[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoJul.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoJul[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[6] = int(pptoJul[j].Column1);
+	            				if(meses_cb.selectedIndex==6) items[i].MES = int(pptoJul[j].Column1);
+	            				if(meses_cb.selectedIndex>=6) items[i].PPTO += int(pptoJul[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoAgo.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoAgo[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[7] = int(pptoAgo[j].Column1);
+	            				if(meses_cb.selectedIndex==7) items[i].MES = int(pptoAgo[j].Column1);
+	            				if(meses_cb.selectedIndex>=7) items[i].PPTO += int(pptoAgo[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoSep.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoSep[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[8] = int(pptoSep[j].Column1);
+	            				if(meses_cb.selectedIndex==8) items[i].MES = int(pptoSep[j].Column1);
+	            				if(meses_cb.selectedIndex>=8) items[i].PPTO += int(pptoSep[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoOct.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoOct[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[9] = int(pptoOct[j].Column1);
+	            				if(meses_cb.selectedIndex==9) items[i].MES = int(pptoOct[j].Column1);
+	            				if(meses_cb.selectedIndex>=9) items[i].PPTO += int(pptoOct[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoNov.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoNov[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[10] = int(pptoNov[j].Column1);
+	            				if(meses_cb.selectedIndex==10) items[i].MES = int(pptoNov[j].Column1);
+	            				if(meses_cb.selectedIndex>=10) items[i].PPTO += int(pptoNov[j].Column1);
+	            			}
+	            		}
+	            		for(j=0; j<pptoDic.length; j++)
+	            		{
+	            			if(items[i].itemName==pptoDic[j].itemName)
+	            			{
+	            				items[i].PPTOMENSUAL[11] = int(pptoDic[j].Column1);
+	            				if(meses_cb.selectedIndex==11) items[i].MES = int(pptoDic[j].Column1);
+	            				if(meses_cb.selectedIndex>=11) items[i].PPTO += int(pptoDic[j].Column1);
+	            			}
+	            		}
+	            		
 	            		var calculo:ITEMS = new ITEMS(items);
 	            		calculo.CALCULAR(ITEMS.VENTASNETAS);	
 		            	calculo.CALCULAR(ITEMS.COSTOSTOTALES);
@@ -166,26 +339,22 @@
 		            	calculo.CALCULAR_IMPUESTO();
 		            	calculo.CALCULAR(ITEMS.RESULTADO);
 		            	calculo.CALCULAR_OTROS(meses_cb.selectedIndex);
-		            	
-	            		generar_btn.enabled = true;
-						balanceCargado = true;
-	            		cargar_btn.enabled = true;
-	            		cargarOtros = true;
-	            		meses_cb.enabled = true;
-	            		sucursales_cb.enabled = true;
-	//            		grafico_btn.enabled  = true;
+		        		
 	            	}
-	           }
-	           else
-	           {
-	           		defaultValues();
-	           }
+            	}
+            	 
+            	generar_btn.enabled = true;
+				balanceCargado = true;
+        		cargar_btn.enabled = true;
+        		cargarOtros = true;
+        		meses_cb.enabled = true;
+        		sucursales_cb.enabled = true;
             }
 			private function generarPDF():void
 			{
 				var pdf:FORMATO = new FORMATO();
 				//pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
-				pdf.generarTabla(tabla1,img,ano_var.toString(),"Estado de Resultado", sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+				pdf.generarTabla(items,tabla1,img,ano_var.toString(),"Estado de Resultado", sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 			}
             private function actualizarColumnas():void
             {
@@ -276,8 +445,7 @@
 		<mx:Label  text="Elija el año:" id="label1"/>
 		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" 		 id="ano"/>
 		<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  	enabled="false" width="77"/>
-		<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" 	enabled="false" width="77"/>
-		<mx:Button label="Cancelar" click="stop()"/>
+		<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" 	enabled="true" width="77"/>
 	</mx:HBox>
 	
 	<estadoResultado:myDataGrid id="tabla1" y="38" width="100%" height="100%" dataProvider="{items}" doubleClickEnabled="true" doubleClick="detalle()">
@@ -297,8 +465,8 @@
 			<mx:DataGridColumn headerText="DIC" 	dataField="DIC" 	sortable="false" textAlign="right" width="68" id="dic"/>
 			<mx:DataGridColumn headerText="PPTO MES" dataField="MES" 	sortable="false" textAlign="right" width="68"/>
 			<mx:DataGridColumn headerText="ACUM" 	dataField="REAL" 	sortable="false" textAlign="right" width="68"/>
-			<mx:DataGridColumn headerText="PPTO" 	dataField="PPTO" 	sortable="false" textAlign="right" width="68"/>
-			<mx:DataGridColumn headerText="DESV %" 	dataField="DESV" 	sortable="false" textAlign="right" width="68"/>
+			<mx:DataGridColumn headerText="PPTO" 	dataField="PPTO" 	sortable="false" textAlign="right" width="71"/>
+			<mx:DataGridColumn headerText="DESV %" 	dataField="DESV" 	sortable="false" textAlign="right" width="65"/>
 		</estadoResultado:columns>
 	</estadoResultado:myDataGrid>
 </mx:Panel>
