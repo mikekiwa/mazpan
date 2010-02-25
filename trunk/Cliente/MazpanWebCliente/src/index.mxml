@@ -12,7 +12,8 @@
 	xmlns:ns9="componentes.mantencionLineas.*" 
 	xmlns:ns10="componentes.mantencionPlantas.*"
 	xmlns:ns11="estadoResultado.*" 
-	xmlns:ns12="gastosVentas.*">
+	xmlns:ns12="gastosVentas.*"
+	xmlns:ns13="locales.*">
 	
 	<mx:states>
 		<mx:State name="Maquinas">
@@ -157,6 +158,12 @@
 				<ns12:RevisarAmarreClienteZona id="revisarAmarreClienteZona_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="ControlAsistencia">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:ControlAsistencia id="controlAsistencia_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
@@ -179,8 +186,8 @@
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
+			public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
+			//public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]

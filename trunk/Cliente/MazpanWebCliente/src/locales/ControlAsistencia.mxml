@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Control de Asistencia de Personal"
+	creationComplete="init()">
+	
+	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 		result="getFechaResult(event)"		fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+		
+		
+			public static const nombre:String = "ControlAsistencia";
+			
+			[Bindable]
+			private var hoy:String;
+			
+			[Bindable]
+			private var locales_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+            {
+            	locales_ac = new Array;
+            	CombosService.getFecha();
+            }
+            private function getFechaResult(event:ResultEvent):void
+            {
+            	hoy = event.result as String;
+            	LocalesService.getLocales();
+            }
+            private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            }
+		]]>
+	</mx:Script>
+	
+	<mx:HBox x="479" y="10" width="273">
+		<mx:Label text="Fecha:" fontWeight="bold"/>
+		<mx:Label text="{hoy}" fontWeight="bold"/>
+	</mx:HBox>
+	<mx:Label x="10" y="38" text="Trabajadores"/>
+	<mx:Label x="10" y="12" text="Local"/>
+	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName"/>
+	<mx:Button x="689" y="428" label="Ingresar"/>
+	<mx:DataGrid x="10" y="64" width="755" height="356">
+		<mx:columns>
+			<mx:DataGridColumn id="colSel" headerText="" width="20" sortable="false" paddingLeft="3">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox selected="{data.actualizado}" enabled="false"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Nombres" dataField="CardName" width="535"/>
+			<mx:DataGridColumn id="Asistencia" headerText="Enero"  width="100" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.enero}" fontSize="8" textAlign="right" focusOut="{data.enero=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn id="ene" headerText="Enero"  width="100" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9" text="{data.enero}" fontSize="8" textAlign="right" focusOut="{data.enero=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:Panel>
