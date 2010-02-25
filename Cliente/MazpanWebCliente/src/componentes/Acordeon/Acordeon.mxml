@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:flexlib="http://code.google.com/p/flexlib/" 
-	xmlns="componentes.*" width="120" height="360" xmlns:Acordeon="componentes.Acordeon.*">
+	xmlns="componentes.*" width="120" height="400" xmlns:Acordeon="componentes.Acordeon.*">
 	
 	<mx:Metadata>
 			[Event(name="complexClick",type="eventos.ComplexEvent")]
@@ -71,7 +71,12 @@
 					menuVentas.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuVentas);
 				}
-				
+				if(niveles[8]=='1')
+				{
+					var menuLocales:MenuLocales = new MenuLocales();
+					menuLocales.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuLocales);
+				}
 				
 				
 				
