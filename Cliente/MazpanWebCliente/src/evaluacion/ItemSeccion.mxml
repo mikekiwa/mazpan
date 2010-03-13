@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Item - Sección"
+	creationComplete="init()">
+	
+	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getSecciones" 		result="getSeccionesResult(event)"			fault="ErrorFaultHandler(event, 'getSecciones')"/>
+		<mx:operation name="getItemSeccion" 	result="getItemSeccionResult(event)"		fault="ErrorFaultHandler(event, 'getItemSeccion')"/>
+		<mx:operation name="addItemSeccion" 	result="guardarItemSeccionResult(event)"	fault="ErrorFaultHandler(event, 'addItemSeccion')"/>
+		<mx:operation name="delItemSeccion" 	result="guardarItemSeccionResult(event)"	fault="ErrorFaultHandler(event, 'delItemSeccion')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "ItemSeccion";
+			
+			[Bindable]
+			private var itemSeccion_ac:Array;
+			[Bindable]
+			private var secciones_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	secciones_cb.enabled = true;
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				secciones_cb.enabled = true;
+				itemSeccion_ac = new Array;
+				secciones_ac = new Array;
+				EvaluacionService.getSecciones();
+			}
+			private function getSeccionesResult(event:ResultEvent):void
+			{
+				secciones_ac = event.result.Tables.Secciones.Rows.source as Array;
+				cargar();
+			}
+			private function cargar():void
+			{
+				EvaluacionService.getItemSeccion(secciones_cb.selectedItem.id);
+			}
+			private function getItemSeccionResult(event:ResultEvent):void
+			{
+				itemSeccion_ac = event.result.Tables.ItemsSeccion.Rows.source as Array;
+				for(var i:int=0; i<itemSeccion_ac.length; i++)
+				{
+					if(itemSeccion_ac[i].id!=null) itemSeccion_ac[i].amarrar = true;
+				}
+				tabla1.dataProvider = itemSeccion_ac;
+			}
+			private var respuestas:int = 0;
+			private function guardar():void
+			{
+				respuestas = itemSeccion_ac.length;
+				for(var i:int=0; i<itemSeccion_ac.length; i++)
+				{
+					if(itemSeccion_ac[i].id!=null && !(itemSeccion_ac[i].amarrar)) 
+						EvaluacionService.delItemSeccion(itemSeccion_ac[i].id);
+					else if(itemSeccion_ac[i].id==null && itemSeccion_ac[i].amarrar) 
+						EvaluacionService.addItemSeccion(secciones_cb.selectedItem.id,itemSeccion_ac[i].id1);
+				}
+			}
+			private function guardarItemSeccionResult(event:ResultEvent):void
+			{
+				respuestas--;
+				if(event.result != 1) trace("Error intentando cambiar amarre de items y seccion");
+				if(respuestas==0) init();
+			}
+			private function todos():void
+            {
+            	for(var i:int=0; i<itemSeccion_ac.length; i++)
+            	{
+            		itemSeccion_ac[i].amarrar = true;
+            	}
+            }
+            private function ninguno():void
+            {
+            	for(var i:int=0; i<itemSeccion_ac.length; i++)
+            	{
+            		itemSeccion_ac[i].amarrar = false;
+            	}
+            }
+            private function invertir():void
+            {
+            	for(var i:int=0; i<itemSeccion_ac.length; i++)
+            	{
+            		itemSeccion_ac[i].amarrar = !(itemSeccion_ac[i].amarrar);
+            	}
+            }
+		]]>
+	</mx:Script>
+	<mx:HBox x="10" y="0" width="753">
+		<mx:Label text="Sección:"/>
+		<mx:ComboBox dataProvider="{secciones_ac}" labelField="nombre" id="secciones_cb" change="cargar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="51" width="775" height="369" id="tabla1" dataProvider="{itemSeccion_ac}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingRight="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.amarrar=!data.amarrar}" selected="{data.amarrar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Item" dataField="item1"/>
+			<mx:DataGridColumn headerText="Descripción Item" dataField="descripcion"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button label="Guardar" click="guardar()" x="690" y="428"/>
+	<mx:LinkButton x="0" y="26" label="Todos" color="#0531F0" click="todos()"/>
+	<mx:LinkButton x="61" y="26" label="Ninguno" color="#0531F0" click="ninguno()"/>
+	<mx:LinkButton x="135" y="26" label="Invertir" color="#0531F0" click="invertir()"/>
+</mx:Panel>

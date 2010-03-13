@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Categorias"
+	creationComplete="init()">
+	
+	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getCategorias" 		result="getCategoriasResult(event)"		fault="ErrorFaultHandler(event, 'getCategorias')"/>
+		<mx:operation name="guardarCategorias" 	result="guardarCategoriaResult(event)"	fault="ErrorFaultHandler(event, 'guardarCategorias')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "Categorias";
+			
+			[Bindable]
+			private var categoria:Object;
+			[Bindable]
+			private var categorias_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				categorias_ac = new Array;
+				clean();
+				EvaluacionService.getCategorias();
+			}
+			private function getCategoriasResult(event:ResultEvent):void
+			{
+				categorias_ac = event.result.Tables.Categorias.Rows.source as Array;
+				verificarPorcentaje();
+			}
+			private function guardarCategoriaResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();
+				}
+				else
+				{
+					trace("Error intentando guardar Categoria");
+				}
+			}
+			private function clean():void
+			{
+				categoria = new Object;
+				descripcion_ti.text = "";
+				nombre_ti.text = "";
+				porcentaje_ns.value = 1;
+				agregar_lf.visible = true;
+				editarText_lf.visible = false;
+				editar_lf.visible = false;
+				verificarPorcentaje();
+			}
+			private function agregar():void
+			{
+				if(nombre_ti.text.length>0)
+				{
+					if(agregar_lf.visible)
+					{
+						var nuevaCategoria:Object = new Object;
+						nuevaCategoria.nombre = nombre_ti.text;
+						nuevaCategoria.descripcion = descripcion_ti.text;
+						nuevaCategoria.porcentaje = porcentaje_ns.value;
+						categorias_ac.push(nuevaCategoria);
+						tabla.dataProvider = categorias_ac;
+					}
+					else
+					{
+						categoria.nombre = nombre_ti.text;
+						categoria.descripcion = descripcion_ti.text;
+						categoria.porcentaje = porcentaje_ns.value;
+					}
+					clean();
+				}
+				verificarPorcentaje();
+			}
+			private function verificarPorcentaje():void
+			{
+				if(categorias_ac!=null)
+				{
+					var aux:int = 0;
+					for(var i:int=0; i<categorias_ac.length; i++)
+					{
+						aux += int(categorias_ac[i].porcentaje);
+					}
+					if(aux==100)
+					{
+						guardar_btn.enabled = true;
+						error.visible = false;
+					} 
+					else
+					{
+						guardar_btn.enabled = false;
+						if(categorias_ac.length>0) error.visible = true;
+					}
+				}
+			}
+			private function editar():void
+			{
+				if(tabla.selectedIndex!=-1)
+				{
+					agregar_lf.visible = false;
+					editarText_lf.visible = true;
+					editar_lf.visible = true;
+					categoria = tabla.selectedItem;
+					nombre_ti.text = tabla.selectedItem.nombre;
+					descripcion_ti.text = tabla.selectedItem.descripcion;
+					porcentaje_ns.value = tabla.selectedItem.porcentaje;
+				}
+			}
+			private function eliminar():void
+			{
+				if(tabla.selectedIndex!=-1)
+				{
+					var aux:Array = new Array;
+					for(var i:int=0; i<categorias_ac.length; i++)
+					{
+						if(tabla.selectedItem!=categorias_ac[i]) aux.push(categorias_ac[i]);
+					}
+					categorias_ac = aux;
+					tabla.dataProvider = categorias_ac;
+					verificarPorcentaje();
+				}
+			}
+			private function guardar():void
+			{
+				EvaluacionService.guardarCategorias(categorias_ac);
+			}
+		]]>
+	</mx:Script>
+	<mx:Canvas x="10" y="326" width="755" height="124" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Editar:" id="editarText_lf" visible="false"/>
+		<mx:Label x="59" y="10" text="{categoria.nombre}" id="editar_lf" visible="false"/>
+		<mx:Label x="10" y="10" text="Agregar nueva Categoria" id="agregar_lf"/>
+		<mx:Label x="10" y="40" text="Nombre"/>
+		<mx:TextInput x="85" y="38" maxChars="50" width="450" id="nombre_ti"/>
+		<mx:Label x="10" y="68" text="Descripcion"/>
+		<mx:TextInput x="85" y="66" maxChars="50" width="450" id="descripcion_ti"/>
+		<mx:Label x="10" y="94" text="Porcentaje"/>
+		<mx:NumericStepper x="85" y="92" minimum="1" maximum="100" id="porcentaje_ns"/>
+		<mx:Button x="671" y="92" label="Agregar" click="agregar()" width="72"/>
+		<mx:Button x="588" y="92" label="Cancelar" click="clean()"/>
+	</mx:Canvas>
+	<mx:DataGrid x="10" y="10" width="755" height="278" id="tabla" dataProvider="{categorias_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Nombre" dataField="nombre"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion"/>
+			<mx:DataGridColumn headerText="Porcentaje" dataField="porcentaje"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="533" y="296" label="Guardar" id="guardar_btn" click="guardar()"/>
+	<mx:Button x="613" y="296" label="Editar" width="72" click="editar()"/>
+	<mx:Button x="693" y="296" label="Eliminar" click="eliminar()"/>
+	<mx:Label x="261" y="298" text="Porcentaje total no corresponde a 100%" width="264" id="error" color="#FC1E07" fontWeight="bold" visible="false"/>
+</mx:Panel>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Desviacion de Ordenes"
+	creationComplete="init()" xmlns:mc="misClases.*">
+
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getDesviaciones" 	result="getDesviacionesResult(event)"	fault="ErrorFaultHandler(event, 'getDesviaciones')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.formatters.NumberFormatter;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+		
+			public static const nombre:String = "DesviacionOrdenes";
+		
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var desviaciones_ac:Array;
+			
+			private var formato:NumberFormatter = new NumberFormatter();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+            {
+            	formato.precision=2;
+				formato.useThousandsSeparator=true;
+				formato.thousandsSeparatorFrom=".";
+				formato.thousandsSeparatorTo=".";
+				formato.decimalSeparatorFrom=",";
+				formato.decimalSeparatorTo=",";
+            	locales_ac = new Array;
+            	
+            	desviaciones_ac = new Array;
+            	LocalesService.getLocales();
+            }
+            private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            }
+			private function cargar():void
+			{
+				if(local_cb.selectedIndex!=-1 && desde_df.text.length>0 && hasta_df.text.length>0)
+				{
+					LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,
+													desde_df.selectedDate.getFullYear()+"-"+(desde_df.selectedDate.getMonth()+1)+"-"+desde_df.selectedDate.date,
+													hasta_df.selectedDate.getFullYear()+"-"+(hasta_df.selectedDate.getMonth()+1)+"-"+hasta_df.selectedDate.date);
+				}
+			}
+			private function getDesviacionesResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Desviaciones.Rows.source as Array;
+            	desviaciones_ac = new Array;
+            	
+            	for(var i:int=0; i<aux.length; i++)
+            	{
+            		aux[i].Logrado = formato.format(aux[i].Logrado);
+            		aux[i].NoLogrado = formato.format(aux[i].NoLogrado);
+            		desviaciones_ac.push(aux[i]);
+            	}
+            }
+		]]>
+	</mx:Script>
+	<mx:HBox x="10" y="4" width="755">
+		<mx:Label text="Local"/>
+		<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName"/>
+		<mx:Spacer width="50"/>
+		<mx:Label text="Desde"/>
+		<mc:myDateField id="desde_df"/>
+		<mx:Label text="Hasta"/>
+		<mc:myDateField id="hasta_df"/>
+		<mx:Button label="Cargar" width="72" click="cargar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="38" width="775" height="422" dataProvider="{desviaciones_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="250"/>
+			<mx:DataGridColumn headerText="Elaborado" dataField="CantidadElaborada" width="111" textAlign="right"/>
+			<mx:DataGridColumn headerText="Completado" dataField="CantidadCompletada" width="111" textAlign="right"/>
+			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="113" textAlign="right"/>
+			<mx:DataGridColumn headerText="% Logrado" dataField="Logrado" width="95" textAlign="right"/>
+			<mx:DataGridColumn headerText="% No Logrado" dataField="NoLogrado" width="95" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>

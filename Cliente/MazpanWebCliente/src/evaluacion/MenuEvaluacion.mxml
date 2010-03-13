@@ -6,26 +6,26 @@
 
 	<mx:Script>
 		<![CDATA[
-			import componentes.mantencionSistema.Usuarios;
-			import componentes.mantencionPlantas.Plantas;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
 			public var description:String;
 			
 			[Bindable]
-			public var title:String="Sistema";
+			public var title:String = "Evaluación";
 			
 			[Bindable]
-			private var nombre:String = "Sistema";
+			private var nombre:String = "Evaluacion";
 			
 			[Bindable]
-			private var visibles:Array = [false,false];
+			private var visibles:Array = [false,false,false,false];
 			
 			public function privilegios(privilegios:Array, inicio:int):void
 			{
 				if(privilegios[inicio]=='1') visibles[0] = true;
 				if(privilegios[inicio+1]=='1') visibles[1] = true;
+				if(privilegios[inicio+2]=='1') visibles[2] = true;
+				if(privilegios[inicio+3]=='1') visibles[3] = true;
 			}
 			private function goState(destino:String):void
 			{
@@ -34,6 +34,8 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Plantas" 	width="100" click="goState(Plantas.nombre)"/>
-	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Usuarios" 	width="100" click="goState(Usuarios.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10"  label="opcion1" 		width="100" click="goState(Evaluar.nombre)"/>
+	<mx:LinkButton visible="{visibles[1]}" x="10" y="40"  label="opcion2" 		width="100" click="goState(Evaluar.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70"  label="opcion3" 		width="100" click="goState(Evaluar.nombre)"/>
+	<mx:LinkButton visible="{visibles[3]}" x="10" y="100"  label="opcion4" 		width="100" click="goState(Evaluar.nombre)"/>
 </mx:Canvas>

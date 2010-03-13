@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Trabajador - Seccion"
+	creationComplete="init()">
+	
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
+	</mx:WebService>
+	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getSecciones" 		result="getSeccionesResult(event)"		fault="ErrorFaultHandler(event, 'getSecciones')"/>
+		<mx:operation name="getSociosDe" 		result="getSociosDeResult(event)"		fault="ErrorFaultHandler(event, 'getSociosDe')"/>
+		<mx:operation name="editClienteSeccion" result="guardarResult(event)"			fault="ErrorFaultHandler(event, 'editClienteSeccion')"/>
+		<mx:operation name="addClienteSeccion" 	result="guardarResult(event)"			fault="ErrorFaultHandler(event, 'addClienteSeccion')"/>
+		<mx:operation name="delClienteSeccion" 	result="guardarResult(event)"			fault="ErrorFaultHandler(event, 'delClienteSeccion')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "TrabajadoresSeccion";
+			
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var socios_ac:Array;
+			[Bindable]
+			private var secciones_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				locales_ac = new Array;
+				socios_ac = new Array;
+				secciones_ac = new Array;
+				LocalesService.getLocales();
+            }
+            private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	cargar();
+            }
+            private function cargar():void
+            {
+            	socios_ac = new Array;
+				EvaluacionService.getSociosDe(local_cb.selectedItem.WhsCode);
+            }
+            private function getSociosDeResult(event:ResultEvent):void
+            {
+            	socios_ac = event.result.Tables.Socios.Rows.source as Array;
+            	secciones_ac = new Array;
+           		EvaluacionService.getSecciones();
+			}
+			private function getSeccionesResult(event:ResultEvent):void
+			{
+				secciones_ac = event.result.Tables.Secciones.Rows.source as Array;
+				var ninguna:Object = new Object;
+				ninguna.nombre = "ninguna";
+				secciones_ac.push(ninguna);
+				secciones_cb.dataProvider = secciones_ac;
+			}
+            private function todos():void
+            {
+            	for(var i:int=0; i<socios_ac.length; i++)
+            	{
+            		socios_ac[i].amarrar = true;
+            	}
+            }
+            private function ninguno():void
+            {
+            	for(var i:int=0; i<socios_ac.length; i++)
+            	{
+            		socios_ac[i].amarrar = false;
+            	}
+            }
+            private function invertir():void
+            {
+            	for(var i:int=0; i<socios_ac.length; i++)
+            	{
+            		socios_ac[i].amarrar = !(socios_ac[i].amarrar);
+            	}
+            }
+            private function sinSeccion():void
+            {
+            	for(var i:int=0; i<socios_ac.length; i++)
+            	{
+            		if(socios_ac[i].nombre==null) socios_ac[i].amarrar = true;
+            		else socios_ac[i].amarrar = false;
+            	}
+            }
+            private function conSeccion():void
+            {
+            	for(var i:int=0; i<socios_ac.length; i++)
+            	{
+            		if(socios_ac[i].nombre!=null) socios_ac[i].amarrar = true;
+            		else socios_ac[i].amarrar = false;
+            	}
+            }
+            private var count:int=0;
+            private function guardar():void
+            {
+            	count = 0;
+            	for(var i:int=0; i<socios_ac.length; i++)
+            	{
+            		if(socios_ac[i].amarrar) count++;
+            	}
+            	if(count>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(count==1) Alert.show("¿Está seguro que desea Asignar la seccion "+secciones_cb.selectedItem.nombre+" al trabajador seleccionado?","Advertencia",3,this,guardarClick);
+                	else Alert.show("¿Está seguro que desea Asignar la seccion "+secciones_cb.selectedItem.nombre+" a los "+count+" trabajadores seleccionados?","Advertencia",3,this,guardarClick);	
+            	}
+            	else Alert.show("Antes seleccione al menos un trabajador de la lista, macando la primera columna","Aviso");
+            }
+            private function guardarClick(event:CloseEvent):void
+            {
+            	if (event.detail==Alert.YES)
+            	{
+            		for(var i:int=0; i<socios_ac.length; i++) 
+            		{
+            			if(socios_ac[i].amarrar)
+            			{
+	            			if(socios_ac[i].id!=null)
+	            			{
+	            				if(secciones_cb.selectedItem.id != null) EvaluacionService.editClienteSeccion(socios_ac[i].id,secciones_cb.selectedItem.id);
+	            				else EvaluacionService.delClienteSeccion(socios_ac[i].id);
+	            			}
+	            			else  EvaluacionService.addClienteSeccion(socios_ac[i].CardCode,secciones_cb.selectedItem.id);
+            			}
+            		}
+				}
+            }
+            private function guardarResult(event:ResultEvent):void
+            {
+            	count--;
+            	if(count==0) init();
+            	if(event.result!=1) trace("Error intentando asociar seccion a trabajador");
+            }
+		]]>
+	</mx:Script>
+	<mx:HBox x="10" y="0" width="755">
+		<mx:Label text="Local"/>
+		<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="cargar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="51" width="775" height="320" dataProvider="{socios_ac}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingRight="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.amarrar=!data.amarrar}" selected="{data.amarrar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Rut" dataField="LicTradNum"/>
+			<mx:DataGridColumn headerText="Trabajador" dataField="CardName"/>
+			<mx:DataGridColumn headerText="Seccion" dataField="nombre"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:LinkButton x="0" y="26" label="Todos" color="#0531F0" click="todos()"/>
+	<mx:LinkButton x="61" y="26" label="Ninguno" color="#0531F0" click="ninguno()"/>
+	<mx:LinkButton x="135" y="26" label="Invertir" color="#0531F0" click="invertir()"/>
+	<mx:LinkButton x="208" y="26" label="Sin Sección" color="#0531F0" click="sinSeccion()"/>
+	<mx:LinkButton x="299" y="26" label="Con Sección" color="#0531F0" click="conSeccion()"/>
+	<mx:Canvas x="10" y="379" width="755" height="71" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Asociar Sección a Trabajadores Seleccionados"/>
+		<mx:HBox x="10" y="36" width="735">
+			<mx:Label text="Secciones:"/>
+			<mx:ComboBox dataProvider="{secciones_ac}" labelField="nombre" id="secciones_cb"/>
+			<mx:Button label="Guardar" click="guardar()"/>
+		</mx:HBox>
+	</mx:Canvas>
+</mx:Panel>

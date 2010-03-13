@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Declaración de Stock de Local"
+	creationComplete="init()" xmlns:misClases="misClases.*">
+	
+	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 	result="getFechaResult(event)"	 fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 	result="getLocalesResult(event)" 	fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getProductos" 	result="getProductosResult(event)" 	fault="ErrorFaultHandler(event, 'getProductos')"/>
+		<mx:operation name="guardarStock" 	result="guardarStockResult(event)" 	fault="ErrorFaultHandler(event, 'guardarStock')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			
+			public static const nombre:String = "StockLocal";
+			
+			[Bindable]
+			private var hoy:String;
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var productos_ac:Array;
+			
+			private var respuestasNecesarias:int = 0;
+						
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				CombosService.getFecha();
+			} 
+			private function getFechaResult(event:ResultEvent):void
+            {
+            	hoy = event.result as String;
+            	LocalesService.getLocales();
+            }
+            private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            }
+            private function cargar():void
+            {
+            	if(fecha_df.text.length>0) LocalesService.getProductos(local_cb.selectedItem.WhsCode,String(fecha_df.selectedDate.getFullYear()+"-"+(fecha_df.selectedDate.getMonth()+1)+"-"+fecha_df.selectedDate.date));
+            }
+            private function getProductosResult(event:ResultEvent):void
+            {
+            	productos_ac = event.result.Tables.Productos.Rows.source as Array;
+            }
+            private function filtar():void
+			{
+				tabla.dataProvider = productos_ac.filter(filtrar);
+			}
+			private function filtrar(element:*, index:int, arr:Array):Boolean 
+			{
+				var res:Boolean=true;
+				try
+				{
+	            	res = (element.ItemName.toLocaleLowerCase().search(input.text.toLocaleLowerCase())>=0)&& res;
+	    		}
+	    		catch(error:Error)
+	    		{
+	    			trace("error");
+	    		}
+            	return res;
+        	}
+        	private function guardar():void
+        	{
+        		for(var j:int=0; j<productos_ac.length; j++)
+        		{
+        			if(productos_ac[j].actualizado)
+        			{
+        				respuestasNecesarias++;
+        			}
+        		}
+        		for(var i:int=0; i<productos_ac.length; i++)
+        		{
+        			if(productos_ac[i].actualizado)
+        			{
+        			 	LocalesService.guardarStock(local_cb.selectedItem.WhsCode,
+        			 								String(fecha_df.selectedDate.getFullYear()+"-"+(fecha_df.selectedDate.getMonth()+1)+"-"+fecha_df.selectedDate.date),
+        			 								productos_ac[i].ItemCode,
+        			 								productos_ac[i].Local);
+        			}
+        		}
+        	}
+        	private function guardarStockResult(event:ResultEvent):void
+        	{
+        		respuestasNecesarias--;
+        		if(respuestasNecesarias==0) cargar();
+        	}
+		]]>
+	</mx:Script>
+	
+	
+	<mx:Label text="Local" y="12" x="10"/>
+	<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" x="59" y="10" change="cargar()" width="209"/>
+	<misClases:myDateField x="276" y="10" id="fecha_df"/>
+	<mx:Button x="374" y="10" label="Cargar" width="72" click="cargar()"/>
+	<mx:Label x="10" y="40" text="Buscar"/>
+	<mx:TextInput x="59" y="38" width="209" id="input"/>
+	<mx:Button x="276" y="38" label="Filtrar" width="72" click="filtar()"/>
+	<mx:DataGrid x="0" y="66" width="775" height="354" dataProvider="{productos_ac}" id="tabla">
+		<mx:columns>
+			<mx:DataGridColumn id="colSel" headerText="" width="10" sortable="false" paddingLeft="3">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox selected="{data.actualizado}" enabled="false"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="400"/>
+			<mx:DataGridColumn headerText="En Stock Local" width="200" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:TextInput restrict="0-9," text="{data.Local}" fontSize="8" textAlign="right" focusOut="{data.Local=event.target.text}" change="data.actualizado=true"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Un. Medida" dataField="InvntryUom" width="100" textAlign="right" sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="693" y="428" label="Guardar" click="guardar()"/>
+</mx:Panel>

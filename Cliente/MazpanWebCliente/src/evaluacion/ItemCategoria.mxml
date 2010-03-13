@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Item - Categoria"
+	creationComplete="init()">
+	
+	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getCategorias" 		result="getCategoriasResult(event)"		fault="ErrorFaultHandler(event, 'getCategorias')"/>
+		<mx:operation name="getItemCategoria" 	result="getItemCategoriaResult(event)"	fault="ErrorFaultHandler(event, 'getItemCategoria')"/>
+		<mx:operation name="getItemsLibres" 	result="getItemsLibresResult(event)"	fault="ErrorFaultHandler(event, 'getItemsLibres')"/>
+		<mx:operation name="delItemCategoria" 	result="delItemCategoriaResult(event)"	fault="ErrorFaultHandler(event, 'delItemCategoria')"/>
+		<mx:operation name="addItemCategoria" 	result="addItemCategoriaResult(event)"	fault="ErrorFaultHandler(event, 'addItemCategoria')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "ItemCategoria";
+			
+			[Bindable]
+			private var itemCateoria_ac:Array;
+			[Bindable]
+			private var itemsLibres_ac:Array;
+			[Bindable]
+			private var categorias_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	if(categoria_cb!=null) categoria_cb.enabled = true;
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				if(categoria_cb!=null) categoria_cb.enabled = true;
+				itemCateoria_ac = new Array;
+				itemsLibres_ac = new Array;
+				categorias_ac = new Array;
+				EvaluacionService.getCategorias();
+			}
+			private function getCategoriasResult(event:ResultEvent):void
+			{
+				categorias_ac = event.result.Tables.Categorias.Rows.source as Array;
+				EvaluacionService.getItemsLibres();
+			}
+			private function getItemsLibresResult(event:ResultEvent):void
+			{
+				itemsLibres_ac = event.result.Tables.ItemsLibres.Rows.source as Array;
+				EvaluacionService.getItemCategoria();
+			}
+			private function getItemCategoriaResult(event:ResultEvent):void
+			{
+				itemCateoria_ac = event.result.Tables.ItemCategoria.Rows.source as Array;
+			}
+			private var datosParaGuardar:Array = new Array;
+			private var respuestas:int = 0;
+			private function amarrar():void
+			{
+				categoria_cb.enabled = false;
+				datosParaGuardar = new Array();
+	          	for(var i:int=0;i< itemsLibres_ac.length;i++)
+	          		if(itemsLibres_ac[i].amarrar) datosParaGuardar.push(itemsLibres_ac[i]);
+          		
+          		if(datosParaGuardar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(datosParaGuardar.length==1) Alert.show("¿Está seguro que desea amarrar el item seleccionado?","Aviso", 3, this, guardarClick);
+                	else Alert.show("¿Está seguro que desea amarrar los "+datosParaGuardar.length+" items seleccionados?","Aviso", 3, this, guardarClick);	
+            	}
+                else Alert.show("Debe seleccionar al menos un item para poder proceder");
+          	}
+          	private function guardarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		respuestas = datosParaGuardar.length;
+            		for(var i:int=0; i<datosParaGuardar.length; i++)
+            		{
+            			EvaluacionService.addItemCategoria(datosParaGuardar[i].id,categoria_cb.selectedItem.id);
+            		}
+				}
+			}
+			private function addItemCategoriaResult(event:ResultEvent):void
+			{
+				if(event.result == 1) init();
+				else trace("Error intentando cambiar amarre de items y categorias");
+			}
+			private function quitar():void
+			{
+				if(tabla2.selectedIndex!=-1)
+				{
+					EvaluacionService.delItemCategoria(tabla2.selectedItem.id,tabla2.selectedItem.id1);
+				}
+			}
+			private function delItemCategoriaResult(event:ResultEvent):void
+			{
+				respuestas--;
+				if(event.result != 1) trace("Error intentando cambiar amarre de items y categorias");
+				
+				if(respuestas==0) init();
+			}
+		]]>
+	</mx:Script>
+	<mx:TabNavigator x="0" y="0" width="775" height="460">
+		<mx:Canvas label="Items Libres" width="100%" height="100%">
+			<mx:HBox x="10" y="0" width="753">
+				<mx:Label text="Categoría:"/>
+				<mx:ComboBox dataProvider="{categorias_ac}" labelField="nombre" id="categoria_cb"/>
+				<mx:Button label="Amarrar" click="amarrar()"/>
+			</mx:HBox>
+			<mx:DataGrid x="0" y="30" width="773" height="396" id="tabla1" dataProvider="{itemsLibres_ac}">
+				<mx:columns>
+					<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingRight="2" textAlign="center" sortable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:CheckBox click="{data.amarrar=!data.amarrar}" selected="{data.amarrar}"/>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Item" dataField="item"/>
+					<mx:DataGridColumn headerText="Descripcion Item" dataField="descripcion"/>
+				</mx:columns>
+			</mx:DataGrid>
+		</mx:Canvas>
+		<mx:Canvas label="Items con Categorias" width="100%" height="100%">
+			<mx:DataGrid x="0" y="0" width="773" height="387" id="tabla2" dataProvider="{itemCateoria_ac}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Item" dataField="item"/>
+					<mx:DataGridColumn headerText="Descripcion Item" dataField="descripcion"/>
+					<mx:DataGridColumn headerText="Categoria" dataField="nombre"/>
+					<mx:DataGridColumn headerText="Descripcion Categoria" dataField="descripcion1"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Button x="691" y="395" label="Quitar" width="72" click="quitar()"/>
+		</mx:Canvas>
+	</mx:TabNavigator>
+</mx:Panel>

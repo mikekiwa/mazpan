@@ -18,6 +18,16 @@
 			[Bindable]
 			private var nombre:String = "EstadoResultado";
 			
+			[Bindable]
+			private var visibles:Array = [false,false,false,false];
+			
+			public function privilegios(privilegios:Array, inicio:int):void
+			{
+				if(privilegios[inicio]=='1') visibles[0] = true;
+				if(privilegios[inicio+1]=='1') visibles[1] = true;
+				if(privilegios[inicio+2]=='1') visibles[2] = true;
+				if(privilegios[inicio+3]=='1') visibles[3] = true;
+			}
 			private function goState(destino:String):void
 			{
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null)); 
@@ -25,8 +35,8 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton x="10" y="10" label="Ver" 			width="100" click="goState(EstadoResultado.nombre)"/>
-	<mx:LinkButton x="10" y="40" label="Detalles" 		width="100" click="goState(Detalle.nombre)"/>
-	<mx:LinkButton x="10" y="70" label="Presupuesto" 	width="100" click="goState(RevisarPresupuesto.nombre)"/>
-	<mx:LinkButton x="10" y="100" label="Gráfico" 		width="100" click="goState(Grafico.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Ver" 			width="100" click="goState(EstadoResultado.nombre)"/>
+	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Detalles" 		width="100" click="goState(Detalle.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Presupuesto" 	width="100" click="goState(RevisarPresupuesto.nombre)"/>
+	<mx:LinkButton visible="{visibles[3]}" x="10" y="100" label="Gráfico" 		width="100" click="goState(Grafico.nombre)"/>
 </mx:Canvas>

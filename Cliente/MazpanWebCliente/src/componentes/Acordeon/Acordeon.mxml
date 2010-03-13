@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:flexlib="http://code.google.com/p/flexlib/" 
-	xmlns="componentes.*" width="120" height="400" xmlns:Acordeon="componentes.Acordeon.*">
+	xmlns="componentes.*" width="120" height="500" xmlns:Acordeon="componentes.Acordeon.*">
 	
 	<mx:Metadata>
 			[Event(name="complexClick",type="eventos.ComplexEvent")]
@@ -8,6 +8,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import evaluacion.MenuEvaluacion;
+			import evaluacion.MenuConfigurarEvaluacion;
 			import mx.controls.Menu;
 			import mx.automation.events.MenuShowEvent;
 			import mx.controls.Alert;
@@ -23,66 +25,87 @@
 				accordion.removeAllChildren();
 				var niveles:Array = privilegio.split('');
 
-				if(niveles[0]=='1')
+				if(niveles[0]=='1')//ocupa 5 bit
 				{
 					var menuEstadoResultado:MenuEstadoResultado = new MenuEstadoResultado();
+					menuEstadoResultado.privilegios(niveles,1);
 					menuEstadoResultado.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuEstadoResultado);
 				}
-				if(niveles[1]=='1')
+				if(niveles[5]=='1')//ocupa 3 bit
 				{
 					var menuAmarre:MenuAmarre = new MenuAmarre();
+					menuAmarre.privilegios(niveles,6);
 					menuAmarre.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuAmarre);
 				}
-				if(niveles[2]=='1')
+				if(niveles[8]=='1')//ocupa 2 bit
 				{
 					var menuGeneral:MenuGerenal = new MenuGerenal();
+					menuGeneral.privilegios(niveles,9);
 					menuGeneral.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuGeneral);
 				}
-				if(niveles[3]=='1')
+				if(niveles[10]=='1')//ocupa 3 bit
 				{
 					var menuAgentesExternos:MenuAgentesExternos = new MenuAgentesExternos();
+					menuAgentesExternos.privilegios(niveles,11);
 					menuAgentesExternos.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuAgentesExternos);
 				}
-				if(niveles[4]=='1')
+				if(niveles[13]=='1')//ocupa 3 bit
 				{
 					var menuPersonal:MenuPersonal = new MenuPersonal();
+					menuPersonal.privilegios(niveles,14);
 					menuPersonal.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuPersonal);
 				}
-				if(niveles[5]=='1')
+				if(niveles[16]=='1')//ocupa 4 bit
 				{
 					var menuMantencion:MenuMantenciones = new MenuMantenciones();
+					menuMantencion.privilegios(niveles,17);
 					menuMantencion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuMantencion);
 				}
-				if(niveles[6]=='1')
+				if(niveles[20]=='1')//ocupa 3 bit
 				{
 					var menuPlan:MenuPlanMantencion = new MenuPlanMantencion();
+					menuPlan.privilegios(niveles,21);
 					menuPlan.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuPlan);
 				}
-				if(niveles[7]=='1')
+				if(niveles[23]=='1')//ocupa 5 bit
 				{
 					var menuVentas:MenuVentas = new MenuVentas();
+					menuVentas.privilegios(niveles,24);
 					menuVentas.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuVentas);
 				}
-				if(niveles[8]=='1')
+				if(niveles[28]=='1')//ocupa 7 bit
 				{
 					var menuLocales:MenuLocales = new MenuLocales();
+					menuLocales.privilegios(niveles,29);
 					menuLocales.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuLocales);
 				}
-				
-				
-				
-				if(niveles[10]=='1')
+				if(niveles[35]=='1')//ocupa 7 bit
+				{
+					var menuConfigurarEvaluacion:MenuConfigurarEvaluacion = new MenuConfigurarEvaluacion();
+					menuConfigurarEvaluacion.privilegios(niveles,36);
+					menuConfigurarEvaluacion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuConfigurarEvaluacion);
+				}
+				if(niveles[42]=='1')//ocupa 4 bit
+				{
+					var menuEvaluacion:MenuEvaluacion = new MenuEvaluacion();
+					menuEvaluacion.privilegios(niveles,43);
+					menuEvaluacion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
+					accordion.addChild(menuEvaluacion);
+				}
+				if(niveles[47]=='1')////ocupa 3 bit
 				{
 					var menuSistema:MenuSistema = new MenuSistema();
+					menuSistema.privilegios(niveles,48);
 					menuSistema.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuSistema);
 				}

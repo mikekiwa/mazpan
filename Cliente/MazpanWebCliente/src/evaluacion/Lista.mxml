@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="390">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Label;
+			import mx.containers.HBox;
+			import mx.controls.Spacer;
+			import misClases.myLabel;
+			import mx.controls.CheckBox;
+			
+			private var categorias:Array = new Array;
+			
+			public function items(items:Array):void
+			{
+				categorias = new Array;
+				var nuevo:Boolean = true;
+				var i:int=0;
+				var j:int=0;
+				
+				for(i=0; i<items.length; i++)
+				{
+					nuevo = true;
+					for(j=0; j<categorias.length; j++)
+					{
+						if(categorias[j].text==items[i].nombre) nuevo = false;
+					}
+					if(nuevo)
+					{
+						var cat:myLabel =  new myLabel;
+						cat.text = items[i].nombre;
+						cat.id = items[i].id1;
+						cat.porcentaje = items[i].porcentaje;
+						cat.descripcion = items[i].descripcion1;
+						categorias.push(cat);
+					}
+				}
+				
+				for(i=0; i<categorias.length; i++)
+				{
+					this.addChild(categorias[i]);
+					
+					for(j=0; j<items.length; j++)
+					{
+						if(items[j].nombre==categorias[i].text)
+						{
+							categorias[i].items++;
+							var hbox:HBox = new HBox();
+							
+							var tab:Spacer = new Spacer();
+							tab.width = 40;
+							hbox.addChild(tab);
+							
+							var cb:CheckBox = new CheckBox();
+							cb.label = items[j].item;
+							cb.id = items[j].id;
+							hbox.addChild(cb);
+							
+							this.addChild(hbox);
+						}
+					}
+					this.addChild(new Label);
+				}
+			}
+			public function clean():void
+			{
+				this.removeAllChildren();
+			}
+			public function getEvaluacion():void
+			{
+				var aux:Array = this.getChildren();
+				var titulo:myLabel;
+				var i:int=0;
+				var j:int=0;
+				
+				for(i=0; i<categorias.length; i++)
+				{
+					categorias[i].cumplidos = 0;
+				}
+				
+				for(i=0; i<aux.length; i++)
+				{
+					if(aux[i].className=="myLabel")
+					{
+						titulo = aux[i];
+					}
+					else if(aux[i].className=="HBox")
+					{
+						var combos:Array = aux[i].getChildren();
+						for(j=0; j<combos.length; j++)
+						{
+							if(combos[j].className=="CheckBox")
+							{
+								var cbx:CheckBox = combos[j];
+								if(cbx.selected) titulo.cumplidos++;
+							}
+						}
+					}
+				}
+				
+				for(i=0; i<categorias.length; i++)
+				{
+					trace(categorias[i].porcentaje + " * " + categorias[i].items + " - " + categorias[i].cumplidos);
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:VBox>
