@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Control de Existencias"
+	creationComplete="init()">
+	
+	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 	result="getFechaResult(event)"	 fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 		result="getLocalesResult(event)" 		fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getStock" 			result="getStockResult(event)"	 		fault="ErrorFaultHandler(event, 'getStock')"/>
+		<mx:operation name="getProductosLocal" 	result="getProductosLocalResult(event)" fault="ErrorFaultHandler(event, 'getProductosLocal')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.formatters.NumberFormatter;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "Stock";
+			
+			[Bindable]
+			private var hoy:String;
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var stock_ac:Array;
+						
+			private var formato:NumberFormatter = new NumberFormatter();
+				
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				formato.precision=3;
+				formato.useThousandsSeparator=true;
+				formato.thousandsSeparatorFrom=".";
+				formato.thousandsSeparatorTo=".";
+				formato.decimalSeparatorFrom=",";
+				formato.decimalSeparatorTo=",";
+            	locales_ac = new Array;
+            	
+				stock_ac = new Array;
+				CombosService.getFecha();
+			} 
+			private function getFechaResult(event:ResultEvent):void
+            {
+            	hoy = event.result as String;
+            	LocalesService.getLocales();
+            }
+			private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	if(locales_ac.length>0) LocalesService.getStock(locales_ac[0].WhsCode);
+            }
+            private function getStockResult(event:ResultEvent):void
+            {
+            	stock_ac = event.result.Tables.Stock.Rows.source as Array;
+            	for(var i:int=0; i<stock_ac.length; i++)
+            	{
+            		stock_ac[i].Local = 0;
+            		stock_ac[i].Diferencia = -1 * stock_ac[i].OnHand;
+            	}
+            	LocalesService.getProductosLocal(local_cb.selectedItem.WhsCode,"");
+            }
+            private function getProductosLocalResult(event:ResultEvent):void
+            {
+            	var auxProductos:Array = event.result.Tables.Productos.Rows.source as Array;
+            	var esta:Boolean;
+            	
+            	for(var i:int=0; i<auxProductos.length; i++)
+            	{
+            		esta=false;
+            		for(var j:int=0; j<stock_ac.length; j++)
+            		{
+            			if(auxProductos[i].ItemCode==stock_ac[j].ItemCode)
+            			{
+            				esta = true;
+            				var aux:Number = Number(auxProductos[i].Local) - Number(stock_ac[j].OnHand);
+            				stock_ac[j].Diferencia = aux;
+            				stock_ac[j].Local = auxProductos[i].Local;
+            			}
+            		}
+            		if(!esta)
+            		{
+            			if(auxProductos[i].Local!=0)
+            			{
+            				auxProductos[i].OnHand = 0;
+            				auxProductos[i].Diferencia = Number(auxProductos[i].Local);
+            				stock_ac.push(auxProductos[i]);
+            			}
+            		}
+            	}
+            	
+            	var partes:Array;
+            	var numeroString:String;
+            	for(var k:int=0; k<stock_ac.length; k++)
+            	{
+            		if(stock_ac[k].Local!=0)
+            		{
+            			stock_ac[k].Local = formato.format(stock_ac[k].Local);
+            			numeroString = stock_ac[k].Local;
+            			partes = numeroString.split(',');
+            			if(partes[1]=="000") stock_ac[k].Local = partes[0];
+            		}
+            		if(stock_ac[k].OnHand!=0)
+            		{
+            			stock_ac[k].OnHand = formato.format(stock_ac[k].OnHand);
+            			numeroString = stock_ac[k].OnHand;
+            			partes = numeroString.split(',');
+            			if(partes[1]=="000") stock_ac[k].OnHand = partes[0];
+            		}
+            		if(stock_ac[k].Diferencia!=0)
+            		{
+            			stock_ac[k].Diferencia = formato.format(stock_ac[k].Diferencia);
+            			numeroString = stock_ac[k].Diferencia;
+            			partes = numeroString.split(',');
+            			if(partes[1]=="000") stock_ac[k].Diferencia = partes[0];
+            		}
+            	}
+            	
+            	tabla.dataProvider = stock_ac;
+            }
+            private function cargar():void
+            {
+            	if(locales_ac.length>0) LocalesService.getStock(local_cb.selectedItem.WhsCode);
+            }
+		]]>
+	</mx:Script>
+	<mx:Label text="Local" y="12" x="10"/>
+	<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" x="51" y="10" change="cargar()"/>
+	<mx:DataGrid x="0" y="38" width="775" height="422" dataProvider="{stock_ac}" id="tabla">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="300"/>
+			<mx:DataGridColumn headerText="En Stock Local" dataField="Local" width="165" textAlign="right"/>
+			<mx:DataGridColumn headerText="En Stock Sistema" dataField="OnHand" width="165" textAlign="right"/>
+			<mx:DataGridColumn headerText="Un. Medida" dataField="InvntryUom" width="111" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="165" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:HBox x="479" y="10" width="273">
+		<mx:Label text="Fecha:" fontWeight="bold"/>
+		<mx:Label text="{hoy}" fontWeight="bold"/>
+	</mx:HBox>
+</mx:Panel>

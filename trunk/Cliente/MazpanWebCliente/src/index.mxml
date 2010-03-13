@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%" 
-	creationComplete="init()"
+	creationComplete="init()" backgroundColor="#999999"
 	xmlns:ns1="componentes.*" 
 	xmlns:ns2="componentes.mantencionMaquinas.*" 
 	xmlns:ns3="componentes.Acordeon.*" 
@@ -13,7 +13,8 @@
 	xmlns:ns10="componentes.mantencionPlantas.*"
 	xmlns:ns11="estadoResultado.*" 
 	xmlns:ns12="gastosVentas.*"
-	xmlns:ns13="locales.*">
+	xmlns:ns13="locales.*" 
+	xmlns:ns14="evaluacion.*">
 	
 	<mx:states>
 		<mx:State name="Maquinas">
@@ -164,6 +165,78 @@
 				<ns13:ControlAsistencia id="controlAsistencia_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="DesviacionOrdenes">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:DesviacionOrdenes id="desviacionOrdenes_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Stock">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:Stock id="stock_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="StockLocal">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:StockLocal id="stockLocal_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Informe">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:Informe id="informe_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="PetroleoLuz">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:PetroleoLuz id="petroleoLuz_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Items">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:Items id="items_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Categorias">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:Categorias id="categorias_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="ItemCategoria">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:ItemCategoria id="itemCategoria_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Secciones">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:Secciones id="secciones_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="ItemSeccion">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:ItemSeccion id="itemSeccion_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="TrabajadoresSeccion">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:TrabajadoresSeccion id="trabajadoresSeccion_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Evaluar">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:Evaluar id="evaluar_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
@@ -247,6 +320,19 @@
 					if(event.stateDestination == PresupuestoVentas.nombre) presupuestoVentas_cmp.init();
 					if(event.stateDestination == AmarreClienteZona.nombre) amarreClienteZona_cmp.init();
 					if(event.stateDestination == RevisarAmarreClienteZona.nombre) revisarAmarreClienteZona_cmp.init();
+					if(event.stateDestination == ControlAsistencia.nombre) controlAsistencia_cmp.init();
+					if(event.stateDestination == DesviacionOrdenes.nombre) desviacionOrdenes_cmp.init();
+					if(event.stateDestination == Stock.nombre) stock_cmp.init();
+					if(event.stateDestination == StockLocal.nombre) stockLocal_cmp.init();
+					if(event.stateDestination == Informe.nombre) informe_cmp.init();
+					if(event.stateDestination == PetroleoLuz.nombre) petroleoLuz_cmp.init();
+					if(event.stateDestination == Items.nombre) items_cmp.init();
+					if(event.stateDestination == Categorias.nombre) categorias_cmp.init();
+					if(event.stateDestination == ItemCategoria.nombre) itemCategoria_cmp.init();
+					if(event.stateDestination == Secciones.nombre) secciones_cmp.init();
+					if(event.stateDestination == ItemSeccion.nombre) itemSeccion_cmp.init();
+					if(event.stateDestination == TrabajadoresSeccion.nombre) trabajadoresSeccion_cmp.init();
+					if(event.stateDestination == Evaluar.nombre) evaluar_cmp.init();
 				}
 				else
 				{
@@ -285,7 +371,7 @@
 	
 	<mx:Style source="Estilo.css"/>
 	
-	<ns1:Login id="login" complexClick="loginResult(event)" horizontalCenter="0" verticalCenter="0"/>
+	<ns1:Login id="login" complexClick="loginResult(event)" horizontalCenter="0" verticalCenter="-59"/>
 	
 	<mx:Canvas id="canvas1">
 		<mx:VBox id="canvas" width="100%" height="100%">
@@ -297,4 +383,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
+	<mx:Label x="525" y="10" text="Versión 01.10.04.10"/>
 </mx:Application>

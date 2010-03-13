@@ -7,10 +7,13 @@
 	</mx:WebService>
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getSociosDe" 		result="getSociosDeResult(event)"		fault="ErrorFaultHandler(event, 'getSociosDe')"/>
+		<mx:operation name="guardarAsistencia" 	result="guardarAsistenciaResult(event)"	fault="ErrorFaultHandler(event, 'guardarAsistencia')"/>
 	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 		
@@ -22,6 +25,8 @@
 			
 			[Bindable]
 			private var locales_ac:Array;
+			[Bindable]
+			private var socios_ac:Array;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -40,6 +45,53 @@
             private function getLocalesResult(event:ResultEvent):void
             {
             	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	if(locales_ac.length>0) LocalesService.getSociosDe(locales_ac[0].WhsCode);
+            }
+            private function getSociosDeResult(event:ResultEvent):void
+            {
+            	socios_ac = event.result.Tables.Socios.Rows.source as Array;
+            }
+            private function EsAtraso():void
+            {
+            	horasAtraso.value = 0.1;
+            	if(comboAsistencia.selectedItem=="Atraso")
+            	{
+            		labelAtraso.visible = true;
+            		labelHorasAtraso.visible = true;
+            		horasAtraso.visible = true;
+            	}
+            	else
+            	{
+            		labelAtraso.visible = false;
+            		labelHorasAtraso.visible = false;
+            		horasAtraso.visible = false;
+            	}
+            }
+            private function guardar():void
+            {
+            	if(tabla.selectedIndex!=-1)
+            	{
+            		var item:Object = tabla.selectedItem;
+            		item.asistencia = comboAsistencia.selectedItem;
+            		if(horasAtraso.visible) item.atraso = horasAtraso.value;
+            		else item.atraso = "";
+            		LocalesService.guardarAsistencia(item.CardCode,item.asistencia,item.atraso);
+            	}
+            	else
+            	{
+            		Alert.show("Seleccione un trabajador de la lista antes de proceder","Aviso");
+            	}
+            }
+            private function guardarAsistenciaResult(event:ResultEvent):void
+            {
+            	if(event.result==1)
+            	{
+            		if(locales_ac.length>0) LocalesService.getSociosDe(local_cb.selectedItem.WhsCode);
+            	}
+            	else
+            	{
+            		trace ("ERROR: intento de guardar asistencia fallido");
+            	}
             }
 		]]>
 	</mx:Script>
@@ -50,33 +102,27 @@
 	</mx:HBox>
 	<mx:Label x="10" y="38" text="Trabajadores"/>
 	<mx:Label x="10" y="12" text="Local"/>
-	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName"/>
-	<mx:Button x="689" y="428" label="Ingresar"/>
-	<mx:DataGrid x="10" y="64" width="755" height="356">
+	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="{LocalesService.getSociosDe(local_cb.selectedItem.WhsCode)}"/>
+	<mx:DataGrid x="10" y="64" width="755" height="314" dataProvider="{socios_ac}" id="tabla">
 		<mx:columns>
-			<mx:DataGridColumn id="colSel" headerText="" width="20" sortable="false" paddingLeft="3">
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:CheckBox selected="{data.actualizado}" enabled="false"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Nombres" dataField="CardName" width="535"/>
-			<mx:DataGridColumn id="Asistencia" headerText="Enero"  width="100" sortable="false">
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:TextInput restrict="0-9" text="{data.enero}" fontSize="8" textAlign="right" focusOut="{data.enero=event.target.text}" change="data.actualizado=true"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:DataGridColumn>
-			<mx:DataGridColumn id="ene" headerText="Enero"  width="100" sortable="false">
-				<mx:itemRenderer>
-					<mx:Component>
-						<mx:TextInput restrict="0-9" text="{data.enero}" fontSize="8" textAlign="right" focusOut="{data.enero=event.target.text}" change="data.actualizado=true"/>
-					</mx:Component>
-				</mx:itemRenderer>
-			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Nombres" dataField="CardName" width="495"/>
+			<mx:DataGridColumn headerText="Asistencia" dataField="asistencia" width="150" sortable="false"/>
+			<mx:DataGridColumn headerText="Horas Atraso" dataField="atraso" width="100" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
-	
+	<mx:Canvas x="10" y="386" width="755" height="64" borderStyle="solid">
+		<mx:Label text="{tabla.selectedItem.CardName}" x="88" y="3" width="655" fontWeight="bold"/>
+		<mx:Label x="10" y="30" text="Asistencia"/>
+		<mx:ComboBox x="78" y="28" id="comboAsistencia" change="EsAtraso()">
+			<mx:String>Asiste</mx:String>
+			<mx:String>Atraso</mx:String>
+			<mx:String>Falta con Aviso</mx:String>
+			<mx:String>Falta sin Aviso</mx:String>
+		</mx:ComboBox>
+		<mx:Label x="264" y="30" text="Atraso" id="labelAtraso" visible="false"/>
+		<mx:NumericStepper x="312" y="28" stepSize="0.1" id="horasAtraso" visible="false" minimum="0.1"/>
+		<mx:Label x="378" y="30" text="Hrs." id="labelHorasAtraso" visible="false"/>
+		<mx:Button x="671" y="26" label="Guardar" click="guardar()"/>
+		<mx:Label x="10" y="3" text="Trabajador:"/>
+	</mx:Canvas>
 </mx:Panel>

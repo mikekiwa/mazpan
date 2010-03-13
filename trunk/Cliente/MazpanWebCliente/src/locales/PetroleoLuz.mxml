@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Gastos Petroleo y Luz"
+	creationComplete="init()">
+	
+	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 	result="getFechaResult(event)"	 fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 	result="getLocalesResult(event)" 	fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getGastos"		result="getGastosResult(event)" 	fault="ErrorFaultHandler(event, 'getGastos')"/>
+		<mx:operation name="editarGastos"	result="guardarGastosResult(event)" fault="ErrorFaultHandler(event, 'editarGastos')"/>
+		<mx:operation name="guardarGastos"	result="guardarGastosResult(event)" fault="ErrorFaultHandler(event, 'guardarGastos')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String = "PetroleoLuz";
+			
+			[Bindable]
+			private var hoy:String;
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var petroleo:Object = new Object;
+            [Bindable]
+            private var luz:Object = new Object;
+            	
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+            {
+            	locales_ac = new Array;
+            	petroleo = new Object;
+            	luz = new Object;
+            	CombosService.getFecha();
+            }
+            private function getFechaResult(event:ResultEvent):void
+            {
+            	hoy = event.result as String;
+            	LocalesService.getLocales();
+            }
+            private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	if(locales_ac.length>0) LocalesService.getGastos(locales_ac[0].WhsCode);
+            }
+            private function getGastosResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Gastos.Rows.source as Array;
+            	petroleo = new Object;
+            	luz = new Object;
+            	
+            	if(aux.length==2)
+            	{
+            		if(aux[0].gasto=="Petroleo")
+            		{
+            			petroleo = aux[0];
+            			luz = aux[1];
+            		}
+            		else
+            		{
+            			luz = aux[0];
+            			petroleo = aux[1];
+            		}
+            	}
+            	if(aux.length==1)
+            	{
+            		if(aux[0].gasto=="Petroleo") petroleo = aux[0];
+            		else luz = aux[0];
+            	}
+            }
+            private function guardar(gasto:Object,tipo:String):void
+            {
+            	if(gasto.id!=null) LocalesService.editarGasto(gasto.id,gasto.total,gasto.observaciones);
+            	else LocalesService.guardarGasto(tipo,local_cb.selectedItem.WhsCode,gasto.total,gasto.observaciones);
+            }
+            private function guardarGastosResult(event:ResultEvent):void
+            {
+            	if(event.result == 1)
+            	{
+            		if(local_cb.selectedIndex!=-1) LocalesService.getGastos(local_cb.selectedItem.WhsCode);
+            	}
+            	else
+            	{
+            		trace("Error intentando cargar datos.");
+            	}
+            }
+		]]>
+	</mx:Script>
+	
+	<mx:HBox x="479" y="10" width="273">
+		<mx:Label text="Fecha:" fontWeight="bold"/>
+		<mx:Label text="{hoy}" fontWeight="bold"/>
+	</mx:HBox>
+	<mx:Label x="10" y="12" text="Local"/>
+	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="{LocalesService.getGastos(local_cb.selectedItem.WhsCode)}"/>
+	<mx:Label x="10" y="45" text="Gasto de Petroleo"/>
+	<mx:Canvas x="10" y="71" width="755" height="153" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Total de Petroleo Gastado" />
+		<mx:Label x="10" y="36" text="Observaciones"/>
+		<mx:TextInput x="190" y="8" text="{petroleo.total}" focusOut="{petroleo.total=event.target.text}" restrict="0-9" id="totalPetroleo_ti"/>
+		<mx:TextArea x="190" y="35" width="473" height="106" text="{petroleo.observaciones}" focusOut="{petroleo.observaciones=event.target.text}" id="obsPetroleo_ta" maxChars="50"/>
+		<mx:Button x="671" y="119" label="Guardar" click="guardar(petroleo,'Petrole')"/>
+	</mx:Canvas>
+	<mx:Label x="10" y="247" text="Gasto de Luz"/>
+	<mx:Canvas x="10" y="273" width="755" height="153" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Total Luz Gastada"/>
+		<mx:Label x="10" y="36" text="Observaciones"/>
+		<mx:TextInput x="189" y="8" text="{luz.total}" focusOut="{luz.total=event.target.text}" restrict="0-9" id="totalLuz_ti"/>
+		<mx:TextArea x="189" y="35" width="474" height="106" text="{luz.observaciones}" focusOut="{luz.observaciones=event.target.text}" id="obsLuz_ta" maxChars="50"/>
+		<mx:Button x="671" y="119" label="Guardar" click="guardar(luz,'Luz')"/>
+	</mx:Canvas>
+</mx:Panel>

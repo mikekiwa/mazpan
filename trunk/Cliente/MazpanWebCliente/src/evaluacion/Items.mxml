@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Items"
+	creationComplete="init()">
+	
+	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getItems" 		result="getItemsResult(event)"		fault="ErrorFaultHandler(event, 'getItems')"/>
+		<mx:operation name="guardarItem" 	result="guardarItemResult(event)"	fault="ErrorFaultHandler(event, 'guardarItem')"/>
+		<mx:operation name="editarItem" 	result="guardarItemResult(event)"	fault="ErrorFaultHandler(event, 'editarItem')"/>
+		<mx:operation name="eliminarItem" 	result="guardarItemResult(event)"	fault="ErrorFaultHandler(event, 'eliminarItem')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "Items";
+			
+			[Bindable]
+			private var items_ac:Array;
+			[Bindable]
+			private var item:Object;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				clean();
+				items_ac = new Array;
+				EvaluacionService.getItems();
+			}
+			private function getItemsResult(event:ResultEvent):void
+			{
+				items_ac = event.result.Tables.ItemsEvaluacion.Rows.source as Array;
+			}
+			private function guardarItemResult(event:ResultEvent):void
+			{
+				if(event.result == 1)
+				{
+					init();
+				}
+				else
+				{
+					trace("Error intentando guardar item");
+				}
+			}
+			private function clean():void
+			{
+				item = new Object;
+				descripcion_ti.text = "";
+				nombre_ti.text = "";
+				agregar_lf.visible = true;
+				editarText_lf.visible = false;
+				editar_lf.visible = false;
+			}
+			private function editar():void
+			{
+				if(tabla.selectedIndex!=-1)
+				{
+					agregar_lf.visible = false;
+					editarText_lf.visible = true;
+					editar_lf.visible = true;
+					item = tabla.selectedItem;
+					nombre_ti.text = tabla.selectedItem.item;
+					descripcion_ti.text = tabla.selectedItem.descripcion;
+				}
+			}
+			private function guardar():void
+			{
+				if(nombre_ti.text.length>0)
+				{
+					if(agregar_lf.visible) EvaluacionService.guardarItem(nombre_ti.text,descripcion_ti.text);
+					else EvaluacionService.editarItem(item.id,nombre_ti.text,descripcion_ti.text);
+				}
+			}
+			private function eliminar():void
+			{
+				if(tabla.selectedIndex!=-1)
+				{
+					EvaluacionService.eliminarItem(tabla.selectedItem.id);
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:DataGrid x="10" y="10" width="755" height="302" id="tabla" dataProvider="{items_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Item" dataField="item"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="613" y="320" label="Editar" width="72" click="editar()"/>
+	<mx:Button x="693" y="320" label="Eliminar" click="eliminar()"/>
+	<mx:Canvas x="10" y="350" width="755" height="100" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Editar" id="editarText_lf" visible="false"/>
+		<mx:Label x="54" y="10" text="{item.item}" id="editar_lf" visible="false"/>
+		<mx:Label x="10" y="10" text="Agregar nuevo Item" id="agregar_lf"/>
+		<mx:Label x="10" y="40" text="Item"/>
+		<mx:TextInput x="85" y="38" maxChars="50" width="450" id="nombre_ti"/>
+		<mx:Label x="10" y="68" text="Descripcion"/>
+		<mx:TextInput x="85" y="66" maxChars="50" width="450" id="descripcion_ti"/>
+		<mx:Button x="673" y="66" label="Guardar" click="guardar()"/>
+		<mx:Button x="590" y="66" label="Cancelar" click="clean()"/>
+	</mx:Canvas>
+</mx:Panel>

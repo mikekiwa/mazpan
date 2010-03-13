@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Evaluar"
+	creationComplete="init()" xmlns:ev="evaluacion.*">
+	
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 	result="getLocalesResult(event)"	fault="ErrorFaultHandler(event, 'getLocales')"/>
+	</mx:WebService>
+	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getSocios" 		result="getSociosResult(event)"		fault="ErrorFaultHandler(event, 'getSocios')"/>
+		<mx:operation name="getItemsDe" 	result="getItemsDeResult(event)"	fault="ErrorFaultHandler(event, 'getItemsDe')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "Evaluar";
+			
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var trabajadores_ac:Array;
+			[Bindable]
+			private var items_ac:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+			{
+				locales_ac = new Array;
+				trabajadores_ac = new Array;
+				items_ac = new Array;
+				lista_cmp.clean();
+				LocalesService.getLocales();
+			}
+			private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	cargarTrabajadores();
+            	lista_cmp.clean();
+            }
+            private function cargarTrabajadores():void
+            {
+            	trabajadores_ac = new Array;
+				EvaluacionService.getSocios(local_cb.selectedItem.WhsCode);
+            }
+            private function getSociosResult(event:ResultEvent):void
+            {
+            	trabajadores_ac = event.result.Tables.Socios.Rows.source as Array;
+            	cargar();
+			}
+			private function cargar():void
+			{
+				if(trabajadores_ac.length>0)
+				{
+					items_ac = new Array;
+					lista_cmp.clean();
+					EvaluacionService.getItemsDe(trabajadores_cb.selectedItem.CardCode);
+				}
+			}
+			private function getItemsDeResult(event:ResultEvent):void
+            {
+            	items_ac = event.result.Tables.Items.Rows.source as Array;
+            	lista_cmp.items(items_ac);
+			}
+			private function guardar():void
+			{
+				lista_cmp.getEvaluacion();
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox x="10" y="0" width="755">
+		<mx:Label text="Local:"/>
+		<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="cargarTrabajadores()"/>
+		<mx:Label text="Trabajadores:"/>
+		<mx:ComboBox id="trabajadores_cb" dataProvider="{trabajadores_ac}" labelField="CardName" change="cargar()"/>
+	</mx:HBox>
+	<ev:Lista y="30" width="775" height="390" id="lista_cmp"/>
+	<mx:Button x="700" y="428" label="Guardar" click="guardar()"/>
+</mx:Panel>

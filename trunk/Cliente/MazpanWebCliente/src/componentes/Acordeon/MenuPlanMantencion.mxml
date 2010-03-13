@@ -19,6 +19,14 @@
 			[Bindable]
 			private var nombre:String = "MenuPlanMantencion";
 			
+			[Bindable]
+			private var visibles:Array = [false,false];
+			
+			public function privilegios(privilegios:Array, inicio:int):void
+			{
+				if(privilegios[inicio]=='1') visibles[0] = true;
+				if(privilegios[inicio+1]=='1') visibles[1] = true;
+			}
 			private function goState(destino:String):void
 			{
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null)); 
@@ -26,6 +34,6 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton x="10" y="10" label="Actividades" width="100" click="goState(Plan.nombre)"/>
-	<mx:LinkButton x="10" y="40" label="Solicitudes" width="100" click="goState(ListaSolicitudes.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Actividades" width="100" click="goState(Plan.nombre)"/>
+	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Solicitudes" width="100" click="goState(ListaSolicitudes.nombre)"/>
 </mx:Canvas>

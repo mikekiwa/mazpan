@@ -22,6 +22,15 @@
 			[Bindable]
 			private var nombre:String = "Mantenciones";
 			
+			[Bindable]
+			private var visibles:Array = [false,false,false];
+			
+			public function privilegios(privilegios:Array, inicio:int):void
+			{
+				if(privilegios[inicio]=='1') visibles[0] = true;
+				if(privilegios[inicio+1]=='1') visibles[1] = true;
+				if(privilegios[inicio+2]=='1') visibles[2] = true;
+			}
 			private function goState(destino:String):void
 			{
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null)); 
@@ -29,7 +38,7 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton x="10" y="10" label="Componentes" width="100" click="goState(Componentes.nombre)"/>
-	<mx:LinkButton x="10" y="40" label="Maquinas" width="100" click="goState(Maquinas.nombre)"/>
-	<mx:LinkButton x="10" y="70" label="Lineas" width="100" click="goState(Lineas.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Componentes" width="100" click="goState(Componentes.nombre)"/>
+	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Maquinas" width="100" click="goState(Maquinas.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Lineas" width="100" click="goState(Lineas.nombre)"/>
 </mx:Canvas>
