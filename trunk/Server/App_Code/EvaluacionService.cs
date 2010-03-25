@@ -41,12 +41,7 @@ public class EvaluacionService : System.Web.Services.WebService
 
         return dt;
     }
-    /// <summary>
-    /// return 1 sí la insercion fue exitosa, 0 EOC
-    /// </summary>
-    /// <param name="query">
-    /// La consulta que se desea ejecutar
-    /// </param>
+    
     private int Ejecutar(string query)
     {
         SqlConnection conn = new SqlConnection(coneccionString);
@@ -91,126 +86,279 @@ public class EvaluacionService : System.Web.Services.WebService
         }
     }
 
-
-
-    [WebMethod]
-    public DataTable getCategorias()
+    public string getId(string from, string where)
     {
-        return obtenerTabla("Categorias"," SELECT * FROM "+MAER+".[Categoria]");
-    }
-    [WebMethod]
-    public int guardarCategorias(List<Categoria> categorias)
-    {
-        string delete = " DELETE "+MAER+".[Categoria]";
-        if(categorias.Count>0) delete += " WHERE id!="+categorias[0].id; 
-        for(int i=1; i<categorias.Count; i++)
+        string query = " SELECT convert(varchar(50),id) FROM " + from + " WHERE " + where + " ";
+        SqlConnection selectConn = new SqlConnection(coneccionString);
+        selectConn.Open();
+        SqlCommand select = new SqlCommand(query, selectConn);
+        SqlDataReader reader = select.ExecuteReader();
+
+        if (reader.Read())
         {
-            if (categorias[i].id!=null) delete += " AND id!=" + categorias[i].id; 
+            return reader.GetString(0);
         }
-        Ejecutar(delete);
+         
+        return "";
+    }
 
-        int result = 0;
-
-        foreach (Categoria c in categorias)
+    /**
+     * -666 : demonio, inyeccion ect
+     * -9   : la seccion existe, pero se intenta agregar una con el mismo nombre
+     * -8   : fallo en la insercion de una nueva seccion
+     * -7   : no todas las categorias han sido guardadas, quiza ninguna lo fue
+     * -6   : falla la actualizacion de la seccion
+     * -5   : no todas las categorias han sido guardadas o actualizadas, quiza ninguna lo fue
+     */
+    [WebMethod]
+    public int guardarSeccion(Usuario u, Seccion seccion, List<Categoria> categorias)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
         {
-            if (c.id != null)
+            if (seccion.id==null)
             {
-                result += Ejecutar("UPDATE " + MAER + ".[Categoria] SET nombre='" + c.nombre + "', descripcion='" + c.descripcion + "', porcentaje='" + c.porcentaje + "' WHERE id='" + c.id + "'");
+                if (!existe(MAER + ".[Seccion]", "nombre='" + seccion.nombre + "'"))
+                {
+                    if (Ejecutar("INSERT INTO " + MAER + ".[Seccion] (nombre,descripcion) VALUES('" + seccion.nombre + "','" + seccion.descripcion + "') ") == 1)
+                    {
+                        seccion.id = getId(MAER + ".[Seccion]", "nombre='" + seccion.nombre + "' AND descripcion='" + seccion.descripcion + "'");
+                        int result = 0;
+
+                        foreach (Categoria c in categorias)
+                        {
+                            result += Ejecutar("INSERT INTO " + MAER + ".[Categoria] (nombre,descripcion,porcentaje,seccion) VALUES('" + c.nombre + "','" + c.descripcion + "','" + c.porcentaje + "','" + seccion.id + "')");
+                        }
+
+                        if (result == categorias.Count) return 1;
+                        else return -7;
+                    }
+                    else return -8;
+                }
+                else return -9;
             }
             else
             {
-                result += Ejecutar("INSERT INTO " + MAER + ".[Categoria] (nombre,descripcion,porcentaje) VALUES('" + c.nombre + "','" + c.descripcion + "','" + c.porcentaje + "') ");
+                if (Ejecutar("UPDATE " + MAER + ".[Seccion] set nombre='" + seccion.nombre + "',descripcion='" + seccion.descripcion + "' WHERE id='"+seccion.id+"'") == 1)
+                {
+                    int result = 0;
+
+                    foreach (Categoria c in categorias)
+                    {
+                        if(c.id.CompareTo("0")==0)  result += Ejecutar("INSERT INTO " + MAER + ".[Categoria] (nombre,descripcion,porcentaje,seccion) VALUES('" + c.nombre + "','" + c.descripcion + "','" + c.porcentaje + "','" + seccion.id + "')");
+                        else result += Ejecutar("UPDATE " + MAER + ".[Categoria] SET nombre='" + c.nombre + "',descripcion='" + c.descripcion + "',porcentaje='" + c.porcentaje + "',seccion='"+seccion.id + "' WHERE id='"+c.id+"'");
+                    }
+
+                    if (result == categorias.Count) return 1;
+                    else return -5;
+                }
+                else return -6;
             }
         }
+        else return -666;//inyeccion
+    }
+    [WebMethod]
+    public DataTable getSecciones(Usuario u)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Secciones", " SELECT * FROM " + MAER + ".[Seccion] T1 JOIN " + MAER + ".[Categoria] T2 ON T2.seccion=T1.id WHERE T1.visible='True' AND T2.visible='True' AND T1.eliminado='False' AND T2.eliminado='False' ORDER BY t1.id ");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public int eliminarSeccion(Usuario u ,string id)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            if (!existe(MAER + ".[Clientes]", "seccion='" + id + "'") && !existe(MAER+".[Categoria] T1 JOIN "+MAER+".[ItemCategoria] T2 ON T1.id=T2.categoria JOIN "+MAER+".[Evaluaciones] T3 ON T3.itemCategoria=T2.id", "T1.seccion='"+id+"'"))
+            {
+                return Ejecutar("DELETE " + MAER + ".[Seccion] WHERE id = '" + id + "' ");
+            }
+            else
+            {
+                return Ejecutar("UPDATE " + MAER + ".[Seccion] SET eliminado='True' WHERE id = '" + id + "'");
 
-        if (result == categorias.Count) return 1;
-        else return 0;
+            }
+        }
+        else return -666;
+    }
+    [WebMethod]
+    public DataTable getItems(Usuario u)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("ItemsEvaluacion", " SELECT * FROM " + MAER + ".[ItemsEvaluacion] WHERE visible='True' AND eliminado='False'");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public int eliminarItem(Usuario u, string id)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            if (!existe(MAER + ".[ItemCategoria]", "item='" + id + "'"))
+            {
+                return Ejecutar("DELETE FROM " + MAER + ".[ItemsEvaluacion] WHERE id='" + id + "'");
+            }
+            else
+            {
+                return Ejecutar("UPDATE " + MAER + ".[ItemsEvaluacion] SET eliminado='True' WHERE id = '" + id + "'");
+            }
+        }
+        else return -666;
+    }
+    [WebMethod]
+    public int guardarItem(Usuario u, string item, string descripcion)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return Ejecutar("INSERT INTO " + MAER + ".[ItemsEvaluacion] (nombre,descripcion,editable,visible,eliminado) VALUES('" + item + "','" + descripcion + "','True','True','False') ");
+        }
+        else return -666;
+    }
+    [WebMethod]
+    public int editarItem(Usuario u, string id, string item, string descripcion)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return Ejecutar("UPDATE " + MAER + ".[ItemsEvaluacion] SET nombre='" + item + "', descripcion='" + descripcion + "' WHERE id = '" + id + "' ");
+        }
+        else return -666;
+    }
+    [WebMethod]
+    public DataTable getSociosDe(Usuario u, string local)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Socios", " SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OWHS] T1 JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE WhsCode='" + local + "' ");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public DataTable getNombreSecciones(Usuario u)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Secciones", " SELECT * FROM "+MAER+".[Seccion] T1 WHERE T1.visible='True' AND T1.eliminado='False' ");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public DataTable getSeccionCategoria(Usuario u)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("SeccionCategoria", " SELECT T1.id, (T1.nombre + ' - ' + T2.nombre) as nombre, T2.id FROM "+MAER+".[Seccion] T1 JOIN "+MAER+".[Categoria] T2 ON T2.seccion=T1.id WHERE T1.visible='True' AND T2.visible='True' AND T1.eliminado='False' AND T2.eliminado='False' ");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public DataTable getItemSeccion(Usuario u)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("ItemsSeccion", " SELECT *,T4.nombre+' - '+T3.nombre as nombre FROM " + MAER + ".[ItemsEvaluacion] T1 LEFT JOIN " + MAER + ".[ItemCategoria] T2 ON T1.id=T2.item AND T1.visible='True' AND T1.eliminado='False' AND T2.eliminado='false' LEFT JOIN " + MAER + ".[Categoria] T3 ON T3.id=T2.categoria LEFT JOIN " + MAER + ".[Seccion] T4 ON T3.seccion=T4.id ");
+        }
+        return null;
+    }
+    [WebMethod]
+    public int amarrarItemSeccion(Usuario u, string id_C, string id_I)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            if (!existe(MAER + ".[ItemCategoria]", "item='" + id_I + "'"))
+            {
+                return Ejecutar("INSERT INTO " + MAER + ".[ItemCategoria] (categoria,item) VALUES('" + id_C + "','" + id_I + "') ");
+            }
+            else
+            {
+                string id = getId(MAER + ".[ItemCategoria]","item='"+id_I+"'");
+                if(id!="" && !existe(MAER+".[Evaluaciones]","itemCategoria='"+id+"'"))
+                {
+                    return Ejecutar("UPDATE " + MAER + ".[ItemCategoria] SET categoria='" + id_C + "' WHERE item='" + id_I + "' ");
+                }
+                else return -10;
+            }
+        }
+        else return -666;
+    }
+    [WebMethod]
+    public int delItemSeccion(Usuario u, string id_i)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {       
+            string id = getId(MAER + ".[ItemCategoria]","item='"+id_i+"'");
+            if (!existe(MAER + ".[Evaluaciones]", "itemCategoria='" + id + "'"))
+            {
+                return Ejecutar("DELETE " + MAER + ".[ItemsSeccion] WHERE id = '" + id + "' ");
+            }
+            else
+            {
+                return Ejecutar("UPDATE " + MAER + ".[ItemsSeccion] SET eliminado='True' WHERE id = '" + id + "' ");
+            }
+        }
+        else return -666;
+    }
+    [WebMethod]
+    public DataTable getSocios(Usuario u, string local)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {       
+            return obtenerTabla("Socios"," SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OWHS] T1 JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE WhsCode='" + local + "' ");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public DataTable getItemsDe(Usuario u, string cliente)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Items", " SELECT T3.*,T4.*,T5.* FROM " + MAER + ".[Clientes] T1 JOIN " + MAER + ".[Seccion] T2 ON T1.seccion=T2.id JOIN " + MAER + ".[Categoria] T3 ON T3.seccion=T2.id AND T3.eliminado='False' JOIN " + MAER + ".[ItemCategoria] T4 ON T4.categoria=T3.id AND T4.eliminado='False' JOIN " + MAER + ".[ItemsEvaluacion] T5 ON T5.id=T4.item AND T5.eliminado='False' WHERE T1.cliente='" + cliente + "' ");
+        }
+        else return null;
+    }
+    [WebMethod]
+    public DataTable getCategoriasDe(Usuario u, string cliente)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Categorias", " SELECT T3.* FROM " + MAER + ".[Clientes] T1 JOIN " + MAER + ".[Seccion] T2 ON T1.seccion=T2.id JOIN " + MAER + ".[Categoria] T3 ON T3.seccion=T2.id AND T3.eliminado='False' WHERE T1.cliente='" + cliente + "' ");
+        }
+        else return null;
     }
 
-    
     [WebMethod]
-    public DataTable getItemCategoria()
+    public int addEvaluacion(Usuario u,string cliente,List<Evaluacion> evaluaciones,List<Categoria> categorias)
     {
-        return obtenerTabla("ItemCategoria", " SELECT T2.*, T3.* FROM " + MAER + ".[ItemCategoria] T1 JOIN " + MAER + ".[ItemsEvaluacion] T2 ON T1.item=T2.id JOIN " + MAER + ".[Categoria] T3 ON T1.categoria=T3.id ");
-    }
-    [WebMethod]
-    public DataTable getItemsLibres()
-    {
-        return obtenerTabla("ItemsLibres", " SELECT * FROM "+MAER+".[ItemsEvaluacion] WHERE id NOT IN (SELECT T2.id FROM "+MAER+".[ItemCategoria] T1 JOIN "+MAER+".[ItemsEvaluacion] T2 ON T1.item=T2.id JOIN "+MAER+".[Categoria] T3 ON T1.categoria=T3.id) ");
-    }
-    [WebMethod]
-    public int delItemCategoria(string item, string categoria)
-    {
-        return Ejecutar(" DELETE "+MAER+".[ItemCategoria] WHERE item='"+item+"' AND categoria='"+categoria+"' ");
-    }
-    [WebMethod]
-    public int addItemCategoria(string item, string categoria)
-    {
-        if (!existe(MAER + ".[ItemCategoria]", "item='"+item+"' AND categoria='"+categoria+"' "))
-            return Ejecutar(" INSERT INTO " + MAER + ".[ItemCategoria] (item,categoria) VALUES('" + item + "','" + categoria + "') ");
-        else return 0;
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            int result = 0;
+            DateTime h = DateTime.Now;
+            string hoy = h.Year + "-" + h.Month + "-" + h.Day + " 00:00.000";
+            Ejecutar("DELETE " + MAER + ".[Evaluaciones] WHERE cliente='" + cliente + "' AND fecha='" + hoy + "'");
+            
+            foreach (Evaluacion e in evaluaciones)
+            {
+                result += Ejecutar("INSERT INTO " + MAER + ".[Evaluaciones] (cliente,itemCategoria,cumple,fecha) VALUES('" + cliente + "','" + e.id + "','" + e.cumple + "','" + hoy + "')");
+            }
+
+            Ejecutar("DELETE " + MAER + ".[ResumenEvaluacion] WHERE cliente='" + cliente + "' AND fecha='" + hoy + "'");
+            foreach (Categoria c in categorias)
+            {
+                result += Ejecutar("INSERT INTO " + MAER + ".[ResumenEvaluacion] (cliente,fecha,categoria,items,cumplidos) VALUES('" + cliente + "','" + hoy + "','" + c.id + "','" + c.items + "','" + c.cumplidos + "')");
+            }
+
+            if ((evaluaciones.Count + categorias.Count) == result) return 1;
+            else
+            {
+                Ejecutar("DELETE " + MAER + ".[ResumenEvaluacion] WHERE cliente='" + cliente + "' AND fecha='" + hoy + "'");
+                Ejecutar("DELETE " + MAER + ".[Evaluaciones] WHERE cliente='" + cliente + "' AND fecha='" + hoy + "'");
+                return 12;
+            }
+        }
+        else return -666;
     }
 
-
-    [WebMethod]
-    public DataTable getItems()
-    {
-        return obtenerTabla("ItemsEvaluacion", " SELECT * FROM " + MAER + ".[ItemsEvaluacion]");
-    }
-    [WebMethod]
-    public int guardarItem(string item, string descripcion)
-    {
-        return Ejecutar("INSERT INTO " + MAER + ".[ItemsEvaluacion] (item,descripcion) VALUES('" + item + "','" + descripcion + "') ");
-    }
-    [WebMethod]
-    public int editarItem(string id, string item, string descripcion)
-    {
-        return Ejecutar("UPDATE " + MAER + ".[ItemsEvaluacion] SET item='" + item + "', descripcion='" + descripcion + "' WHERE id = '" + id + "' ");
-    }
-    [WebMethod]
-    public int eliminarItem(string id)
-    {
-        return Ejecutar("DELETE " + MAER + ".[ItemsEvaluacion] WHERE id = '" + id + "' ");
-    }
-
-
-    [WebMethod]
-    public DataTable getSecciones()
-    {
-        return obtenerTabla("Secciones", " SELECT * FROM " + MAER + ".[Seccion] ");
-    }
-    [WebMethod]
-    public int guardarSeccion(string nombre, string descripcion)
-    {
-        return Ejecutar("INSERT INTO " + MAER + ".[Seccion] (nombre,descripcion) VALUES('" + nombre + "','" + descripcion + "') ");
-    }
-    [WebMethod]
-    public int editarSeccion(string id, string nombre, string descripcion)
-    {
-        return Ejecutar("UPDATE " + MAER + ".[Seccion] SET nombre='" + nombre + "', descripcion='" + descripcion + "' WHERE id = '" + id + "' ");
-    }
-    [WebMethod]
-    public int eliminarSeccion(string id)
-    {
-        return Ejecutar("DELETE " + MAER + ".[Seccion] WHERE id = '" + id + "' ");
-    }
-    
-
-    [WebMethod]
-    public DataTable getItemSeccion(string seccion)
-    {
-        return obtenerTabla("ItemsSeccion", " SELECT T1.*,T2.* FROM "+MAER+".[ItemsSeccion] T1 RIGHT JOIN "+MAER+".[ItemsEvaluacion] T2 ON T1.item=T2.id AND T1.seccion = '"+seccion+"'");
-    }
-    [WebMethod]
-    public int addItemSeccion(string seccion, string item)
-    {
-        return Ejecutar("INSERT INTO " + MAER + ".[ItemsSeccion] (seccion,item) VALUES('"+seccion+"','"+item+"') ");
-    }
-    [WebMethod]
-    public int delItemSeccion(string id)
-    {
-        return Ejecutar("DELETE " + MAER + ".[ItemsSeccion] WHERE id = '" + id + "' ");
-    }
 
     [WebMethod]
     public int editClienteSeccion(string id, string seccion)
@@ -227,57 +375,90 @@ public class EvaluacionService : System.Web.Services.WebService
     {
         return Ejecutar(" DELETE " + MAER + ".[Clientes] WHERE id='"+id+"' ");
     }
-    [WebMethod]
-    public DataTable getSociosDe(string local)
+
+    private DateTime toDateTime(string fecha)
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Socios";
+        string[] date = fecha.Split('/');
+        int dia = Convert.ToInt32(date[0]);
+        int mes = Convert.ToInt32(date[1]);
+        int año = Convert.ToInt32(date[2]);
 
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM "+SAP+".[OWHS] T1 JOIN "+SAP+".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN "+MAER+".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN "+MAER+".[Seccion] T4 ON T4.id = T3.seccion WHERE WhsCode='"+local+"' ";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
-        {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
-        }
-
-        return dt;
+        return new DateTime(año, mes, dia);
     }
     [WebMethod]
-    public DataTable getSocios(string local)
+    public DataTable getEvaluaciones(Usuario u, string fi, string ft)
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Socios";
-
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OWHS] T1 JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE WhsCode='" + local + "' ";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
         {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
-        }
+            string f1="", f2="";
+            string sql = "SELECT convert(varchar(20),T1.fecha,103) as fecha, T1.cumplidos, T1.items, T2.nombre, T2.porcentaje,T3.CardCode,T3.CardName FROM " + MAER + ".[ResumenEvaluacion] T1 RIGHT JOIN " + MAER + ".[Categoria] T2 ON T1.categoria=T2.id JOIN " + SAP + ".[OCRD] T3 ON T3.CardCode=T1.cliente";
+            
+            if(fi.Length>0)
+            {
+                DateTime inicio = toDateTime(fi);
+                f1 = inicio.Year + "-" + inicio.Month + "-" + inicio.Day + " 00:00.000";
+            }
+            if (ft.Length > 0)
+            {
+                DateTime termino = toDateTime(ft);
+                f2 = termino.Year + "-" + termino.Month + "-" + termino.Day + " 00:00.000";
+            }
 
-        return dt;
+            if (fi.Length > 0 && ft.Length > 0)
+            {
+                sql += " WHERE T1.fecha>='" + f1 + "' AND T1.fecha<='" + f2 + "'";
+            }
+            else if(fi.Length > 0 && ft.Length == 0)
+            {
+                sql += " WHERE T1.fecha>='" + f1 + "'";
+            }
+            else if(fi.Length == 0 && ft.Length > 0)
+            {
+                sql += " WHERE T1.fecha<='" + f2 + "'";
+            }
+            return obtenerTabla("Evaluaciones",sql);
+        }
+        else return null;
     }
 
-    [WebMethod]
-    public DataTable getItemsDe(string cliente)
+    private String getLocal(string cliente)
     {
-        return obtenerTabla("Items"," SELECT T4.*,T6.* FROM "+MAER+".[Clientes] T1 JOIN "+MAER+".[Seccion] T2 ON T1.seccion=T2.id JOIN "+MAER+".[ItemsSeccion] T3 ON T3.seccion=T2.id JOIN "+MAER+".[ItemsEvaluacion] T4 ON T3.item=T4.id JOIN "+MAER+".[ItemCategoria] T5 ON T5.item=T4.id JOIN "+MAER+".[Categoria] T6 ON T5.categoria=T6.id WHERE T1.cliente='"+cliente+"' ");
+        String query  = "SELECT WhsName FROM "+SAP+".[OWHS] T1 JOIN "+SAP+".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj WHERE CardCode='"+cliente+"'";
+        SqlConnection selectConn = new SqlConnection(coneccionString);
+        selectConn.Open();
+        SqlCommand select = new SqlCommand(query, selectConn);
+        SqlDataReader reader = select.ExecuteReader();
+
+        if (reader.Read())
+        {
+            if (!reader.IsDBNull(0)) return reader.GetString(0);
+            else return "";
+        }
+        else
+        {
+            return "";
+        }
+    }
+    private DataTable getEvaluacion(string cliente, string fecha)
+    {
+        return obtenerTabla("Evaluacion", "SELECT T2.cumple,T3.nombre,T3.descripcion,T4.id,T4.nombre,T4.porcentaje,T4.descripcion FROM " + MAER + ".[ItemCategoria] T1 JOIN " + MAER + ".[Evaluaciones] T2 ON T1.id=T2.itemCategoria AND T1.eliminado='False' JOIN " + MAER + ".[ItemsEvaluacion] T3 ON T1.item=T3.id AND T3.visible='True' AND T3.eliminado='False' JOIN " + MAER + ".[Categoria] T4 ON T4.id=T1.categoria WHERE T2.cliente='"+cliente+"' AND T2.fecha='"+fecha+"'");
+    }
+    [WebMethod]
+    public Evaluacion getEvaluacionDe(Usuario u, string cliente1, string cliente2, string fecha)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            DateTime date = toDateTime(fecha);
+            string f = date.Year + "-" + date.Month + "-" + date.Day + " 00:00.000";
+            Evaluacion e = new Evaluacion();
+            e.fecha = fecha;
+            e.trabajador = cliente1;
+            e.nombreTrabajador = cliente2;
+            e.evaluacion = getEvaluacion(cliente1,f);
+            e.local = getLocal(cliente1);
+            e.categorias = getCategoriasDe(u,cliente1);
+            return e;
+        }
+        else return null;
     }
 }
-

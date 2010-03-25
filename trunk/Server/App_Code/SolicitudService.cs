@@ -56,7 +56,7 @@ public class SolicitudService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T2.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.idSolicitado=T4.id WHERE T3.userName='" + u.user + "' AND T3.password='" + u.pass + "' AND T1.realizada<T1.solicitada ";
+        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T5.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.idSolicitado=T4.id JOIN [PracticaDb].[dbo].Personal T5 ON T4.rutTecnico=T5.rut WHERE T3.userName='" + u.user + "' AND T3.password='" + u.pass + "' AND T1.realizada<T1.solicitada ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -84,7 +84,7 @@ public class SolicitudService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T2.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.idSolicitado=T4.id WHERE T1.realizada<T1.solicitada AND T2.planta='"+u.planta+"'";
+        String query = " SELECT T1.*,convert(varchar(20),T1.solicitada, 105) solicitadaString,convert(varchar(20),T1.limite, 105) limiteString,T5.*,T4.especialidad,T4.otro FROM [PracticaDb].[dbo].Solicitudes T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rutSolicitante=T2.rut JOIN [PracticaDb].[dbo].Usuario T3 ON T2.rut=T3.rut_persona JOIN [PracticaDb].[dbo].Tecnico T4 ON T1.idSolicitado=T4.id JOIN [PracticaDb].[dbo].Personal T5 ON T4.rutTecnico=T5.rut WHERE T1.realizada<T1.solicitada AND T2.planta='" + u.planta + "'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 

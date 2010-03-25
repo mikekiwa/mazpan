@@ -274,19 +274,19 @@ public class VentasService : System.Web.Services.WebService
 
         SqlConnection cn1 = new SqlConnection(coneccionString);
         SqlDataAdapter da1 = new SqlDataAdapter();
-        String query1 = " SELECT itemname,sum(T1.price) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
+        String query1 = " SELECT itemname,sum(T1.price*T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn2 = new SqlConnection(coneccionString);
         SqlDataAdapter da2 = new SqlDataAdapter();
-        String query2 = " SELECT itemname,sum(T1.price*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
+        String query2 = " SELECT itemname,sum(T1.price*-1*T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn3 = new SqlConnection(coneccionString);
         SqlDataAdapter da3 = new SqlDataAdapter();
-        String query3 = " SELECT itemname,sum(T1.price) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
+        String query3 = " SELECT itemname,sum(T1.price*T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn4 = new SqlConnection(coneccionString);
         SqlDataAdapter da4 = new SqlDataAdapter();
-        String query4 = " SELECT itemname,sum(T1.price*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
+        String query4 = " SELECT itemname,sum(T1.price*-1*T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2 ";
 
         SqlConnection cn5 = new SqlConnection(coneccionString);
         SqlDataAdapter da5 = new SqlDataAdapter();
