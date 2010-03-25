@@ -11,6 +11,8 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 			
@@ -23,13 +25,14 @@
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
+            	clean();
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
 			public function init():void
 			{
 				clean();
 				items_ac = new Array;
-				EvaluacionService.getItems();
+				EvaluacionService.getItems(index.usuario);
 			}
 			private function getItemsResult(event:ResultEvent):void
 			{
@@ -39,11 +42,12 @@
 			{
 				if(event.result == 1)
 				{
+					Alert.show("Operación Completada con Éxito","Mensaje");
 					init();
 				}
 				else
 				{
-					trace("Error intentando guardar item");
+					Alert.show("Imposible proceder por ahora inténtelo nuevamente ó mas tarde","Error");
 				}
 			}
 			private function clean():void
@@ -63,44 +67,64 @@
 					editarText_lf.visible = true;
 					editar_lf.visible = true;
 					item = tabla.selectedItem;
-					nombre_ti.text = tabla.selectedItem.item;
+					nombre_ti.text = tabla.selectedItem.nombre;
 					descripcion_ti.text = tabla.selectedItem.descripcion;
+				}
+				else
+				{
+					Alert.show("Primero seleccione un ítem de la tabla","Mensaje");
 				}
 			}
 			private function guardar():void
 			{
 				if(nombre_ti.text.length>0)
 				{
-					if(agregar_lf.visible) EvaluacionService.guardarItem(nombre_ti.text,descripcion_ti.text);
-					else EvaluacionService.editarItem(item.id,nombre_ti.text,descripcion_ti.text);
+					if(agregar_lf.visible) EvaluacionService.guardarItem(index.usuario,nombre_ti.text,descripcion_ti.text);
+					else EvaluacionService.editarItem(index.usuario,item.id,nombre_ti.text,descripcion_ti.text);
+				}
+				else
+				{
+					Alert.show("Debe ingresar algún valor para nombre","Mensaje");
 				}
 			}
 			private function eliminar():void
 			{
 				if(tabla.selectedIndex!=-1)
 				{
-					EvaluacionService.eliminarItem(tabla.selectedItem.id);
+					Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	Alert.show("¿Está seguro que desea eliminar el ítem seleccionado?\nNote que si el ítem esta en uso actualmente, solo desaparecerá efectivamente cuando ya no sea requerido por otro lugar, mientras tanto estará oculto","Alerta", 3, this, guardarClick);
+     			}            
+			}
+			private function guardarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		if(tabla.selectedIndex!=-1)
+					{
+						EvaluacionService.eliminarItem(index.usuario,tabla.selectedItem.id);
+					}
 				}
 			}
 		]]>
 	</mx:Script>
-	<mx:DataGrid x="10" y="10" width="755" height="302" id="tabla" dataProvider="{items_ac}">
+	<mx:DataGrid x="10" y="10" width="755" height="274" id="tabla" dataProvider="{items_ac}">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Item" dataField="item"/>
-			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion"/>
+			<mx:DataGridColumn headerText="Item" dataField="nombre" width="300"/>
+			<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" width="455"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button x="613" y="320" label="Editar" width="72" click="editar()"/>
-	<mx:Button x="693" y="320" label="Eliminar" click="eliminar()"/>
-	<mx:Canvas x="10" y="350" width="755" height="100" borderStyle="solid">
+	<mx:Button x="603" y="292" label="Editar" width="77" click="editar()"/>
+	<mx:Button x="688" y="292" label="Eliminar" click="eliminar()"/>
+	<mx:Canvas x="10" y="322" width="755" height="128" borderStyle="solid">
 		<mx:Label x="10" y="10" text="Editar" id="editarText_lf" visible="false"/>
-		<mx:Label x="54" y="10" text="{item.item}" id="editar_lf" visible="false"/>
+		<mx:Label x="54" y="10" text="{item.nombre}" id="editar_lf" visible="false"/>
 		<mx:Label x="10" y="10" text="Agregar nuevo Item" id="agregar_lf"/>
 		<mx:Label x="10" y="40" text="Item"/>
 		<mx:TextInput x="85" y="38" maxChars="50" width="450" id="nombre_ti"/>
 		<mx:Label x="10" y="68" text="Descripcion"/>
 		<mx:TextInput x="85" y="66" maxChars="50" width="450" id="descripcion_ti"/>
-		<mx:Button x="673" y="66" label="Guardar" click="guardar()"/>
-		<mx:Button x="590" y="66" label="Cancelar" click="clean()"/>
+		<mx:Button x="671" y="92" label="Guardar" click="guardar()"/>
+		<mx:Button x="590" y="92" label="Cancelar" click="clean()"/>
 	</mx:Canvas>
 </mx:Panel>

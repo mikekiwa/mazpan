@@ -7,7 +7,7 @@
 			[Bindable]
 			private var tipoMantencion_ac:ArrayCollection = new ArrayCollection(["Preventiva","Correctiva"]);
 			[Bindable]
-			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Mensual","Anual"]);
+			private var frecuencia_ac:ArrayCollection = new ArrayCollection(["Diario","Semanal","Quincenal","Mensual","Bimestral","Trimestral","Cuatrimestral","Semestral","Anual"]);
 			[Bindable]
 			private var mantenciones_ac:ArrayCollection = new ArrayCollection();
 			

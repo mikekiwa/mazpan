@@ -2,16 +2,24 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Evaluar"
 	creationComplete="init()" xmlns:ev="evaluacion.*">
 	
+	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 		result="getFechaResult(event)"		fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getLocales" 	result="getLocalesResult(event)"	fault="ErrorFaultHandler(event, 'getLocales')"/>
 	</mx:WebService>
 	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getSocios" 		result="getSociosResult(event)"		fault="ErrorFaultHandler(event, 'getSocios')"/>
-		<mx:operation name="getItemsDe" 	result="getItemsDeResult(event)"	fault="ErrorFaultHandler(event, 'getItemsDe')"/>
+		<mx:operation name="getSocios" 		 result="getSociosResult(event)"		fault="ErrorFaultHandler(event, 'getSocios')"/>
+		<mx:operation name="getCategoriasDe" result="getCategoriasDeResult(event)"	fault="ErrorFaultHandler(event, 'getCategoriasDe')"/>
+		<mx:operation name="getItemsDe" 	 result="getItemsDeResult(event)"		fault="ErrorFaultHandler(event, 'getItemsDe')"/>
+		<mx:operation name="addEvaluacion" 	 result="addEvaluacionResult(event)"	fault="ErrorFaultHandler(event, 'addEvaluacion')"/>
 	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.Alert;
+			import mx.controls.CheckBox;
+			import misClases.myLabel;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 			
@@ -23,19 +31,32 @@
 			private var trabajadores_ac:Array;
 			[Bindable]
 			private var items_ac:Array;
+			[Bindable]
+			private var categorias_ac:Array;
+			private var hoy:String = "";
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
+            	guardar_btn.enabled = true;
+				trabajadores_cb.enabled = true;
+				
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
             public function init():void
 			{
+				guardar_btn.enabled = true;
+				trabajadores_cb.enabled = true;
 				locales_ac = new Array;
 				trabajadores_ac = new Array;
 				items_ac = new Array;
 				lista_cmp.clean();
-				LocalesService.getLocales();
-			}
+				CombosService.getFecha();
+            }
+            private function getFechaResult(event:ResultEvent):void
+            {
+            	hoy = event.result as String;
+            	LocalesService.getLocales();
+            }
 			private function getLocalesResult(event:ResultEvent):void
             {
             	locales_ac = event.result.Tables.Locales.Rows.source as Array;
@@ -45,7 +66,7 @@
             private function cargarTrabajadores():void
             {
             	trabajadores_ac = new Array;
-				EvaluacionService.getSocios(local_cb.selectedItem.WhsCode);
+				EvaluacionService.getSocios(index.usuario,local_cb.selectedItem.WhsCode);
             }
             private function getSociosResult(event:ResultEvent):void
             {
@@ -57,18 +78,70 @@
 				if(trabajadores_ac.length>0)
 				{
 					items_ac = new Array;
+					categorias_ac = new Array;
 					lista_cmp.clean();
-					EvaluacionService.getItemsDe(trabajadores_cb.selectedItem.CardCode);
+					EvaluacionService.getCategoriasDe(index.usuario,trabajadores_cb.selectedItem.CardCode);
 				}
+			}
+			private function getCategoriasDeResult(event:ResultEvent):void
+			{
+				categorias_ac = event.result.Tables.Categorias.Rows.source as Array;
+				EvaluacionService.getItemsDe(index.usuario,trabajadores_cb.selectedItem.CardCode);
 			}
 			private function getItemsDeResult(event:ResultEvent):void
             {
             	items_ac = event.result.Tables.Items.Rows.source as Array;
-            	lista_cmp.items(items_ac);
+            	lista_cmp.items(items_ac,categorias_ac);
 			}
 			private function guardar():void
 			{
-				lista_cmp.getEvaluacion();
+				guardar_btn.enabled = false;
+				trabajadores_cb.enabled = false;
+				var aux:Array = lista_cmp.getChildren();
+				var titulo:myLabel;
+				var i:int=0;
+				var j:int=0;
+				var evaluacion_ac:Array = new Array;
+				
+				for(i=0; i<lista_cmp.categorias.length; i++)
+				{
+					lista_cmp.categorias[i].cumplidos = 0;
+				}
+				for(i=0; i<aux.length; i++)
+				{
+					if(aux[i].className=="myLabel")
+					{
+						titulo = aux[i];
+					}
+					else if(aux[i].className=="HBox")
+					{
+						var combos:Array = aux[i].getChildren();
+						for(j=0; j<combos.length; j++)
+						{
+							if(combos[j].className=="CheckBox")
+							{
+								var cbx:CheckBox = combos[j];
+								if(cbx.selected) titulo.cumplidos++;
+								
+								var item:Object = new Object;
+								item.id = cbx.id;
+								item.cumple = cbx.selected;
+								evaluacion_ac.push(item);
+							}
+						}
+					}
+				}
+				
+				var layoutEvaluacion:LayoutEvaluacion = new LayoutEvaluacion;
+				layoutEvaluacion.crear(local_cb.selectedItem,trabajadores_cb.selectedItem,lista_cmp.getChildren(),lista_cmp.categorias,hoy);
+				EvaluacionService.addEvaluacion(index.usuario,trabajadores_cb.selectedItem.CardCode,evaluacion_ac,lista_cmp.categorias);
+			}
+			private function addEvaluacionResult(event:ResultEvent):void
+			{				
+				guardar_btn.enabled = true;
+				trabajadores_cb.enabled = true;
+				if(event.result =='1') Alert.show("Datos guardados exitósamente","Mensaje");
+				else Alert.show("Se produjo un error durante el proceso de guardado, ningún dato se ha guardado","Error "+event.result);
 			}
 		]]>
 	</mx:Script>
@@ -79,5 +152,5 @@
 		<mx:ComboBox id="trabajadores_cb" dataProvider="{trabajadores_ac}" labelField="CardName" change="cargar()"/>
 	</mx:HBox>
 	<ev:Lista y="30" width="775" height="390" id="lista_cmp"/>
-	<mx:Button x="700" y="428" label="Guardar" click="guardar()"/>
+	<mx:Button x="693" y="428" label="Guardar" click="guardar()" id="guardar_btn"/>
 </mx:Panel>

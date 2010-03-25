@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Evaluaciones"
+	creationComplete="init()" xmlns:mc="misClases.*">
+	
+	<mx:WebService id="EvaluacionService" wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getEvaluaciones" result="getEvaluacionesResult(event)" fault="ErrorFaultHandler(event, 'getEvaluaciones')"/>
+		<mx:operation name="getEvaluacionDe" result="getEvaluacionDeResult(event)" fault="ErrorFaultHandler(event, 'getEvaluacionDe')"/>
+	</mx:WebService>
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			public static const nombre:String = "Evaluaciones";
+			
+			[Bindable]
+			private var evaluaciones_ac:Array; 
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				
+			}
+			private function buscar():void
+			{
+				evaluaciones_ac = new Array;
+				EvaluacionService.getEvaluaciones(index.usuario,fi.text,ft.text);
+			}
+			private function getEvaluacionesResult(event:ResultEvent):void
+			{
+				var aux:Array = event.result.Tables.Evaluaciones.Rows.source as Array;
+				var i:int;
+				var j:int;
+				
+				for(i=0; i<aux.length; i++)
+				{
+					var nuevo:Boolean = true;
+					for(j=0; j<evaluaciones_ac.length; j++)
+					{
+						if(evaluaciones_ac[j].CardName==aux[i].CardName) nuevo = false;
+					}
+					if(nuevo)
+					{
+						//persona
+						var persona:Object = new Object;
+						persona.tipo = 1;
+						persona.CardCode = aux[i].CardCode;
+						persona.CardName = aux[i].CardName;
+						persona.fecha = aux[i].fecha;
+						var cumplimiento:Number = 0;
+						evaluaciones_ac.push(persona);
+						
+						var continuar:Boolean = true;
+						for(j=i; j<aux.length && continuar; j++)
+						{
+							//categoria
+							if(aux[i].CardCode==aux[j].CardCode)
+							{
+								var categoria:Object = new Object;
+								categoria.tipo = 2;
+								categoria.nombre = aux[j].nombre;
+								if(int(aux[j].items)>0)
+								{
+									categoria.cumplimiento = int(aux[j].porcentaje)*int(aux[j].cumplidos)/int(aux[j].items);
+									cumplimiento += int(aux[j].porcentaje)*int(aux[j].cumplidos)/int(aux[j].items);
+								}
+								else
+								{
+									categoria.cumplimiento = int(aux[j].porcentaje);
+									cumplimiento += int(aux[j].porcentaje);
+								}
+								evaluaciones_ac.push(categoria);
+							}
+							else continuar=false;
+						}
+						persona.cumplimiento = cumplimiento;
+						var separacion:Object  = new Object;
+						separacion.tipo=3;
+						evaluaciones_ac.push(separacion);
+					}
+				}
+				tabla.dataProvider = evaluaciones_ac;
+			}
+			private function mostrar():void
+			{
+				if(tabla.selectedIndex!=-1 && tabla.selectedItem.tipo==1)
+					EvaluacionService.getEvaluacionDe(index.usuario,tabla.selectedItem.CardCode,tabla.selectedItem.CardName,tabla.selectedItem.fecha);
+			}
+			private function getEvaluacionDeResult(event:ResultEvent):void
+			{
+				var layoutEvaluacion:LayoutEvaluacion = new LayoutEvaluacion;
+				layoutEvaluacion.mostrar(event.result.local,
+										 event.result.nombreTrabajador,
+										 event.result.trabajador,
+										 event.result.evaluacion.Tables.Evaluacion.Rows.source as Array,
+										 event.result.categorias.Tables.Categorias.Rows.source as Array,
+										 event.result.fecha,
+										 evaluaciones_ac,
+										 tabla.selectedIndex,
+										 index.meses);
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox x="0" y="0" width="100%">
+		<mx:Label text="Desde:"/>
+		<mc:myDateField id="fi"/>
+		<mx:Label text="Hasta:"/>
+		<mc:myDateField id="ft"/>
+		<mx:Button label="Buscar" click="buscar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="30" width="775" height="390" dataProvider="{evaluaciones_ac}" id="tabla">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Trabajador" 		dataField="CardName"/>
+			<mx:DataGridColumn headerText="Fecha" 			dataField="fecha" width="100"/>
+			<mx:DataGridColumn headerText="Categoria" 		dataField="nombre" width="200"/>
+			<mx:DataGridColumn headerText="% Cumplimiento"  dataField="cumplimiento" width="110"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="695" y="428" label="Mostrar" click="mostrar()"/>
+</mx:Panel>

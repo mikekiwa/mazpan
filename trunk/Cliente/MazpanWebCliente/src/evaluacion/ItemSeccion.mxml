@@ -3,10 +3,10 @@
 	creationComplete="init()">
 	
 	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getSecciones" 		result="getSeccionesResult(event)"			fault="ErrorFaultHandler(event, 'getSecciones')"/>
-		<mx:operation name="getItemSeccion" 	result="getItemSeccionResult(event)"		fault="ErrorFaultHandler(event, 'getItemSeccion')"/>
-		<mx:operation name="addItemSeccion" 	result="guardarItemSeccionResult(event)"	fault="ErrorFaultHandler(event, 'addItemSeccion')"/>
-		<mx:operation name="delItemSeccion" 	result="guardarItemSeccionResult(event)"	fault="ErrorFaultHandler(event, 'delItemSeccion')"/>
+		<mx:operation name="getItemSeccion" 	 result="getItemSeccionResult(event)"		fault="ErrorFaultHandler(event, 'getItemSeccion')"/>
+		<mx:operation name="getSeccionCategoria" result="getSeccionCategoriaResult(event)"	fault="ErrorFaultHandler(event, 'getSeccionCategoria')"/>
+		<mx:operation name="delItemSeccion" 	 result="delItemSeccionResult(event)"		fault="ErrorFaultHandler(event, 'delItemSeccion')"/>
+		<mx:operation name="amarrarItemSeccion"  result="amarrarItemSeccionResult(event)"	fault="ErrorFaultHandler(event, 'amarrarItemSeccion')"/>
 	</mx:WebService>
 	
 	<mx:Script>
@@ -21,54 +21,61 @@
 			[Bindable]
 			private var itemSeccion_ac:Array;
 			[Bindable]
-			private var secciones_ac:Array;
+			private var categorias_ac:Array;
+			private var respuestas:int = 0;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
-            	secciones_cb.enabled = true;
+            	categorias_cb.enabled = true;
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
 			public function init():void
 			{
-				secciones_cb.enabled = true;
+				categorias_cb.enabled = true;
 				itemSeccion_ac = new Array;
-				secciones_ac = new Array;
-				EvaluacionService.getSecciones();
+				categorias_ac = new Array;
+				EvaluacionService.getSeccionCategoria(index.usuario);
 			}
-			private function getSeccionesResult(event:ResultEvent):void
+			private function getSeccionCategoriaResult(event:ResultEvent):void
 			{
-				secciones_ac = event.result.Tables.Secciones.Rows.source as Array;
+				categorias_ac = event.result.Tables.SeccionCategoria.Rows.source as Array;
 				cargar();
 			}
 			private function cargar():void
 			{
-				EvaluacionService.getItemSeccion(secciones_cb.selectedItem.id);
+				EvaluacionService.getItemSeccion(index.usuario);
 			}
 			private function getItemSeccionResult(event:ResultEvent):void
 			{
 				itemSeccion_ac = event.result.Tables.ItemsSeccion.Rows.source as Array;
-				for(var i:int=0; i<itemSeccion_ac.length; i++)
-				{
-					if(itemSeccion_ac[i].id!=null) itemSeccion_ac[i].amarrar = true;
-				}
-				tabla1.dataProvider = itemSeccion_ac;
 			}
-			private var respuestas:int = 0;
-			private function guardar():void
+			private function amarrar():void
 			{
-				respuestas = itemSeccion_ac.length;
+				respuestas = 0;
 				for(var i:int=0; i<itemSeccion_ac.length; i++)
 				{
-					if(itemSeccion_ac[i].id!=null && !(itemSeccion_ac[i].amarrar)) 
-						EvaluacionService.delItemSeccion(itemSeccion_ac[i].id);
-					else if(itemSeccion_ac[i].id==null && itemSeccion_ac[i].amarrar) 
-						EvaluacionService.addItemSeccion(secciones_cb.selectedItem.id,itemSeccion_ac[i].id1);
+					if(itemSeccion_ac[i].amarrar) respuestas++;
+				}
+				Alert.yesLabel = "Si";
+            	Alert.noLabel = "No";
+            	if(respuestas==1) Alert.show("¿Está seguro que desea amarrar el item seleccionado?","Mensaje", 3, this, guardarClick);
+            	else if(respuestas>1) Alert.show("¿Está seguro que desea amarrar los "+respuestas+" items seleccionados?","Mensaje", 3, this, guardarClick);
+            }
+            private function guardarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		var id:int=888;
+            		for(var i:int=0; i<itemSeccion_ac.length; i++)
+					{
+						if(itemSeccion_ac[i].amarrar) EvaluacionService.amarrarItemSeccion(index.usuario,categorias_cb.selectedItem.id1,itemSeccion_ac[i].id);
+					}
 				}
 			}
-			private function guardarItemSeccionResult(event:ResultEvent):void
+			private function amarrarItemSeccionResult(event:ResultEvent):void
 			{
 				respuestas--;
-				if(event.result != 1) trace("Error intentando cambiar amarre de items y seccion");
+				if(event.result != 1) trace("Error " + event.result);
 				if(respuestas==0) init();
 			}
 			private function todos():void
@@ -92,13 +99,41 @@
             		itemSeccion_ac[i].amarrar = !(itemSeccion_ac[i].amarrar);
             	}
             }
+            private function quitar():void
+            {
+            	respuestas=0;
+            	for(var i:int=0; i<itemSeccion_ac.length; i++)
+            	{
+            		if(itemSeccion_ac[i].amarrar) respuestas++;
+            	}
+            	Alert.yesLabel = "Si";
+            	Alert.noLabel = "No";
+            	if(respuestas==1) Alert.show("¿Está seguro que desea quitar el item seleccionado?","Mensaje", 3, this, guardarClick);
+            	else if(respuestas>1) Alert.show("¿Está seguro que desea quitar los "+respuestas+" items seleccionados?","Mensaje", 3, this, guardarClick);
+            }
+            private function quitarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		for(var i:int=0; i<itemSeccion_ac.length; i++)
+	            	{
+	            		if(itemSeccion_ac[i].amarrar)  EvaluacionService.delItemSeccion(index.usuario,itemSeccion_ac[i].id1)
+	            	}
+				}
+			}            
+            private function delItemSeccionResult(event:ResultEvent):void
+            {
+            	respuestas--;
+            	if(event.result!=1) trace("Error "+event.result);
+            	if(respuestas==0) init();
+            }
 		]]>
 	</mx:Script>
 	<mx:HBox x="10" y="0" width="753">
-		<mx:Label text="Sección:"/>
-		<mx:ComboBox dataProvider="{secciones_ac}" labelField="nombre" id="secciones_cb" change="cargar()"/>
+		<mx:Label text="Categorías:"/>
+		<mx:ComboBox dataProvider="{categorias_ac}" labelField="nombre" id="categorias_cb"/>
 	</mx:HBox>
-	<mx:DataGrid x="0" y="51" width="775" height="369" id="tabla1" dataProvider="{itemSeccion_ac}">
+	<mx:DataGrid x="0" y="51" width="775" height="369" id="tabla" dataProvider="{itemSeccion_ac}">
 		<mx:columns>
 			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingRight="2" textAlign="center" sortable="false">
 				<mx:itemRenderer>
@@ -107,11 +142,13 @@
 					</mx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Item" dataField="item1"/>
+			<mx:DataGridColumn headerText="Item" dataField="nombre"/>
 			<mx:DataGridColumn headerText="Descripción Item" dataField="descripcion"/>
+			<mx:DataGridColumn headerText="Sección - Categoría" dataField="nombre3"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button label="Guardar" click="guardar()" x="690" y="428"/>
+	<mx:Button x="602" y="428" label="Amarrar" click="amarrar()" />
+	<mx:Button x="682" y="428" label="Quitar" click="quitar()" width="75"/>
 	<mx:LinkButton x="0" y="26" label="Todos" color="#0531F0" click="todos()"/>
 	<mx:LinkButton x="61" y="26" label="Ninguno" color="#0531F0" click="ninguno()"/>
 	<mx:LinkButton x="135" y="26" label="Invertir" color="#0531F0" click="invertir()"/>

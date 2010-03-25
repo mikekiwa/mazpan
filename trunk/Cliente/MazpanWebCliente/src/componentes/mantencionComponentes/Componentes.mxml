@@ -24,7 +24,19 @@
 			<mx:RemoveChild target="{add}"/>
 			<mx:RemoveChild target="{canvas1}"/>
 			<mx:AddChild position="lastChild">
-				<ns2:Mantenciones  id="addMantenciones_cmp" x="0" y="0" complexClick="statesResult(event)"/>
+				<ns2:Mantenciones id="addMantenciones_cmp" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="EditarState">
+			<mx:RemoveChild target="{componentes_dg}"/>
+			<mx:RemoveChild target="{del}"/>
+			<mx:RemoveChild target="{mostrar}"/>
+			<mx:RemoveChild target="{input}"/>
+			<mx:RemoveChild target="{filtro}"/>
+			<mx:RemoveChild target="{add}"/>
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:Editar id="editar_cmp" x="0" y="0" complexClick="statesResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -123,6 +135,14 @@
 				var datosComponente:FORMATO = new FORMATO();
 				datosComponente.vistaComponente(component); 
 			}
+			private function editar():void
+			{
+				if(componentes_dg.selectedIndex!=-1)
+				{
+					currentState='EditarState';
+					if(editar_cmp!=null) editar_cmp.parametros(componentes_dg.selectedItem as Object);
+				}
+			}
 			private function mantenciones():void
 			{
 				if(componentes_dg.selectedIndex!=-1)
@@ -146,8 +166,9 @@
 	</mx:Canvas>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="add" click="{currentState='AgregarState'}"/>
 	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="del" click="if(componentes_dg.selectedIndex!=-1) ElementoService.delElemento(componentes_dg.selectedItem.codigo)"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/mantencion.png" id="mantancion" click="mantenciones()"/>
-	<mx:Image x="202" y="57" width="56" height="55" source="iconos/pdf.png" id="mostrar" click="ver()"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="edit" click="editar()"/>
+	<mx:Image x="202" y="57" width="56" height="55" source="iconos/mantencion.png" id="mantancion" click="mantenciones()"/>
+	<mx:Image x="266" y="57" width="56" height="55" source="iconos/pdf.png" id="mostrar" click="ver()"/>
 	<mx:DataGrid id="componentes_dg" width="755" x="10" y="120" dataProvider="{componentes_ac}" height="330">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>

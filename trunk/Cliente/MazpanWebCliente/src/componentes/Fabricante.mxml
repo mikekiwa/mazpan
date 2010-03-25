@@ -15,6 +15,9 @@
 			[Bindable]
 			private var pais_ac:Array = new Array();
 			
+			[Bindable]
+			public var fabricante_ob:Object;
+			
 			private var fabricante:Object;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
@@ -23,12 +26,13 @@
             }
 			public function init():void
 			{
-            	CombosService.Paises();
+				CombosService.Paises();
 			}
 			private function paisesResult(event:ResultEvent):void
             {
             	pais_ac = event.result.Tables.Paises.Rows.source as Array;
             	pais_ac.push("Otro");
+            	if(fabricante_ob==null || fabricante_ob.pais==null || fabricante_ob.pais=="") pais_cb.selectedIndex=0;
             }
 			private function actualizarPais():void
 			{
@@ -51,8 +55,18 @@
 				var fabricante:Object = new Object();
 				fabricante.marca = marca_ti.text;
 				fabricante.ano = ano_ti.text;
-				if(pais_cb.visible) fabricante.pais = pais_cb.text;
-				else fabricante.pais = pais_ti.text;
+				if(pais_cb.visible)
+				{
+					if(pais_cb.text.length>0)
+						fabricante.pais = pais_cb.text;
+					else
+						fabricante.pais = "CHILE";
+				}
+				else
+				{
+					fabricante.pais = pais_ti.text;
+					CombosService.agregarPais(pais_ti.text);
+				}
 				fabricante.modelo = modelo_ti.text;
 				fabricante.serie = serie_ti.text;
 				fabricante.fabricante = fabricante_ti.text;
@@ -71,22 +85,23 @@
 				pais_ti.visible=false;
 				cancelarPais_btn.visible=false;
 				fabricante=null;
+				fabricante_ob = new Object;
 			}
 		]]>
 	</mx:Script>
 
 	<mx:Label x="8.5" y="17" text="Marca"/>
-	<mx:TextInput x="108.5" y="15" width="261.5" id="marca_ti" maxChars="50"/>
+	<mx:TextInput x="108.5" y="15" width="261.5" id="marca_ti" maxChars="50" text="{fabricante_ob.marca}"/>
 	<mx:Label x="8.5" y="55" text="Año"/>
-	<mx:TextInput x="108.5" y="53" restrict="0-9" width="81" id="ano_ti"/>
+	<mx:TextInput x="108.5" y="53" restrict="0-9" width="81" id="ano_ti" text="{fabricante_ob.ano}"/>
 	<mx:Label x="8.5" y="95" text="Pais"/>
-	<mx:ComboBox x="108.5" y="93" width="261.5" id="pais_cb" dataProvider="{pais_ac}" labelField="pais" change="actualizarPais()"/>
+	<mx:ComboBox x="108.5" y="93" width="261.5" id="pais_cb" dataProvider="{pais_ac}" labelField="pais" change="actualizarPais()" text="{fabricante_ob.pais}"/>
 	<mx:TextInput x="108.5" y="93" width="231.5" id="pais_ti" visible="false" maxChars="50"/>
 	<mx:Image x="348" y="93" width="22" height="22" id="cancelarPais_btn" source="iconos/cancelar.png" visible="false" click="pais_cb.selectedIndex=0; actualizarPais()"/>
 	<mx:Label x="8.5" y="140" text="Modelo"/>
-	<mx:TextInput x="108.5" y="138" width="261.5" id="modelo_ti" maxChars="50"/>
+	<mx:TextInput x="108.5" y="138" width="261.5" id="modelo_ti" maxChars="50" text="{fabricante_ob.modelo}"/>
 	<mx:Label x="8.5" y="181" text="Serie"/>
-	<mx:TextInput x="108.5" y="179" width="261.5" id="serie_ti" maxChars="50"/>
+	<mx:TextInput x="108.5" y="179" width="261.5" id="serie_ti" maxChars="50" text="{fabricante_ob.serie}"/>
 	<mx:Label x="8.5" y="220" text="Fabricante"/>
-	<mx:TextInput x="108.5" y="218" width="261.5" id="fabricante_ti" maxChars="50"/>
+	<mx:TextInput x="108.5" y="218" width="261.5" id="fabricante_ti" maxChars="50" text="{fabricante_ob.fabricante}"/>
 </mx:Canvas>

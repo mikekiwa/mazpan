@@ -122,7 +122,7 @@
 	            		if(t1[i].itemname == t3[k].itemname)
 	            		{
 	            			t1[i].anterior += int(t3[k].quantity);
-	            			seguir = false;//esto es para decir que ya encontre el item busacado y ya no debo seguir buscado
+	            			seguir = false;//esto es para decir que ya encontre el item buscado y ya no debo seguir buscado
 	            		}
 	            	}
 	            	if(t1[i].QryGroup1=='Y')

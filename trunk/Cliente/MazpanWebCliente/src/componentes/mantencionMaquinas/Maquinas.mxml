@@ -2,12 +2,6 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Maquinas"
 	creationComplete="init()" xmlns:ns1="componentes.mantencionMaquinas.*" xmlns:ns2="componentes.*">
 	
-	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="allElementos" 		result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
-		<mx:operation name="delElemento" 		result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
-		<mx:operation name="getElemento"		result="getElementoResult(event)"	fault="ErrorFaultHandler(event, 'getElemento')"/>
-	</mx:WebService>
-	
 	<mx:states>
 		<mx:State name="AgregarState">
 			<mx:RemoveChild target="{canvas1}"/>
@@ -29,7 +23,23 @@
 				<ns2:Mantenciones  id="addMantenciones_cmp" x="0" y="0" complexClick="statesResult(event)"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="EditarState">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:RemoveChild target="{image1}"/>
+			<mx:RemoveChild target="{image2}"/>
+			<mx:RemoveChild target="{image3}"/>
+			<mx:RemoveChild target="{maquinas_dg}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:Editar id="editar_cmp" x="0" y="0" complexClick="statesResult(event)"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
+	
+	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="allElementos" 		result="allElementosResult(event)" 	fault="ErrorFaultHandler(event, 'allElementos')"/>
+		<mx:operation name="delElemento" 		result="delElementoResult(event)" 	fault="ErrorFaultHandler(event, 'delElemento')"/>
+		<mx:operation name="getElemento"		result="getElementoResult(event)"	fault="ErrorFaultHandler(event, 'getElemento')"/>
+	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
@@ -124,6 +134,14 @@
 				var datosMaquina:FORMATO = new FORMATO();
 				datosMaquina.vistaMaquina(maquina); 
 			}
+			private function editar():void
+			{
+				if(maquinas_dg.selectedIndex!=-1)
+				{
+					currentState='EditarState';
+					if(editar_cmp!=null) editar_cmp.parametros(maquinas_dg.selectedItem as Object);
+				}
+			}
 			private function mantenciones():void
 			{
 				if(maquinas_dg.selectedIndex!=-1)
@@ -148,8 +166,9 @@
 	</mx:Canvas>
 	<mx:Image x="10" y="57" width="56" height="55" source="iconos/add.png" id="image3" click="{currentState='AgregarState'}"/>
 	<mx:Image x="74" y="57" width="56" height="55" source="iconos/del.png" id="image2" click="if(maquinas_dg.selectedIndex!=-1) ElementoService.delElemento(maquinas_dg.selectedItem.codigo)"/>
-	<mx:Image x="138" y="57" width="56" height="55" source="iconos/mantencion.png" id="mantancion" click="mantenciones()"/>
-	<mx:Image x="202" y="57" width="56" height="55" source="iconos/pdf.png" id="image1" click="ver()"/>
+	<mx:Image x="138" y="57" width="56" height="55" source="iconos/edit.png" id="edit" click="editar()"/>
+	<mx:Image x="202" y="57" width="56" height="55" source="iconos/mantencion.png" id="mantancion" click="mantenciones()"/>
+	<mx:Image x="266" y="57" width="56" height="55" source="iconos/pdf.png" id="image1" click="ver()"/>
 	<mx:DataGrid id="maquinas_dg" width="755" x="10" y="120" dataProvider="{maquinas_ac}" height="330">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>

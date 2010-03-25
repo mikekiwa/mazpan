@@ -2,14 +2,14 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" verticalScrollPolicy="off" 
 	creationComplete="init()" xmlns:ns1="componentes.*">
 	
-	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="TipoMaquina" 			result="tipoMaquinaResult(event)" 			fault="ErrorFaultHandler(event, 'TipoMaquina')"/>
+	<mx:WebService id="CombosService" wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="TipoMaquina" result="tipoMaquinaResult(event)" fault="ErrorFaultHandler(event, 'TipoMaquina')"/>
 	</mx:WebService>
 	
-	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="addElemento" 	result="addElementoResult(event)" 	fault="ErrorFaultHandler(event, 'addElemento')"/>
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="editElemento" result="editElementoResult(event)" fault="ErrorFaultHandler(event, 'editElemento')"/>
+		<mx:operation name="getElemento" result="getElementoResult(event)" fault="ErrorFaultHandler(event, 'getElemento')"/>
 	</mx:WebService>
-	
 	
 	<mx:Metadata>
 		[Event(name="complexClick",type="eventos.ComplexEvent")]
@@ -23,7 +23,7 @@
 			import mx.collections.ArrayCollection;
 			import eventos.ComplexEvent;
 		
-			public static const nombre:String = "AgregarMaquina";
+			public static const nombre:String = "EditarState";
 			
 			[Bindable]
 			private var tipoMaquina_ac:ArrayCollection = new ArrayCollection();
@@ -31,9 +31,12 @@
 			private var estado_ac:ArrayCollection = new ArrayCollection(["En Uso","En Bodega"]);
 			[Bindable]
 			private var recepcion_ac:ArrayCollection = new ArrayCollection(["Nueva","Usada"]);
+			[Bindable]
+			private var machine:Object;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
+            	agregar_btn.enabled = true;
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
 			private function init():void
@@ -53,7 +56,7 @@
             }
 			private function onClick(event:String):void
 			{
-				if(event=="agregar")
+				if(event=="editar")
 				{
 					agregar_btn.enabled = false;
 					var maquina:Object = new Object();
@@ -81,19 +84,18 @@
 					
 					//Hoja 2
 					if(fabricante_cmp!=null) maquina.fabricante = fabricante_cmp.getFabricante();
+					else maquina.fabricante = machine.fabricante;
 					
 					//Hoja 3
 					if(datosRelevantes_cmp!=null) maquina.especificaciones = datosRelevantes_cmp.getEspecificaciones();
+					else maquina.especificaciones = machine.especificaciones;
 					
 					//Hoja 4
 					if(union_cmp!=null) maquina.subordinados = union_cmp.getComponentesMaquina();
-					
-					//Hoja 5
-					if(actividadesMantencion_cmp!=null) maquina.mantenciones = actividadesMantencion_cmp.getMantenciones();
+					else maquina.subordinados = machine.subordinados;
 					
 					
-					
-					ElementoService.addElemento(index.usuario, maquina);
+					ElementoService.editElemento(index.usuario, maquina);
 				}
 				else
 				{
@@ -119,18 +121,14 @@
 				if(union_cmp!=null) union_cmp.clean();
 			 	tabNavigator.selectedIndex=0;
 			}
-			private function addElementoResult(event:ResultEvent):void
+			private function editElementoResult(event:ResultEvent):void
 			{
-				var result:int = event.result as int;
-				if(result == 1)
+				if(event.result == 1)
 				{
+					clean();
 					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
-				else if(result==-1)
-				{
-					Alert.show("Lo siento el codigo ya exite");
-				}
-				else 
+				else
 				{
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 				}
@@ -141,9 +139,20 @@
 				if(tipo_cb.text=="Otro"){tipo_cb.visible=false; tipo_ti.visible=true; cancelarTipo_btn.visible=true;} 
 				else{tipo_cb.visible=true; tipo_ti.visible=false; cancelarTipo_btn.visible=false;}
 			}
+			public function parametros(_maq:Object):void
+			{
+//hacer esto despues de cargar los tipo de componentes y variables de sistema
+//no se sis se puedea porq no se en que momento podria llegar a la funcion el parametro, y quisa no carge el elemento.				
+				ElementoService.getElemento(_maq);
+				agregar_btn.enabled = true;
+			}
+			private function getElementoResult(event:ResultEvent):void
+			{
+				machine = event.result as Object;
+			}
 			private function revisar():void
 			{
-				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && vidaUtil_ti.text.length>0 && nombre_ti.text.length>0 && ubicacion_ti.text.length>0 && costo_ti.text.length>0 && horasActuales_ti.text.length>0 && horasPromedio_ti.text.length>0 && descripcion_ta.text.length>0) agregar_btn.enabled=true;
+				if(vidaUtil_ti.text.length>0 && nombre_ti.text.length>0 && ubicacion_ti.text.length>0 && costo_ti.text.length>0 && horasActuales_ti.text.length>0 && horasPromedio_ti.text.length>0 && descripcion_ta.text.length>0) agregar_btn.enabled=true;
 				else agregar_btn.enabled=false;
 			}
 			private function cargarUnion():void
@@ -153,50 +162,50 @@
 		]]>
 	</mx:Script>
 	<mx:TabNavigator id="tabNavigator" width="100%" height="420" horizontalCenter="0" fontWeight="normal" change="cargarUnion()">
-		<mx:Canvas label="Datos Básicos" width="100%" height="100%" fontWeight="normal" fontStyle="normal">
+		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
 			<mx:Label x="53" y="10" text="Tipo Maquina"/>
-			<mx:ComboBox x="186" y="10" id="tipo_cb" dataProvider="{tipoMaquina_ac}" change="actualizarTipo(); revisar()"/>
-			<mx:TextInput x="186" y="10" width="319" id="tipo_ti" visible="false" maxChars="50" change="revisar()"/>
+			<mx:ComboBox x="186" y="10" id="tipo_cb" dataProvider="{tipoMaquina_ac}" change="actualizarTipo()" text="{machine.tipo}"/>
+			<mx:TextInput x="186" y="10" width="319" id="tipo_ti" visible="false" maxChars="50"/>
 			<mx:Image x="512" y="10" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
 			<mx:Label x="53" y="38" text="Codigo"/>
-			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20" change="revisar()"/>
+			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20" text="{machine.codigo}" editable="false"/>
 			<mx:Label x="53" y="66" text="Puesta en Marcha"/>
-			<ns1:myDateField x="186" y="64" width="175" id="puestaMarcha_df" change="revisar()"/>
+			<mx:TextInput x="186" y="64" width="175" id="puestaMarcha_df" text="{machine.puestaMarcha}" editable="false"/>
 			<mx:Label x="53" y="94" text="Nombre"/>
-			<mx:TextInput x="186" y="92" width="319" id="nombre_ti" maxChars="50" change="revisar()"/>
+			<mx:TextInput x="186" y="92" width="319" id="nombre_ti" maxChars="50"  text="{machine.nombre}"/>
 			<mx:Label x="53" y="122" text="Ubicacion"/>
-			<mx:TextInput x="186" y="120" width="319" id="ubicacion_ti" maxChars="50" change="revisar()"/>
+			<mx:TextInput x="186" y="120" width="319" id="ubicacion_ti" maxChars="50"  text="{machine.ubicacion}"/>
 			<mx:Label x="53" y="150" text="Estado"/>
-			<mx:ComboBox x="186" y="148" id="estado_cb" dataProvider="{estado_ac}" change="revisar()"/>
+			<mx:ComboBox x="186" y="148" id="estado_cb" dataProvider="{estado_ac}" text="{machine.estado}"/>
 			<mx:Label x="443" y="150" text="Condicion de Recepcion"/>
-			<mx:ComboBox x="587" y="148" width="162" id="recepcion_cb" dataProvider="{recepcion_ac}" change="revisar()"/>
+			<mx:ComboBox x="587" y="148" width="162" id="recepcion_cb" dataProvider="{recepcion_ac}" text="{machine.condicionRecepcion}"/>
 			<mx:Label x="53" y="178" text="Costo"/>
-			<mx:TextInput x="186" y="176" id="costo_ti" restrict="0-9" change="revisar()"/>
+			<mx:TextInput x="186" y="176" id="costo_ti" restrict="0-9"  text="{machine.costo}"/>
 			<mx:Label x="443" y="178" text="Horas vida util"/>
-			<mx:TextInput x="587" y="176" restrict="0-9" id="vidaUtil_ti" width="162" change="revisar()"/>
+			<mx:TextInput x="587" y="176" restrict="0-9" id="vidaUtil_ti" width="162"  text="{machine.horasVidaUtil}"/>
 			<mx:Label x="53" y="206" text="Horas Actuales"/>
-			<mx:TextInput x="186" y="204" restrict="0-9" id="horasActuales_ti" width="160" change="revisar()"/>
+			<mx:TextInput x="186" y="204" restrict="0-9" id="horasActuales_ti" width="160"  text="{machine.horasActuales}"/>
 			<mx:Label x="443" y="208" text="Horas Diarias Promedio"/>
-			<mx:TextInput x="587" y="206" restrict="0-9" id="horasPromedio_ti" width="137" change="revisar()"/>
+			<mx:TextInput x="587" y="206" restrict="0-9" id="horasPromedio_ti" width="137"  text="{machine.horasDiariasPromedio}"/>
 			<mx:Image x="726" y="206" width="22" height="22" source="iconos/refresh.png" id="refrescar_btn"/>
 			<mx:Label x="53" y="235" text="Descripcion"/>
-			<mx:TextArea x="186" y="234" width="565" maxChars="100" id="descripcion_ta" height="83" change="revisar()"/>
+			<mx:TextArea x="186" y="234" width="565" maxChars="100" id="descripcion_ta" height="83"  text="{machine.descripcion}"/>
 			<mx:Label x="284.5" y="359" text="(*) Todos los datos son Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos del Fabricante" width="100%" height="100%">
-			<ns1:Fabricante id="fabricante_cmp" x="185" y="78"/>
+			<ns1:Fabricante id="fabricante_cmp" x="185" y="78" fabricante_ob="{machine.fabricante}"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos Relevantes" width="100%" height="100%" >
-			<ns1:DatosRelevantes id="datosRelevantes_cmp"/>
+			<ns1:DatosRelevantes id="datosRelevantes_cmp" especificaciones_ac="{machine.especificaciones}"/>
 		</mx:Canvas>
 		<mx:Canvas label="Componentes" width="100%" height="100%">
-			<ns1:Union id="union_cmp"/>
+			<ns1:Union id="union_cmp" componentes_ac="{machine.subordinados}"/>
 		</mx:Canvas>
 		<mx:Canvas label="Actividades de Mantencion" width="100%" height="100%">
-			<ns1:ActividadesMantencion id="actividadesMantencion_cmp"/>
+			<ns1:VerActividadesMantencion id="actividadesMantencion_cmp" mantenciones_ac="{machine.mantenciones}" codigoElemento="{machine.codigo}"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
 	
-	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('editar')" id="agregar_btn" enabled="false"/>
 	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 </mx:Canvas>
