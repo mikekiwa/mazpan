@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Secciones"
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="875" height="500" title="Secciones"
 	creationComplete="init()">
 	
 	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
@@ -11,6 +11,10 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.controls.NumericStepper;
+			import mx.containers.HBox;
+			import mx.controls.Button;
+			import mx.controls.Alert;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 			
@@ -18,8 +22,7 @@
 			
 			[Bindable]
 			private var secciones_ac:Array;
-			[Bindable]
-			private var seccion:Object;
+			private var seccionEnEdicion:int = 0;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -28,80 +31,223 @@
 			public function init():void
 			{
 				clean();
-				secciones_ac = new Array;
-				EvaluacionService.getSecciones();
+				todas.visible = true;
+				nueva.visible = false;
+				todas_btn.visible=false;
+				agregar_btn.visible=true;
+				EvaluacionService.getSecciones(index.usuario);
+			}
+			private function clean():void
+			{
+				seccionEnEdicion = 0;
+				if(Categorias_list!=null)
+				{
+					var count:int = Categorias_list.getChildren().length-1;
+					for(var i:int=1; i<count; i++)
+					{
+						Categorias_list.removeChildAt(1);
+					}
+				}
+				if(nombre_ti!=null) nombre_ti.text = "";
+				if(descripcion_ti!=null) descripcion_ti.text = "";
+				if(nuevaCategoria_btn!=null)nuevaCategoria_btn.visible=true;
 			}
 			private function getSeccionesResult(event:ResultEvent):void
 			{
-				secciones_ac = event.result.Tables.Secciones.Rows.source as Array;
+				var aux:Array = event.result.Tables.Secciones.Rows.source as Array;
+				var seccion:String="";
+				var salida:Array = new Array;
+				
+				for(var i:int=0; i<aux.length; i++)
+				{
+					if(seccion!=aux[i].id)
+					{ 
+						if(salida.length>0) salida.push(new Seccion);
+						salida.push(new Seccion(aux[i].id,aux[i].nombre,aux[i].descripcion,aux[i].editable));
+						salida.push(new Seccion(aux[i].id,"","",aux[i].editable,aux[i].id1,aux[i].nombre1,aux[i].descripcion1,aux[i].editable1,aux[i].porcentaje));
+						seccion = aux[i].id;
+					}
+					else salida.push(new Seccion(aux[i].id,"","",aux[i].editable,aux[i].id1,aux[i].nombre1,aux[i].descripcion1,aux[i].editable1,aux[i].porcentaje));
+				}
+				secciones_ac = salida;
 			}
-			private function guardarSeccionResult(event:ResultEvent):void
+			private function guardarSeccionResult(event:ResultEvent):void	
 			{
 				if(event.result == 1)
 				{
+					Alert.show("Operación Completada con Éxito","Mensaje");
 					init();
 				}
 				else
 				{
-					trace("Error intentando guardar item");
+					Alert.show("Imposible proceder por ahora inténtelo nuevamente ó mas tarde","Error");
 				}
 			}
-			private function clean():void
+			private function crearCategorias(_nombre:String='',_descripcion:String='',_porcentaje:int=1,_id:String='0',_editable:Boolean=true,_porcentajeVariable:Boolean=true):void
 			{
-				seccion = new Object;
-				descripcion_ti.text = "";
-				nombre_ti.text = "";
-				agregar_lf.visible = true;
-				editarText_lf.visible = false;
-				editar_lf.visible = false;
+				var hbox:HBox = new HBox;
+				hbox.id = _id;
+				hbox.enabled = _editable;
+				var name:TextInput = new TextInput;
+				name.width=365;
+				name.maxChars=50;
+				name.text = _nombre;
+				var description:TextInput = new TextInput;
+				description.width=365;
+				description.maxChars=50;
+				description.text = _descripcion;
+				var percentage:NumericStepper = new NumericStepper;
+				percentage.minimum = 1;
+				percentage.maximum = 100;
+				percentage.value = _porcentaje;
+				percentage.enabled = _porcentajeVariable;
+				hbox.addChild(name);
+				hbox.addChild(description);
+				hbox.addChild(percentage);
+				Categorias_list.addChildAt(hbox,Categorias_list.getChildren().length-1);
 			}
 			private function editar():void
 			{
-				if(tabla.selectedIndex!=-1)
+				if(tabla.selectedIndex!=-1 && tabla.selectedItem.id!=null && tabla.selectedItem.id1==null && tabla.selectedItem.editable==true)
 				{
-					agregar_lf.visible = false;
-					editarText_lf.visible = true;
-					editar_lf.visible = true;
-					seccion = tabla.selectedItem;
+					clean();
+					seccionEnEdicion = tabla.selectedItem.id;
 					nombre_ti.text = tabla.selectedItem.nombre;
 					descripcion_ti.text = tabla.selectedItem.descripcion;
+					
+					todas.visible=false;
+					nueva.visible=true;
+					todas_btn.visible=true;
+					agregar_btn.visible=false;
+					nuevaCategoria_btn.visible=false;
+				
+					tabla.selectedIndex = tabla.selectedIndex+1;
+					for(var i:int=tabla.selectedIndex; i<secciones_ac.length && tabla.selectedItem.id!=null; i++)
+					{
+						if(tabla.selectedItem.id==seccionEnEdicion)
+						{
+							crearCategorias(tabla.selectedItem.nombre1,
+											tabla.selectedItem.descripcion,
+											tabla.selectedItem.porcentaje,
+											tabla.selectedItem.id1,
+											tabla.selectedItem.editable1,
+											false);
+						}
+						tabla.selectedIndex = tabla.selectedIndex+1;
+					}
 				}
-			}
-			private function guardar():void
-			{
-				if(nombre_ti.text.length>0)
+				else if(tabla.selectedItem.id!=null && tabla.selectedItem.editable!=true)
 				{
-					if(agregar_lf.visible) EvaluacionService.guardarSeccion(nombre_ti.text,descripcion_ti.text);
-					else EvaluacionService.editarSeccion(seccion.id,nombre_ti.text,descripcion_ti.text);
+					Alert.show("La Sección no es editable, revise relaciones");
 				}
 			}
 			private function eliminar():void
 			{
 				if(tabla.selectedIndex!=-1)
 				{
-					EvaluacionService.eliminarSeccion(tabla.selectedItem.id);
+					if(tabla.selectedItem.id!=null)
+					{
+						EvaluacionService.eliminarSeccion(index.usuario,tabla.selectedItem.id);
+					}
+				}
+			}
+			private function guardar():void
+			{
+				var aux:Array = Categorias_list.getChildren();
+				var i:int = 0;
+				var porcentajeTotal:int=0;
+				var tienenNombre:Boolean = true;
+				var nombresRepetidos:Boolean = false;
+						
+				for(i=1; i<aux.length-1; i++)
+				{
+					var datos:Array = aux[i].getChildren();
+					porcentajeTotal+=datos[2].value;
+					if(datos[0].text.length==0) tienenNombre=false;
+					
+					for(var j:int=i+1; j<aux.length-1; j++)
+					{
+						var datos2:Array = aux[j].getChildren();
+						if(datos[0].text==datos2[0].text) nombresRepetidos = true;
+					}
+				}
+				if(nombre_ti.text.length==0)
+				{
+					Alert.show("Es necesario asignar un nombre a la sección","Mensaje");
+				}
+				else if((aux.length-2)==0)
+				{
+					Alert.show("Debe crear al menos una categoria para la sección","Mensaje");
+				}
+				else if(porcentajeTotal!=100)
+				{
+					if(porcentajeTotal>100)	Alert.show("El porcentaje total debe ser 100%, debe reducir alguna categoría en "+(porcentajeTotal-100)+"%","Mensaje");
+					else Alert.show("El porcentaje total debe ser 100%, debe aumentar alguna categoría en "+(100-porcentajeTotal)+"%","Mensaje");
+				}
+				else if(!tienenNombre)
+				{
+					Alert.show("Es necesario que todas las categorías tengan un nombre","Mensaje");
+				}
+				else if(nombresRepetidos)
+				{
+					Alert.show("Los nombre de las categorías no deben repetirse","Mensaje");
+				}
+				else
+				{
+					var categorias:Array = new Array;
+					var seccion:Object = new Object;
+					if(seccionEnEdicion!=0) seccion.id = seccionEnEdicion;
+					seccion.nombre = nombre_ti.text;
+					seccion.descripcion = descripcion_ti.text;
+					
+					for(i=1; i<aux.length-1; i++)
+					{
+						var categoria:Object = new Object;
+						
+						if(aux[i].id!="0") categoria.id = aux[i].id;
+						else categoria.id = 0;
+						
+						categoria.nombre = aux[i].getChildren()[0].text;
+						categoria.descripcion = aux[i].getChildren()[1].text;
+						categoria.porcentaje = aux[i].getChildren()[2].value;
+						
+						categorias.push(categoria);
+					}
+					EvaluacionService.guardarSeccion(index.usuario,seccion,categorias);
 				}
 			}
 		]]>
 	</mx:Script>
-	
-	<mx:DataGrid x="10" y="10" width="755" height="302" id="tabla" dataProvider="{secciones_ac}">
-		<mx:columns>
-			<mx:DataGridColumn headerText="Nombre" dataField="nombre"/>
-			<mx:DataGridColumn headerText="Descripción" dataField="descripcion"/>
-		</mx:columns>
-	</mx:DataGrid>
-	<mx:Button x="613" y="320" label="Editar" width="72" click="editar()"/>
-	<mx:Button x="693" y="320" label="Eliminar" click="eliminar()"/>
-	<mx:Canvas x="10" y="350" width="755" height="100" borderStyle="solid">
-		<mx:Label x="10" y="10" text="Editar" id="editarText_lf" visible="false"/>
-		<mx:Label x="54" y="10" text="{seccion.nombre}" id="editar_lf" visible="false"/>
-		<mx:Label x="10" y="10" text="Agregar nueva Seccion" id="agregar_lf"/>
-		<mx:Label x="10" y="40" text="Nombre"/>
-		<mx:TextInput x="85" y="38" maxChars="50" width="450" id="nombre_ti"/>
-		<mx:Label x="10" y="68" text="Descripcion"/>
-		<mx:TextInput x="85" y="66" maxChars="50" width="450" id="descripcion_ti"/>
-		<mx:Button x="673" y="66" label="Guardar" click="guardar()"/>
-		<mx:Button x="590" y="66" label="Cancelar" click="clean()"/>
+	<mx:LinkButton label="Todas" click="{todas.visible=true;nueva.visible=false;todas_btn.visible=false;agregar_btn.visible=true;}" id="todas_btn" visible="false" color="#0000FF"/>
+	<mx:LinkButton label="Agregar" click="{todas.visible=false;nueva.visible=true;todas_btn.visible=true;agregar_btn.visible=false;clean()}" id="agregar_btn" color="#0000FF"/>
+	<mx:Canvas label="Todas" width="100%" height="100%" id="todas" y="30">
+		<mx:DataGrid x="0" y="0" width="855" height="390" dataProvider="{secciones_ac}" id="tabla">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Seccion" dataField="nombre" sortable="false"/>
+				<mx:DataGridColumn headerText="Categoria" dataField="nombre1" sortable="false"/>
+				<mx:DataGridColumn headerText="Descripcion" dataField="descripcion" sortable="false"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Button x="693" y="398" label="Editar" width="72" click="editar()"/>
+		<mx:Button x="773" y="398" label="Eliminar" click="eliminar()"/>
+	</mx:Canvas>
+	<mx:Canvas label="Nueva" width="100%" height="430" id="nueva" visible="false" y="30">
+		<mx:Label x="9" y="2" text="Nombre Seccion"/>
+		<mx:TextInput x="110" y="0" maxChars="50" width="431" id="nombre_ti"/>
+		<mx:Label x="10" y="28" text="Descripcion"/>
+		<mx:TextInput x="110" y="26" maxChars="50" width="431" id="descripcion_ti"/>
+		<mx:Label x="10" y="54" text="Categorias"/>
+		<mx:VBox x="10" y="80" height="307" width="833" id="Categorias_list">
+			<mx:HBox width="100%" id="HBox0">
+				<mx:Label text="Nombre"/>
+				<mx:Spacer width="308"/>
+				<mx:Label text="Descripción"/>
+				<mx:Spacer width="290"/>
+				<mx:Label text="Porcentaje"/>
+			</mx:HBox>
+			<mx:Button label="Nueva" width="72" click="crearCategorias()" id="nuevaCategoria_btn"/>
+		</mx:VBox>
+		<mx:Button x="685" y="395" label="Guardar" width="75" click="guardar()"/>
+		<mx:Button x="768" y="395" label="Cancelar" click="clean()"/>
 	</mx:Canvas>
 </mx:Panel>

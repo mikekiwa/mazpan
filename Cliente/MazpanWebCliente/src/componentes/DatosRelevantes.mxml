@@ -16,7 +16,7 @@
 			[Bindable]
 			private var especificacion_ac:Array = new Array();
 			[Bindable]
-			private var especificaciones_ac:ArrayCollection = new ArrayCollection();
+			public var especificaciones_ac:ArrayCollection = new ArrayCollection();
 			
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void

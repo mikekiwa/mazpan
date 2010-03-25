@@ -6,7 +6,7 @@
 		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
 	</mx:WebService>
 	<mx:WebService id="EvaluacionService" 	wsdl="{index.URL + 'EvaluacionService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getSecciones" 		result="getSeccionesResult(event)"		fault="ErrorFaultHandler(event, 'getSecciones')"/>
+		<mx:operation name="getNombreSecciones" result="getSeccionesResult(event)"		fault="ErrorFaultHandler(event, 'getNombreSecciones')"/>
 		<mx:operation name="getSociosDe" 		result="getSociosDeResult(event)"		fault="ErrorFaultHandler(event, 'getSociosDe')"/>
 		<mx:operation name="editClienteSeccion" result="guardarResult(event)"			fault="ErrorFaultHandler(event, 'editClienteSeccion')"/>
 		<mx:operation name="addClienteSeccion" 	result="guardarResult(event)"			fault="ErrorFaultHandler(event, 'addClienteSeccion')"/>
@@ -48,13 +48,13 @@
             private function cargar():void
             {
             	socios_ac = new Array;
-				EvaluacionService.getSociosDe(local_cb.selectedItem.WhsCode);
+				EvaluacionService.getSociosDe(index.usuario,local_cb.selectedItem.WhsCode);
             }
             private function getSociosDeResult(event:ResultEvent):void
             {
             	socios_ac = event.result.Tables.Socios.Rows.source as Array;
             	secciones_ac = new Array;
-           		EvaluacionService.getSecciones();
+           		EvaluacionService.getNombreSecciones(index.usuario);
 			}
 			private function getSeccionesResult(event:ResultEvent):void
 			{

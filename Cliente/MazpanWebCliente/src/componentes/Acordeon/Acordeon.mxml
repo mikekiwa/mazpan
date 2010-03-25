@@ -88,17 +88,17 @@
 					menuLocales.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuLocales);
 				}
-				if(niveles[35]=='1')//ocupa 7 bit
+				if(niveles[35]=='1')//ocupa 5 bit
 				{
 					var menuConfigurarEvaluacion:MenuConfigurarEvaluacion = new MenuConfigurarEvaluacion();
 					menuConfigurarEvaluacion.privilegios(niveles,36);
 					menuConfigurarEvaluacion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuConfigurarEvaluacion);
 				}
-				if(niveles[42]=='1')//ocupa 4 bit
+				if(niveles[40]=='1')//ocupa 7 bit
 				{
 					var menuEvaluacion:MenuEvaluacion = new MenuEvaluacion();
-					menuEvaluacion.privilegios(niveles,43);
+					menuEvaluacion.privilegios(niveles,41);
 					menuEvaluacion.addEventListener(ComplexEvent.COMPLEX_CLICK, reDireccionar);
 					accordion.addChild(menuEvaluacion);
 				}

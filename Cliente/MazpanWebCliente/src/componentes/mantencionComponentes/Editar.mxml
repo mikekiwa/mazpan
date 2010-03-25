@@ -7,7 +7,8 @@
 	</mx:WebService>
 
 	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="addElemento" result="addElementoResult(event)" fault="ErrorFaultHandler(event, 'addElemento')"/>
+		<mx:operation name="editElemento" result="editElementoResult(event)" fault="ErrorFaultHandler(event, 'editElemento')"/>
+		<mx:operation name="getElemento" result="getElementoResult(event)" fault="ErrorFaultHandler(event, 'getElemento')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -16,6 +17,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import componentes.mantencionAgentesExternos.AgentesExternos;
 			import flash.sampler.NewObjectSample;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
@@ -24,7 +26,7 @@
 			import eventos.ComplexEvent;
 			
 			[Bindable]
-			public static var nombre:String = "AgregarComponente";
+			public static var nombre:String = "EditarState";
 			
 			[Bindable]
 			private var tipoComponente_ac:ArrayCollection = new ArrayCollection();
@@ -34,12 +36,14 @@
 			private var especificaciones_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
 			private var especificacion_ac:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var component:Object;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
+            	agregar_btn.enabled = true;
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
-			
 			private function init():void
 			{
 				CombosService.TipoComponente();
@@ -57,7 +61,7 @@
             }
 			private function onClick(event:String):void
 			{
-				if(event=="agregar")
+				if(event=="editar")
 				{
 					agregar_btn.enabled = false;
 					var componente:Object = new Object();
@@ -81,15 +85,13 @@
 					
 					//Hoja 2
 					if(fabricante_cmp!=null) componente.fabricante = fabricante_cmp.getFabricante();
+					else componente.fabricante = component.fabricante
 					
 					//Hoja 3
 					if(datosRelevantes_cmp!=null) componente.especificaciones = datosRelevantes_cmp.getEspecificaciones();
+					else componente.especificaciones = component.especificaciones;
 					
-					//Hoja 4
-					if(actividadesMantencion_cmp!=null) componente.mantenciones = actividadesMantencion_cmp.getMantenciones();
-					
-					
-					ElementoService.addElemento(index.usuario, componente);
+					ElementoService.editElemento(index.usuario, componente);
 				}
 				else
 				{
@@ -111,36 +113,14 @@
 				if(actividadesMantencion_cmp!=null) actividadesMantencion_cmp.clean();
 				tabNavigator.selectedIndex=0;
 			}
-			private function addElementoResult(event:ResultEvent):void
+			private function editElementoResult(event:ResultEvent):void
             {
-            	var result:int = event.result as int;
-				
-				if(result == 1)
+            	if(event.result == 1)
 				{
 					clean();
 					dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, "", nombre, null));
 				}
-				else if(result==0)
-				{
-					Alert.show("Lo siento, el codigo ya exite");
-				}
-				else if(result==-1)
-				{
-					Alert.show("Lo siento, es imposible proceder por ahora");
-				}
-				else if(result==-2)
-				{
-					Alert.show("Lo siento, solo fueron guardados los datos basicos y fabricante del componente");
-				}
-				else if(result==-3)
-				{
-					Alert.show("Lo siento, solo fueron guardados los datos basicos, fabricante y especificaciones del componente");
-				}
-				else if(result==-4)
-				{
-					Alert.show("Lo siento, imposible crear el plan de mantencion para el componente");
-				}
-				else 
+				else
 				{
 					Alert.show("No es posible reponder a su peticion por el momento\nIntentelo de nuevo ó mas tarde");
 				}
@@ -151,12 +131,21 @@
 				if(tipo_cb.text=="Otro"){tipo_cb.visible=false; tipo_ti.visible=true; cancelarTipo_btn.visible=true;} 
 				else{tipo_cb.visible=true; tipo_ti.visible=false; cancelarTipo_btn.visible=false;}
 			}
-			
+			public function parametros(_cmp:Object):void
+			{
+//hacer esto despues de cargar los tipo de componentes y variables de sistema
+//no se sis se puedea porq no se en que momento podria llegar a la funcion el parametro, y quisa no carge el elemento.				
+				ElementoService.getElemento(_cmp);
+				agregar_btn.enabled = true;
+			}
+			private function getElementoResult(event:ResultEvent):void
+			{
+				component = event.result as Object;
+			}
 			private function revisar():void
 			{
-				if(codigo_ti.length>0 && puestaMarcha_df.text.length>0 && vidaUtil_ti.text.length>0) agregar_btn.enabled=true;
-				else agregar_btn.enabled=false;
-//aqui se deben revisar todos lo parametros requeridos para las otra partes del sistema
+				if(vidaUtil_ti.text.length>0) agregar_btn.enabled = true;
+				else agregar_btn.enabled = false;
 			}
 		]]>
 	</mx:Script>
@@ -164,36 +153,36 @@
 	<mx:TabNavigator y="0" width="100%" height="420" id="tabNavigator" horizontalCenter="0" selectedIndex="1">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%">
 			<mx:Label x="135.5" y="41" text="Tipo Componente"/>
-			<mx:ComboBox x="268.5" y="41" id="tipo_cb" dataProvider="{tipoComponente_ac}" change="actualizarTipo();revisar()"/>
-			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50" change="revisar()"/>
+			<mx:ComboBox x="268.5" y="41" id="tipo_cb" dataProvider="{tipoComponente_ac}" change="actualizarTipo()" text="{component.tipo}"/>
+			<mx:TextInput x="268.5" y="41" width="319" id="tipo_ti" visible="false" maxChars="50"/>
 			<mx:Image x="595.5" y="41" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
 			<mx:Label x="135.5" y="79" text="Codigo (*)"/>
-			<mx:TextInput x="268.5" y="77" id="codigo_ti" maxChars="20" change="revisar()"/>
+			<mx:TextInput x="268.5" y="77" id="codigo_ti" maxChars="20" text="{component.codigo}" editable="false"/>
 			<mx:Label x="135.5" y="114" text="Sistema"/>
-			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}" change="revisar()"/>
+			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}" text="{component.sistema}"/>
 			<mx:Label x="137.5" y="150" text="Nombre"/>
-			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" change="revisar()"/>
+			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" text="{component.nombre}"/>
 			<mx:Label x="137.5" y="184" text="Costo"/>
-			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti" change="revisar()"/>
+			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti" text="{component.costo}"/>
 			<mx:Label x="135.5" y="212" text="Puesta en Marcha (*)"/>
-			<ns1:myDateField x="268.5" y="210" width="160" id="puestaMarcha_df" change="revisar()"/>
+			<mx:TextInput x="268.5" y="210" width="160" id="puestaMarcha_df" editable="false" text="{component.puestaMarcha}"/>
 			<mx:Label x="135.5" y="242" text="Horas vida util (*)"/>
-			<mx:TextInput x="268.5" y="240" restrict="0-9" id="vidaUtil_ti" change="revisar()"/>
+			<mx:TextInput x="268.5" y="240" restrict="0-9" id="vidaUtil_ti" text="{component.horasVidaUtil}" change="revisar()"/>
 			<mx:Label x="135.5" y="277" text="Descripcion"/>
-			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78" change="revisar()"/>
+			<mx:TextArea x="268.5" y="276" width="349" maxChars="100" id="descripcion_ta" height="78" text="{component.descripcion}"/>
 			<mx:Label x="328" y="362" text="(*) Dato Obligatorio"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos del Fabricante" width="100%" height="100%">
-			<ns1:Fabricante id="fabricante_cmp" x="196.5" y="72"/>
+			<ns1:Fabricante id="fabricante_cmp" x="196.5" y="72" fabricante_ob="{component.fabricante}"/>
 		</mx:Canvas>
 		<mx:Canvas label="Datos Relevantes" width="100%" height="100%" >
-			<ns1:DatosRelevantes id="datosRelevantes_cmp"/>
+			<ns1:DatosRelevantes id="datosRelevantes_cmp" especificaciones_ac="{component.especificaciones}"/>
 		</mx:Canvas>
 		<mx:Canvas label="Actividades de Mantencion" width="100%" height="100%">
-			<ns1:ActividadesMantencion id="actividadesMantencion_cmp"/>
+			<ns1:VerActividadesMantencion id="actividadesMantencion_cmp" mantenciones_ac="{component.mantenciones}" codigoElemento="{component.codigo}"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
 	
-	<mx:Button x="610" y="428" label="Aceptar" click="onClick('agregar')" id="agregar_btn" enabled="false"/>
+	<mx:Button x="610" y="428" label="Aceptar" click="onClick('editar')" id="agregar_btn" enabled="false"/>
 	<mx:Button x="690" y="428" label="Cancelar" click="onClick('cancelar')" id="cancelar_btn"/>
 </mx:Canvas>

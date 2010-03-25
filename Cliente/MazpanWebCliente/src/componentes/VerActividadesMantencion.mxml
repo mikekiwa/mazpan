@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="770" height="387">
+	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="delMantencion" fault="ErrorFaultHandler(event, 'delMantencion')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.graphics.Stroke;
+			import mx.rpc.events.FaultEvent;
+			import mx.collections.ArrayCollection;
+			
+			public static const nombre:String = "VerActividadesMantencion";
+		
+			[Bindable]
+			public var mantenciones_ac:ArrayCollection = new ArrayCollection();
+			public var codigoElemento:String;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function getMantenciones():ArrayCollection
+			{
+				return mantenciones_ac;
+			}
+			public function clean():void
+			{
+				mantenciones_ac = new ArrayCollection;
+			}
+			public function eliminar():void
+			{
+				Alert.yesLabel = "Si";
+            	Alert.noLabel = "No";
+            	Alert.show("¿Está seguro que desea eliminar los datos seleccionados?","Alerta: Operarción NO Reversible", 3, this, eliminarClick);
+			}
+			private function eliminarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{	
+					for(var i:int=mantenciones_ac.length-1; i>=0; i--)
+					{
+						if(mantenciones_ac[i].borrar)
+						{
+							ElementoService.delMantencion(mantenciones_ac[i].id,codigoElemento);
+							mantenciones_ac.removeItemAt(i);
+						}
+					}
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label x="26" y="10" text="Lista de Actividades de Mantención" fontWeight="bold"/>
+	<mx:DataGrid x="10" y="26" width="750" height="321" id="mantenciones_dg" dataProvider="{mantenciones_ac}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingRight="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.borrar=!data.borrar}" selected="{data.borrar}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Actividad" 			dataField="actividad" width="243" sortable="false"/>
+			<mx:DataGridColumn headerText="Tipo de Mantencion" 	dataField="mantencion" width="243" sortable="false"/>
+			<mx:DataGridColumn headerText="Frecuencia" 			dataField="frecuencia" width="243" sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="688" y="355" click="eliminar()" label="Eliminar"/>
+</mx:Canvas>

@@ -18,7 +18,7 @@
 			[Bindable]
 			private var componentesSistema_ac:Array = new Array();
 			[Bindable]
-			private var componentes_ac:ArrayCollection = new ArrayCollection();
+			public var componentes_ac:ArrayCollection = new ArrayCollection();
 			private var superClass:String;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void

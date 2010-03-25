@@ -201,18 +201,6 @@
 				<ns14:Items id="items_cmp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="Categorias">
-			<mx:RemoveChild target="{login}"/>
-			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns14:Categorias id="categorias_cmp"/>
-			</mx:AddChild>
-		</mx:State>
-		<mx:State name="ItemCategoria">
-			<mx:RemoveChild target="{login}"/>
-			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns14:ItemCategoria id="itemCategoria_cmp"/>
-			</mx:AddChild>
-		</mx:State>
 		<mx:State name="Secciones">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
@@ -235,6 +223,12 @@
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
 				<ns14:Evaluar id="evaluar_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Evaluaciones">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns14:Evaluaciones id="evaluaciones_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
@@ -327,12 +321,11 @@
 					if(event.stateDestination == Informe.nombre) informe_cmp.init();
 					if(event.stateDestination == PetroleoLuz.nombre) petroleoLuz_cmp.init();
 					if(event.stateDestination == Items.nombre) items_cmp.init();
-					if(event.stateDestination == Categorias.nombre) categorias_cmp.init();
-					if(event.stateDestination == ItemCategoria.nombre) itemCategoria_cmp.init();
 					if(event.stateDestination == Secciones.nombre) secciones_cmp.init();
 					if(event.stateDestination == ItemSeccion.nombre) itemSeccion_cmp.init();
 					if(event.stateDestination == TrabajadoresSeccion.nombre) trabajadoresSeccion_cmp.init();
 					if(event.stateDestination == Evaluar.nombre) evaluar_cmp.init();
+					if(event.stateDestination == Evaluaciones.nombre) evaluaciones_cmp.init();
 				}
 				else
 				{
@@ -383,5 +376,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 01.10.04.10"/>
+	<mx:Label x="525" y="10" text="Versión 07.25.04.10"/>
 </mx:Application>
