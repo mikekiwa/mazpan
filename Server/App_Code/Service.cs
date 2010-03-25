@@ -127,6 +127,7 @@ public class Service : System.Web.Services.WebService
 
         return dt;
     }
+    
     [WebMethod]
     public Flujo getFlujo(string sucursal, int ano)
     {
@@ -140,7 +141,7 @@ public class Service : System.Web.Services.WebService
 
         f.FLUJOMAR = flujo(sucursal, 3, ano);
         f.PPTOMAR = PresupuestoMensual(sucursal, 2, ano);
-
+        
         f.FLUJOABR = flujo(sucursal, 4, ano);
         f.PPTOABR = PresupuestoMensual(sucursal, 3, ano);
 
@@ -167,7 +168,7 @@ public class Service : System.Web.Services.WebService
 
         f.FLUJODIC = flujo(sucursal, 12, ano);
         f.PPTODIC = PresupuestoMensual(sucursal, 11, ano);
-
+        
         return f;
     }
 
@@ -182,17 +183,68 @@ public class Service : System.Web.Services.WebService
         if(f2.Month>9) ft = f2.Year + "-" + f2.Month + "-01 00:00.000";
         else ft = f2.Year + "-0" + f2.Month + "-01 00:00.000";
 
-        string query = "SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000" +
+        string query;
+        if (sucursal.CompareTo("00") == 0)
+        {
+            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000" +
                        " FROM [Maspan].[dbo].[OACT] T1" +
                        " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
                        " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item"+
-                       " WHERE RefDate>='"+fi+"' AND RefDate<'"+ft+"'";
-        if (sucursal.CompareTo("00") != 0) { query += " AND T1.Segment_1='" + sucursal + "'"; }
-        query  += " GROUP BY itemName";
-
+                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
+                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY itemName";
+        }
+        else
+        {
+            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000, T1.Segment_1" +
+                       " FROM [Maspan].[dbo].[OACT] T1" +
+                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
+                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
+                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY itemName, T1.[Segment_1]";
+        }
         DataTable dt = new DataTable();
         dt.TableName = "MES";
+
+        SqlConnection cn = new SqlConnection(url);
+        SqlDataAdapter da = new SqlDataAdapter();
+
+        cn.Open();
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try { da.Fill(dt); }
+        finally { cn.Close(); }
+
+        return dt;
+    }
+
+    public DataTable PresupuestoMensual(string sucursal, int mes, int ano)
+    {
+        string query;
+        if (sucursal.CompareTo("00") == 0)
+        {
+            query = " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
+                     " FROM 		[Maspan].[dbo].BGT1					T1 " +
+                     " JOIN 		[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                     " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                     " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                     " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+                     " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' " +
+                     " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName";
+        }
+        else
+        {
+            query = " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000, T5.Segment_1 " +
+                     " FROM 		[Maspan].[dbo].BGT1					T1 " +
+                     " JOIN 		[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                     " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                     " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                     " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+                     " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' " +
+                     " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName,T5.Segment_1";
+        }
+
+        DataTable dt = new DataTable();
+        dt.TableName = "PresupuestoMensual";
 
         SqlConnection cn = new SqlConnection(url);
         SqlDataAdapter da = new SqlDataAdapter();
@@ -288,35 +340,6 @@ public class Service : System.Web.Services.WebService
         if (results < cuentas.Count) return -1;
         if (results == cuentas.Count) return 1;
         return 0;
-    }
-	
-    [WebMethod]
-	public DataTable PresupuestoMensual(string sucursal, int mes, int ano)
-    {
-        string query =  " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
-                        " FROM 		[Maspan].[dbo].BGT1					T1 " +
-                        " JOIN 		[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
-                        " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
-                        " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
-                        " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
-                        " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' " +
-                        " AND 		Line_ID='" + mes + "' ";
-        if (sucursal.CompareTo("00") != 0) { query += " AND T5.Segment_1='" + sucursal + "'"; }
-        query  +=       " GROUP BY 	T4.ItemName ";
-
-        DataTable dt = new DataTable();
-        dt.TableName = "PresupuestoMensual";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
-
-        cn.Open();
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
     }
 
     [WebMethod]

@@ -11,6 +11,8 @@ public class Categoria
     private string n;//nombre
     private string d;//descripcion
     private string p;//porcentaje
+    private int it;//items
+    private int c;//cumplidos
 
 	public Categoria()
 	{
@@ -35,5 +37,15 @@ public class Categoria
     {
         set { p = value; }
         get { return p; }
+    }
+    public int items
+    {
+        set { it = value; }
+        get { return it; }
+    }
+    public int cumplidos
+    {
+        set { c = value; }
+        get { return c; }
     }
 }

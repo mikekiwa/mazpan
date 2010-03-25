@@ -78,6 +78,19 @@ public class ElementoService : System.Web.Services.WebService
 
         return 0;//EOC
     }
+
+    [WebMethod(Description = "Permite editar un elemento")]
+    public int editElemento(Usuario u, Elemento e)
+    {
+        if (existe(e.codigo))
+        {
+            if (e.superClass.CompareTo("CMP") == 0) return editComponente(u, e);
+            if (e.superClass.CompareTo("MAQ") == 0) return editMaquina(u, e);
+            return 2;
+        }
+
+        return 0;//EOC
+    }
     
 
     /// <summary>
@@ -229,7 +242,7 @@ public class ElementoService : System.Web.Services.WebService
             else return -2;
         else return -1;
     }
-
+    
 
     /// <summary>
     /// return 1 sí la insercion fue exitosa, 0 EOC
@@ -240,6 +253,8 @@ public class ElementoService : System.Web.Services.WebService
     public int addUnion(List<Elemento> elementos, string codigo)
     {
         int result = 0;
+
+        Ejecutar(" DELETE [PracticaDb].[dbo].[Union] WHERE codigo='"+codigo+"' ");
 
         foreach (Elemento e in elementos)
         {
@@ -291,6 +306,8 @@ public class ElementoService : System.Web.Services.WebService
     {
         int result = 0;
 
+        Ejecutar(" DELETE [PracticaDb].[dbo].[Especificaciones] WHERE codigo='"+codigo+"' ");
+
         foreach (Especificacion e in especificaciones)
         {
             result += Ejecutar(" INSERT INTO [PracticaDb].[dbo].[Especificaciones](especificacion, valor, codigo) " +
@@ -312,6 +329,7 @@ public class ElementoService : System.Web.Services.WebService
     {
         int orden = 0;
         int result = 0;
+
         foreach (Mantencion m in mantenciones)
         {
             orden++;
@@ -340,7 +358,12 @@ public class ElementoService : System.Web.Services.WebService
             DateTime fechas_planificada = new DateTime();
             if (m.frecuencia == "Diario") fechas_planificada = t.AddDays(1);
             if (m.frecuencia == "Semanal") fechas_planificada = t.AddDays(7);
+            if (m.frecuencia == "Quincenal") fechas_planificada = t.AddDays(15);
             if (m.frecuencia == "Mensual") fechas_planificada = t.AddMonths(1);
+            if (m.frecuencia == "Bimestral") fechas_planificada = t.AddMonths(2);
+            if (m.frecuencia == "Trimestral") fechas_planificada = t.AddMonths(3);
+            if (m.frecuencia == "Cuatrimestral") fechas_planificada = t.AddMonths(4);
+            if (m.frecuencia == "Semestral") fechas_planificada = t.AddMonths(6);
             if (m.frecuencia == "Anual") fechas_planificada = t.AddYears(1);
 
             //Con esto evitamos que nos aparezca un sabado o domingo en el plan
@@ -349,8 +372,7 @@ public class ElementoService : System.Web.Services.WebService
 
             string planificada = fechas_planificada.Year + "-" + fechas_planificada.Month + "-" + fechas_planificada.Day + " 00:00.000";
 
-            result += Ejecutar(" INSERT INTO [PracticaDb].[dbo].[Plan]([planificada],[realizada],[frecuencia],[actividad],[codigo])"    +
-                               " VALUES('" + planificada + "','','" + m.frecuencia + "','"+m.actividad+"','" + codigo + "')"            );
+            result += Ejecutar(" INSERT INTO [PracticaDb].[dbo].[Plan]([planificada],[realizada],[frecuencia],[actividad],[codigo]) VALUES('" + planificada + "','','" + m.frecuencia + "','"+m.actividad+"','" + codigo + "')" );
         }
 
         if (mantenciones.Count == result) return 1;
@@ -414,8 +436,13 @@ public class ElementoService : System.Web.Services.WebService
             DateTime t = DateTime.Now;
             DateTime fechas_planificada = new DateTime();
             if (m.frecuencia == "Diario") fechas_planificada = t.AddDays(1);
-            if (m.frecuencia == "Semanal") fechas_planificada = t.AddDays(7);
+            if (m.frecuencia == "Semanal") fechas_planificada = t.AddDays(7); 
+            if (m.frecuencia == "Quincenal") fechas_planificada = t.AddDays(15);
             if (m.frecuencia == "Mensual") fechas_planificada = t.AddMonths(1);
+            if (m.frecuencia == "Bimestral") fechas_planificada = t.AddMonths(2);
+            if (m.frecuencia == "Trimestral") fechas_planificada = t.AddMonths(3);
+            if (m.frecuencia == "Cuatrimestral") fechas_planificada = t.AddMonths(4);
+            if (m.frecuencia == "Semestral") fechas_planificada = t.AddMonths(6);
             if (m.frecuencia == "Anual") fechas_planificada = t.AddYears(1);
 
             if (fechas_planificada.DayOfWeek.ToString().CompareTo("Saturday")==0) fechas_planificada = fechas_planificada.AddDays(2);
@@ -553,6 +580,7 @@ public class ElementoService : System.Web.Services.WebService
         while (reader.Read())
         {
             Mantencion actividad = new Mantencion();
+            if (!reader.IsDBNull(0)) actividad.id = reader.GetInt32(0) + ""; else actividad.id = null;
             if (!reader.IsDBNull(1)) actividad.actividad = reader.GetString(1); else actividad.actividad = null;
             if (!reader.IsDBNull(3)) actividad.mantencion = reader.GetString(3); else actividad.mantencion = null;
             if (!reader.IsDBNull(4)) actividad.frecuencia = reader.GetString(4); else actividad.frecuencia = null;
@@ -561,6 +589,59 @@ public class ElementoService : System.Web.Services.WebService
         }
         cn.Close();
         return salida;
+    }
+
+    [WebMethod]
+    public void delMantencion(string id, string codigo)
+    {
+        Ejecutar(" DELETE [PracticaDb].[dbo].[Actividades] WHERE id='"+id+"' ");
+        Ejecutar(" DELETE [PracticaDb].[dbo].[Plan] WHERE planificada>realizada AND codigo='" + codigo + "' ");
+    }
+
+
+
+    /// <summary>
+    /// retorna 1 si se completa la insercion
+    ///        -1 si no se pueden insertar los datos basicos de la maquina
+    ///        -2 si no se puede insertar especificaciones de la maquina
+    ///        -3 si no se puede insertar mantenciones de la maquina
+    ///        -4 si no se puede insertar actividades de mantencion de la maquina
+    ///        -5 si no se puede insertar los elemento subordinados de la maquina
+    /// </summary>
+    /// <param name="c">El componente a insertar</param>
+    /// <returns></returns>
+    [WebMethod]
+    public int editMaquina(Usuario u, Elemento m)
+    {
+        String query = " UPDATE [PracticaDb].[dbo].[Elemento] SET tipo='"+m.tipo+"',nombre='"+m.nombre+"',ubicacion='"+m.ubicacion+"',estado='"+m.estado+"',condicionRecepcion='"+m.condicionRecepcion+"',costo='"+m.costo+"',horasVidaUtil='"+m.horasVidaUtil+"',horasActuales='"+m.horasActuales+"',horasDiariasPromedio='"+m.horasDiariasPromedio+"',descripcion='"+m.descripcion+"',marca='"+m.fabricante.marca+"',ano='"+m.fabricante.ano+"',pais='"+m.fabricante.pais+"',modelo='"+m.fabricante.modelo+"',serie='"+m.fabricante.serie+"',fabricante='"+m.fabricante.fabricante+"' WHERE codigo='"+m.codigo+"' ";
+
+        if (Ejecutar(query) == 1)//si insercion exitosa
+            if (addEspecificaciones(m.especificaciones, m.codigo) == 1)//si insercion exitosa
+                if (addUnion(m.subordinados, m.codigo) == 1) return 1;
+                else return -5;
+            else return -2;
+        else return -1;
+    }
+
+
+    /// <summary>
+    /// retorna 1 si se completa la insercion
+    ///        -1 si no se pueden insertar los datos basicos del componente
+    ///        -2 si no se puede insertar especificaciones del componente
+    ///        -3 si no se puede insertar mantenciones del componente
+    ///        -4 si no se puede insertar actividades de mantencion del componente
+    /// </summary>
+    /// <param name="c">El componente a insertar</param>
+    /// <returns></returns>
+    [WebMethod]
+    public int editComponente(Usuario u, Elemento c)
+    {
+        string query = " UPDATE [PracticaDb].[dbo].[Elemento] SET [tipo]='" + c.tipo + "',[sistema]='" + c.sistema + "',[nombre]='" + c.nombre + "',[costo]='" + c.costo + "',[horasVidaUtil]='" + c.horasVidaUtil + "',[descripcion]='" + c.descripcion + "',[marca]='" + c.fabricante.marca + "',[ano]='" + c.fabricante.ano + "',[pais]='" + c.fabricante.pais + "',[modelo]='" + c.fabricante.modelo + "',[serie]='" + c.fabricante.serie + "',[fabricante]='" + c.fabricante.fabricante + "' WHERE codigo='"+c.codigo+"'";
+
+        if (Ejecutar(query) == 1)//si insercion exitosa
+            if (addEspecificaciones(c.especificaciones, c.codigo) == 1) return 1;
+            else return -2;
+        else return -1;
     }
 }
 
