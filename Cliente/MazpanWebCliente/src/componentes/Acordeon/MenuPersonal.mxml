@@ -35,6 +35,6 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Personal" width="100" click="goState(Personal.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Personas" width="100" click="goState(Personal.nombre)"/>
 	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Técnicos" width="100" click="goState(Tecnicos.nombre)"/>
 </mx:Canvas>

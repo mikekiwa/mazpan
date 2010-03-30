@@ -18,16 +18,12 @@
 			private var nombre:String = "Evaluacion";
 			
 			[Bindable]
-			private var visibles:Array = [false,false,false,false,false,false];
+			private var visibles:Array = [false,false];
 			
 			public function privilegios(privilegios:Array, inicio:int):void
 			{
 				if(privilegios[inicio]=='1') visibles[0] = true;
 				if(privilegios[inicio+1]=='1') visibles[1] = true;
-				if(privilegios[inicio+2]=='1') visibles[2] = true;
-				if(privilegios[inicio+3]=='1') visibles[3] = true;
-				if(privilegios[inicio+4]=='1') visibles[4] = true;
-				if(privilegios[inicio+5]=='1') visibles[5] = true;
 			}
 			private function goState(destino:String):void
 			{
@@ -38,8 +34,4 @@
 	
 	<mx:LinkButton visible="{visibles[0]}" x="10" y="10"  label="Evaluar" 		width="100" click="goState(Evaluar.nombre)"/>
 	<mx:LinkButton visible="{visibles[1]}" x="10" y="40"  label="Evaluaciones" 	width="100" click="goState(Evaluaciones.nombre)"/>
-	<mx:LinkButton visible="{visibles[2]}" x="10" y="70"  label="opcion1" 		width="100" click="goState(Evaluaciones.nombre)"/>
-	<mx:LinkButton visible="{visibles[3]}" x="10" y="100"  label="opcion2" 		width="100" click="goState(Evaluaciones.nombre)"/>
-	<mx:LinkButton visible="{visibles[4]}" x="10" y="130"  label="opcion3" 		width="100" click="goState(Evaluaciones.nombre)"/>
-	<mx:LinkButton visible="{visibles[5]}" x="10" y="160"  label="opcion4" 		width="100" click="goState(Evaluaciones.nombre)"/>
 </mx:Canvas>
