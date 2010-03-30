@@ -39,7 +39,7 @@
 					var nuevo:Boolean = true;
 					for(j=0; j<evaluaciones_ac.length; j++)
 					{
-						if(evaluaciones_ac[j].CardName==aux[i].CardName) nuevo = false;
+						if(evaluaciones_ac[j].CardName==aux[i].CardName && evaluaciones_ac[j].fecha==aux[i].fecha) nuevo = false;
 					}
 					if(nuevo)
 					{
@@ -56,7 +56,7 @@
 						for(j=i; j<aux.length && continuar; j++)
 						{
 							//categoria
-							if(aux[i].CardCode==aux[j].CardCode)
+							if(aux[i].CardCode==aux[j].CardCode && aux[i].fecha==aux[j].fecha)
 							{
 								var categoria:Object = new Object;
 								categoria.tipo = 2;

@@ -37,7 +37,7 @@ package evaluacion
 			var columnas:Array;
 			var grid:Grid;
 			
-			
+			pdf.writeText(6,"\nNota: Items que cumple marcados con 'X'.");			
 			for(i=0; i<_evaluaciones.length; i++)
 			{
 				if(_evaluaciones[i].className=="myLabel")
@@ -114,7 +114,7 @@ package evaluacion
 			var fechaArr:Array = fecha.split('/');
 			var mes:int = fechaArr[1];
 			
-			fecha = fechaArr[0]+"/"+meses.getItemAt(mes-1)+"/"+fechaArr[2];
+			fecha = fechaArr[0]+"-"+meses.getItemAt(mes-1)+"-"+fechaArr[2];
 			
 			pdf.writeText(12,"Evaluacion "+fecha+"\n");
 			pdf.setFontSize(12);
@@ -126,6 +126,7 @@ package evaluacion
 			var grid:Grid;
 			var columnas:Array;
 			
+			pdf.writeText(6,"\nNota: Items que cumple marcados con 'X'.");			
 			pdf.writeText(8,"\n");
 			
 			
