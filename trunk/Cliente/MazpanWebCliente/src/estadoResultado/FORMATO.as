@@ -2,6 +2,8 @@ package estadoResultado
 {
 	import componentes.Atributo;
 	
+	import evaluacion.Items;
+	
 	import flash.display.DisplayObject;
 	
 	import mx.collections.ArrayCollection;
@@ -88,7 +90,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	for(var i:int=0; i<arreglo.length; i++)
 			{
 				pdf.addCell(deltaX, 5);
-				if(i!=0 && i!=5 && i!=6 && i!=13 && i!=14 && i!=15 && i!=25 && i!=26 && i!=30 && i!=32)
+				if(i!=ITEMS.VENTAS && i!=ITEMS.VENTASNETAS && i!=ITEMS.COSTOS && i!=ITEMS.COSTOSTOTALES && i!=ITEMS.MARGENCOMERCIAL && i!=ITEMS.GASTOSADMISTRATIVOS && i!=ITEMS.TOTALGASTOSADMINISTRATIVOS && i!=ITEMS.MARGENOPERACIONAL && i!=ITEMS.RESULTADOANTESDEIMPUESTO && i!=ITEMS.RESULTADO)
 				{
 					pdf.addCell(45, 5,arreglo[i].itemName, 1);
 					pdf.addCell(14, 5,arreglo[i].ENE, 1,0,Align.RIGHT);
@@ -109,7 +111,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 					pdf.addCell(13, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
 					
 				}
-				else if(i!=0 && i!=6 && i!=15)
+				else if(i!=ITEMS.VENTAS && i!=ITEMS.COSTOS && i!=ITEMS.GASTOSADMISTRATIVOS)
 				{
 					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
 					pdf.addCell(45, 5,arreglo[i].itemName, 1);
@@ -152,6 +154,12 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 			var array:Array;
 			array = e.split(".");
 			return array.join("");
+		}
+		private function parentesis(valor:String):String
+		{
+			var arreglo:Array = valor.split('-');
+			if(arreglo.length==1) return valor;
+			return "("+arreglo[1]+")";
 		}
 		public function generarTabla2(arreglo:Array,tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
 		{
@@ -204,26 +212,26 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	
           	for(var i:int=0; i<arreglo.length; i++)
 			{
+				var aux1:Number=0;
+				var aux2:Number=0;
+				var desv:Number=0;
+				
 				pdf.addCell(deltaX, 5);
-				if(i==31)
+				if(i==ITEMS.IMPUESTOALARENTA)
 				{
-					var aux1:Number=0;
-					var aux2:Number=0;
-					var desv:Number=0;
-						
 					pdf.addCell(50, 5,arreglo[i].itemName, 1);
-					if(meses==0){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
-					if(meses==1){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
-					if(meses==2){ pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
-					if(meses==3){ pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
-					if(meses==4){ pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
-					if(meses==5){ pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
-					if(meses==6){ pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
-					if(meses==7){ pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
-					if(meses==8){ pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
-					if(meses==9){ pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
-					if(meses==10){ pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
-					if(meses==11){ pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].DIC, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
+					if(meses==0){ pdf.addCell(20, 5,parentesis(arreglo[i].ENE+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
+					if(meses==1){ pdf.addCell(20, 5,parentesis(arreglo[i].ENE+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].FEB+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
+					if(meses==2){ pdf.addCell(20, 5,parentesis(arreglo[i].FEB+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].MAR+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
+					if(meses==3){ pdf.addCell(20, 5,parentesis(arreglo[i].MAR+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].ABR+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
+					if(meses==4){ pdf.addCell(20, 5,parentesis(arreglo[i].ABR+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].MAY+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
+					if(meses==5){ pdf.addCell(20, 5,parentesis(arreglo[i].MAY+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].JUN+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
+					if(meses==6){ pdf.addCell(20, 5,parentesis(arreglo[i].JUN+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].JUL+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
+					if(meses==7){ pdf.addCell(20, 5,parentesis(arreglo[i].JUL+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].AGO+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
+					if(meses==8){ pdf.addCell(20, 5,parentesis(arreglo[i].AGO+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].SEP+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
+					if(meses==9){ pdf.addCell(20, 5,parentesis(arreglo[i].SEP+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].OCT+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
+					if(meses==10){ pdf.addCell(20, 5,parentesis(arreglo[i].OCT+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].NOV+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
+					if(meses==11){ pdf.addCell(20, 5,parentesis(arreglo[i].NOV+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].DIC+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
 					
 					if(arreglo[i].PPTO==0) aux1 = 0;
 					else
@@ -234,33 +242,29 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 						desv = desv * 1000;
 						desv = Number(formato.format(Math.round(desv)/10)) as Number;
 					}
-					pdf.addCell(20, 5,arreglo[i].MES, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,desv+"", 1,0,Align.CENTER);
+					pdf.addCell(20, 5,parentesis(arreglo[i].MES+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(desv+""), 1,0,Align.CENTER);
 					pdf.addCell(20, 5);
 					
-					pdf.addCell(20, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].REAL+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].PPTO+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].DESV+""), 1,0,Align.RIGHT);
 				}
-				else if(i!=0 && i!=5 && i!=6 && i!=13 && i!=14 && i!=15 && i!=25 && i!=26 && i!=30 && i!=32)
+				else if(i!=ITEMS.VENTAS && i!=ITEMS.VENTASNETAS && i!=ITEMS.COSTOS && i!=ITEMS.COSTOSTOTALES && i!=ITEMS.MARGENCOMERCIAL && i!=ITEMS.GASTOSADMISTRATIVOS && i!=ITEMS.TOTALGASTOSADMINISTRATIVOS && i!=ITEMS.MARGENOPERACIONAL && i!=ITEMS.RESULTADOANTESDEIMPUESTO && i!=ITEMS.RESULTADO)
 				{
-					var aux1:Number=0;
-					var aux2:Number=0;
-					var desv:Number=0;
-						
 					pdf.addCell(50, 5,arreglo[i].itemName, 1);
-					if(meses==0){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
-					if(meses==1){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
-					if(meses==2){ pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
-					if(meses==3){ pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
-					if(meses==4){ pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
-					if(meses==5){ pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
-					if(meses==6){ pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
-					if(meses==7){ pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
-					if(meses==8){ pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
-					if(meses==9){ pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
-					if(meses==10){ pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
-					if(meses==11){ pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].DIC, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
+					if(meses==0){ pdf.addCell(20, 5,parentesis(arreglo[i].ENE+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
+					if(meses==1){ pdf.addCell(20, 5,parentesis(arreglo[i].ENE+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].FEB+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
+					if(meses==2){ pdf.addCell(20, 5,parentesis(arreglo[i].FEB+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].MAR+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
+					if(meses==3){ pdf.addCell(20, 5,parentesis(arreglo[i].MAR+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].ABR+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
+					if(meses==4){ pdf.addCell(20, 5,parentesis(arreglo[i].ABR+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].MAY+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
+					if(meses==5){ pdf.addCell(20, 5,parentesis(arreglo[i].MAY+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].JUN+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
+					if(meses==6){ pdf.addCell(20, 5,parentesis(arreglo[i].JUN+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].JUL+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
+					if(meses==7){ pdf.addCell(20, 5,parentesis(arreglo[i].JUL+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].AGO+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
+					if(meses==8){ pdf.addCell(20, 5,parentesis(arreglo[i].AGO+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].SEP+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
+					if(meses==9){ pdf.addCell(20, 5,parentesis(arreglo[i].SEP+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].OCT+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
+					if(meses==10){ pdf.addCell(20, 5,parentesis(arreglo[i].OCT+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].NOV+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
+					if(meses==11){ pdf.addCell(20, 5,parentesis(arreglo[i].NOV+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].DIC+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
 					
 					if(arreglo[i].PPTOMENSUAL[meses]==0) aux1 = 0;
 					else
@@ -271,35 +275,31 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 						desv = desv * 1000;
 						desv = Number(formato.format(Math.round(desv)/10)) as Number;
 					}
-					pdf.addCell(20, 5,arreglo[i].MES, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,desv+"", 1,0,Align.CENTER);
+					pdf.addCell(20, 5,parentesis(arreglo[i].MES+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(desv+""), 1,0,Align.CENTER);
 					pdf.addCell(20, 5);
 					
-					pdf.addCell(20, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].REAL+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].PPTO+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].DESV+""), 1,0,Align.RIGHT);
 					
 				}
-				else if(i!=0 && i!=6 && i!=15)
+				else if(i!=ITEMS.VENTAS && i!=ITEMS.COSTOS && i!=ITEMS.GASTOSADMISTRATIVOS)
 				{
-					var aux1:Number=0;
-					var aux2:Number=0;
-					var desv:Number=0;
-					
 					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
 					pdf.addCell(50, 5,arreglo[i].itemName, 1);
-					if(meses==0){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
-					if(meses==1){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
-					if(meses==2){ pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
-					if(meses==3){ pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
-					if(meses==4){ pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
-					if(meses==5){ pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
-					if(meses==6){ pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
-					if(meses==7){ pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
-					if(meses==8){ pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
-					if(meses==9){ pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
-					if(meses==10){ pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
-					if(meses==11){ pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].DIC, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
+					if(meses==0){ pdf.addCell(20, 5,parentesis(arreglo[i].ENE+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
+					if(meses==1){ pdf.addCell(20, 5,parentesis(arreglo[i].ENE+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].FEB+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
+					if(meses==2){ pdf.addCell(20, 5,parentesis(arreglo[i].FEB+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].MAR+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
+					if(meses==3){ pdf.addCell(20, 5,parentesis(arreglo[i].MAR+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].ABR+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
+					if(meses==4){ pdf.addCell(20, 5,parentesis(arreglo[i].ABR+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].MAY+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
+					if(meses==5){ pdf.addCell(20, 5,parentesis(arreglo[i].MAY+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].JUN+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
+					if(meses==6){ pdf.addCell(20, 5,parentesis(arreglo[i].JUN+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].JUL+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
+					if(meses==7){ pdf.addCell(20, 5,parentesis(arreglo[i].JUL+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].AGO+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
+					if(meses==8){ pdf.addCell(20, 5,parentesis(arreglo[i].AGO+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].SEP+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
+					if(meses==9){ pdf.addCell(20, 5,parentesis(arreglo[i].SEP+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].OCT+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
+					if(meses==10){ pdf.addCell(20, 5,parentesis(arreglo[i].OCT+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].NOV+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
+					if(meses==11){ pdf.addCell(20, 5,parentesis(arreglo[i].NOV+""), 1,0,Align.RIGHT);pdf.addCell(20, 5,parentesis(arreglo[i].DIC+""), 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
 					
 					if(arreglo[i].PPTO==0) aux1 = 0;
 					else
@@ -310,13 +310,13 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 						desv = desv * 1000;
 						desv = Number(formato.format(Math.round(desv)/10)) as Number;
 					}
-					pdf.addCell(20, 5,arreglo[i].MES, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,desv+"", 1,0,Align.CENTER);
+					pdf.addCell(20, 5,parentesis(arreglo[i].MES+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(desv+""), 1,0,Align.CENTER);
 					pdf.addCell(20, 5);
 					
-					pdf.addCell(20, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
-					pdf.addCell(20, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].REAL+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].PPTO+""), 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,parentesis(arreglo[i].DESV+""), 1,0,Align.RIGHT);
 					pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
 				}
 				else
@@ -330,7 +330,6 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 				
 				pdf.writeText(5,"\n");
 			}
-			
 			
           	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER2.pdf");
 		}

@@ -60,6 +60,16 @@
 			private function getLocalesResult(event:ResultEvent):void
             {
             	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	/*var plantaCurico:Object = new Object;
+            	plantaCurico.WhsCode = "P01";
+            	plantaCurico.WhsName = "Planta Curicó";
+            	var plantaTemuco:Object = new Object;
+            	plantaTemuco.WhsCode = "P02";
+            	plantaTemuco.WhsName = "Planta Temuco";
+            	locales_ac.push(plantaCurico);
+            	locales_ac.push(plantaTemuco);
+            	local_cb.dataProvider = locales_ac;*/
+            	
             	cargarTrabajadores();
             	lista_cmp.clean();
             }
@@ -75,11 +85,14 @@
 			}
 			private function cargar():void
 			{
+				guardar_btn.enabled = false;
+				lista_cmp.clean();
+				
 				if(trabajadores_ac.length>0)
 				{
+					guardar_btn.enabled = true;
 					items_ac = new Array;
 					categorias_ac = new Array;
-					lista_cmp.clean();
 					EvaluacionService.getCategoriasDe(index.usuario,trabajadores_cb.selectedItem.CardCode);
 				}
 			}

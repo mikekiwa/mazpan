@@ -253,8 +253,8 @@
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			//public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
+			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
+			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]
@@ -376,5 +376,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 13.14.04.10"/>
+	<mx:Label x="525" y="10" text="Versión 15.15.04.10"/>
 </mx:Application>

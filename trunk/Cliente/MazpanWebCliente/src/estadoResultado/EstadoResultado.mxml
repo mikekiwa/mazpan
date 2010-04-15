@@ -122,34 +122,9 @@
             	{
             		if(sucursales_ac[sucursales_cb.selectedIndex].Code!='01')//si no es curico
             		{
-		            	if(sucursales_ac[sucursales_cb.selectedIndex].Code!='23')//si no es hualpen
-	            		{
-			            	for(i=0; i<arreglo.length; i++)
-			            	{
-			            		if(arreglo[i].Segment_1==sucursales_ac[sucursales_cb.selectedIndex].Code) salida.push(arreglo[i]);
-			            	}
-			            }
-			            else//es hualpen asi que junto hualpen y '00'
+		            	for(i=0; i<arreglo.length; i++)
 			            {
-			            	for(i=0; i<arreglo.length; i++)
-			            	{
-			            		if(arreglo[i].Segment_1=="23" || arreglo[i].Segment_1=="00")
-				            	{
-				            		existe=false;
-			            			//Con es siguiente procedimiento procuro ver si el item ya existe en el arreglo de salida,
-			            			//ya que de existir es necesario sumar ambos valores.
-			            			for(j=0; j<salida.length && !existe; j++)
-			            			{
-			            				if(salida[j].itemName==arreglo[i].itemName)
-			            				{
-			            					existe = true;
-			            					salida[j].Column1 = int(salida[j].Column1)+int(arreglo[i].Column1);
-			            				}
-			            			}
-			            			if(!existe)
-			            				salida.push(arreglo[i]);
-			            		}
-			            	}
+			            	if(arreglo[i].Segment_1==sucursales_ac[sucursales_cb.selectedIndex].Code) salida.push(arreglo[i]);
 			            }
 		            }
 		            else//es curico asi que junto curico y rauquen
@@ -184,31 +159,31 @@
             }
             private function getFlujoResult(event:ResultEvent):void
             {
-            	var flujoEne:Array = event.result.FLUJOENE.Tables.MES.Rows.source as Array; flujoEne=trimSucursal(flujoEne);
-            	var flujoFeb:Array = event.result.FLUJOFEB.Tables.MES.Rows.source as Array; flujoFeb=trimSucursal(flujoFeb);
-            	var flujoMar:Array = event.result.FLUJOMAR.Tables.MES.Rows.source as Array; flujoMar=trimSucursal(flujoMar);
-            	var flujoAbr:Array = event.result.FLUJOABR.Tables.MES.Rows.source as Array; flujoAbr=trimSucursal(flujoAbr);
-            	var flujoMay:Array = event.result.FLUJOMAY.Tables.MES.Rows.source as Array; flujoMay=trimSucursal(flujoMay);
-            	var flujoJun:Array = event.result.FLUJOJUN.Tables.MES.Rows.source as Array; flujoJun=trimSucursal(flujoJun);
-            	var flujoJul:Array = event.result.FLUJOJUL.Tables.MES.Rows.source as Array; flujoJul=trimSucursal(flujoJul);
-            	var flujoAgo:Array = event.result.FLUJOAGO.Tables.MES.Rows.source as Array; flujoAgo=trimSucursal(flujoAgo);
-            	var flujoSep:Array = event.result.FLUJOSEP.Tables.MES.Rows.source as Array; flujoSep=trimSucursal(flujoSep);
-            	var flujoOct:Array = event.result.FLUJOOCT.Tables.MES.Rows.source as Array; flujoOct=trimSucursal(flujoOct);
-            	var flujoNov:Array = event.result.FLUJONOV.Tables.MES.Rows.source as Array; flujoNov=trimSucursal(flujoNov);
-            	var flujoDic:Array = event.result.FLUJODIC.Tables.MES.Rows.source as Array; flujoDic=trimSucursal(flujoDic);
+            	var flujoEne:Array = event.result.FLUJOENE.Tables.MES.Rows.source as Array;// flujoEne=trimSucursal(flujoEne);
+            	var flujoFeb:Array = event.result.FLUJOFEB.Tables.MES.Rows.source as Array;// flujoFeb=trimSucursal(flujoFeb);
+            	var flujoMar:Array = event.result.FLUJOMAR.Tables.MES.Rows.source as Array;// flujoMar=trimSucursal(flujoMar);
+            	var flujoAbr:Array = event.result.FLUJOABR.Tables.MES.Rows.source as Array;// flujoAbr=trimSucursal(flujoAbr);
+            	var flujoMay:Array = event.result.FLUJOMAY.Tables.MES.Rows.source as Array;// flujoMay=trimSucursal(flujoMay);
+            	var flujoJun:Array = event.result.FLUJOJUN.Tables.MES.Rows.source as Array;// flujoJun=trimSucursal(flujoJun);
+            	var flujoJul:Array = event.result.FLUJOJUL.Tables.MES.Rows.source as Array;// flujoJul=trimSucursal(flujoJul);
+            	var flujoAgo:Array = event.result.FLUJOAGO.Tables.MES.Rows.source as Array;// flujoAgo=trimSucursal(flujoAgo);
+            	var flujoSep:Array = event.result.FLUJOSEP.Tables.MES.Rows.source as Array;// flujoSep=trimSucursal(flujoSep);
+            	var flujoOct:Array = event.result.FLUJOOCT.Tables.MES.Rows.source as Array;// flujoOct=trimSucursal(flujoOct);
+            	var flujoNov:Array = event.result.FLUJONOV.Tables.MES.Rows.source as Array;// flujoNov=trimSucursal(flujoNov);
+            	var flujoDic:Array = event.result.FLUJODIC.Tables.MES.Rows.source as Array;// flujoDic=trimSucursal(flujoDic);
             	
-            	var pptoEne:Array = event.result.PPTOENE.Tables.PresupuestoMensual.Rows.source as Array; pptoEne=trimSucursal(pptoEne);
-            	var pptoFeb:Array = event.result.PPTOFEB.Tables.PresupuestoMensual.Rows.source as Array; pptoFeb=trimSucursal(pptoFeb);
-            	var pptoMar:Array = event.result.PPTOMAR.Tables.PresupuestoMensual.Rows.source as Array; pptoMar=trimSucursal(pptoMar);
-            	var pptoAbr:Array = event.result.PPTOABR.Tables.PresupuestoMensual.Rows.source as Array; pptoAbr=trimSucursal(pptoAbr);
-            	var pptoMay:Array = event.result.PPTOMAY.Tables.PresupuestoMensual.Rows.source as Array; pptoMay=trimSucursal(pptoMay);
-            	var pptoJun:Array = event.result.PPTOJUN.Tables.PresupuestoMensual.Rows.source as Array; pptoJun=trimSucursal(pptoJun);
-            	var pptoJul:Array = event.result.PPTOJUL.Tables.PresupuestoMensual.Rows.source as Array; pptoJul=trimSucursal(pptoJul);
-            	var pptoAgo:Array = event.result.PPTOAGO.Tables.PresupuestoMensual.Rows.source as Array; pptoAgo=trimSucursal(pptoAgo);
-            	var pptoSep:Array = event.result.PPTOSEP.Tables.PresupuestoMensual.Rows.source as Array; pptoSep=trimSucursal(pptoSep);
-            	var pptoOct:Array = event.result.PPTOOCT.Tables.PresupuestoMensual.Rows.source as Array; pptoOct=trimSucursal(pptoOct);
-            	var pptoNov:Array = event.result.PPTONOV.Tables.PresupuestoMensual.Rows.source as Array; pptoNov=trimSucursal(pptoNov);
-            	var pptoDic:Array = event.result.PPTODIC.Tables.PresupuestoMensual.Rows.source as Array; pptoDic=trimSucursal(pptoDic);
+            	var pptoEne:Array = event.result.PPTOENE.Tables.PresupuestoMensual.Rows.source as Array;// pptoEne=trimSucursal(pptoEne);
+            	var pptoFeb:Array = event.result.PPTOFEB.Tables.PresupuestoMensual.Rows.source as Array;// pptoFeb=trimSucursal(pptoFeb);
+            	var pptoMar:Array = event.result.PPTOMAR.Tables.PresupuestoMensual.Rows.source as Array;// pptoMar=trimSucursal(pptoMar);
+            	var pptoAbr:Array = event.result.PPTOABR.Tables.PresupuestoMensual.Rows.source as Array;// pptoAbr=trimSucursal(pptoAbr);
+            	var pptoMay:Array = event.result.PPTOMAY.Tables.PresupuestoMensual.Rows.source as Array;// pptoMay=trimSucursal(pptoMay);
+            	var pptoJun:Array = event.result.PPTOJUN.Tables.PresupuestoMensual.Rows.source as Array;// pptoJun=trimSucursal(pptoJun);
+            	var pptoJul:Array = event.result.PPTOJUL.Tables.PresupuestoMensual.Rows.source as Array;// pptoJul=trimSucursal(pptoJul);
+            	var pptoAgo:Array = event.result.PPTOAGO.Tables.PresupuestoMensual.Rows.source as Array;// pptoAgo=trimSucursal(pptoAgo);
+            	var pptoSep:Array = event.result.PPTOSEP.Tables.PresupuestoMensual.Rows.source as Array;// pptoSep=trimSucursal(pptoSep);
+            	var pptoOct:Array = event.result.PPTOOCT.Tables.PresupuestoMensual.Rows.source as Array;// pptoOct=trimSucursal(pptoOct);
+            	var pptoNov:Array = event.result.PPTONOV.Tables.PresupuestoMensual.Rows.source as Array;// pptoNov=trimSucursal(pptoNov);
+            	var pptoDic:Array = event.result.PPTODIC.Tables.PresupuestoMensual.Rows.source as Array;// pptoDic=trimSucursal(pptoDic);
             	
             	var i:int;
             	var j:int;
