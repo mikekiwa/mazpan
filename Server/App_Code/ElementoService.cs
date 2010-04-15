@@ -80,12 +80,12 @@ public class ElementoService : System.Web.Services.WebService
     }
 
     [WebMethod(Description = "Permite editar un elemento")]
-    public int editElemento(Usuario u, Elemento e)
+    public int editElemento(Usuario u, Elemento e, string code)
     {
-        if (existe(e.codigo))
+        if (existe(code))
         {
-            if (e.superClass.CompareTo("CMP") == 0) return editComponente(u, e);
-            if (e.superClass.CompareTo("MAQ") == 0) return editMaquina(u, e);
+            if (e.superClass.CompareTo("CMP") == 0) return editComponente(u, e, code);
+            if (e.superClass.CompareTo("MAQ") == 0) return editMaquina(u, e, code);
             return 2;
         }
 
@@ -607,18 +607,21 @@ public class ElementoService : System.Web.Services.WebService
     ///        -3 si no se puede insertar mantenciones de la maquina
     ///        -4 si no se puede insertar actividades de mantencion de la maquina
     ///        -5 si no se puede insertar los elemento subordinados de la maquina
+    ///        -7 si no se puede actualizar los elementos subordinados
     /// </summary>
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod]
-    public int editMaquina(Usuario u, Elemento m)
+    public int editMaquina(Usuario u, Elemento m, string codigo)
     {
-        String query = " UPDATE [PracticaDb].[dbo].[Elemento] SET tipo='"+m.tipo+"',nombre='"+m.nombre+"',ubicacion='"+m.ubicacion+"',estado='"+m.estado+"',condicionRecepcion='"+m.condicionRecepcion+"',costo='"+m.costo+"',horasVidaUtil='"+m.horasVidaUtil+"',horasActuales='"+m.horasActuales+"',horasDiariasPromedio='"+m.horasDiariasPromedio+"',descripcion='"+m.descripcion+"',marca='"+m.fabricante.marca+"',ano='"+m.fabricante.ano+"',pais='"+m.fabricante.pais+"',modelo='"+m.fabricante.modelo+"',serie='"+m.fabricante.serie+"',fabricante='"+m.fabricante.fabricante+"' WHERE codigo='"+m.codigo+"' ";
+        String query = " UPDATE [PracticaDb].[dbo].[Elemento] SET [codigo]='" + m.codigo + "',[tipo]='" + m.tipo + "',[nombre]='" + m.nombre + "',[ubicacion]='" + m.ubicacion + "',[estado]='" + m.estado + "',[condicionRecepcion]='" + m.condicionRecepcion + "',[costo]='" + m.costo + "',[horasVidaUtil]='" + m.horasVidaUtil + "',[horasActuales]='" + m.horasActuales + "',[horasDiariasPromedio]='" + m.horasDiariasPromedio + "',[descripcion]='" + m.descripcion + "',[marca]='" + m.fabricante.marca + "',[ano]='" + m.fabricante.ano + "',[pais]='" + m.fabricante.pais + "',[modelo]='" + m.fabricante.modelo + "',[serie]='" + m.fabricante.serie + "',[fabricante]='" + m.fabricante.fabricante + "' WHERE [codigo]='" + codigo + "' ";
 
         if (Ejecutar(query) == 1)//si insercion exitosa
             if (addEspecificaciones(m.especificaciones, m.codigo) == 1)//si insercion exitosa
-                if (addUnion(m.subordinados, m.codigo) == 1) return 1;
-                else return -5;
+                if (Ejecutar("DELETE [PracticaDb].[dbo].[Union] WHERE [padre]='" + codigo +"'") == 1)
+                    if (addUnion(m.subordinados, m.codigo) == 1) return 1;
+                    else return -5;
+                else return -7;
             else return -2;
         else return -1;
     }
@@ -634,9 +637,9 @@ public class ElementoService : System.Web.Services.WebService
     /// <param name="c">El componente a insertar</param>
     /// <returns></returns>
     [WebMethod]
-    public int editComponente(Usuario u, Elemento c)
+    public int editComponente(Usuario u, Elemento c, string codigo)
     {
-        string query = " UPDATE [PracticaDb].[dbo].[Elemento] SET [tipo]='" + c.tipo + "',[sistema]='" + c.sistema + "',[nombre]='" + c.nombre + "',[costo]='" + c.costo + "',[horasVidaUtil]='" + c.horasVidaUtil + "',[descripcion]='" + c.descripcion + "',[marca]='" + c.fabricante.marca + "',[ano]='" + c.fabricante.ano + "',[pais]='" + c.fabricante.pais + "',[modelo]='" + c.fabricante.modelo + "',[serie]='" + c.fabricante.serie + "',[fabricante]='" + c.fabricante.fabricante + "' WHERE codigo='"+c.codigo+"'";
+        string query = " UPDATE [PracticaDb].[dbo].[Elemento] SET [codigo]='"+c.codigo+"',[tipo]='" + c.tipo + "',[sistema]='" + c.sistema + "',[nombre]='" + c.nombre + "',[costo]='" + c.costo + "',[horasVidaUtil]='" + c.horasVidaUtil + "',[descripcion]='" + c.descripcion + "',[marca]='" + c.fabricante.marca + "',[ano]='" + c.fabricante.ano + "',[pais]='" + c.fabricante.pais + "',[modelo]='" + c.fabricante.modelo + "',[serie]='" + c.fabricante.serie + "',[fabricante]='" + c.fabricante.fabricante + "' WHERE [codigo]='"+codigo+"'";
 
         if (Ejecutar(query) == 1)//si insercion exitosa
             if (addEspecificaciones(c.especificaciones, c.codigo) == 1) return 1;

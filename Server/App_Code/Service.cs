@@ -195,8 +195,9 @@ public class Service : System.Web.Services.WebService
         else
         {
             query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000, T1.Segment_1" +
-                       " FROM [Maspan].[dbo].[JDT1] T4 " +
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T4.[Account] = T2.cuenta" +
+                       " FROM [Maspan].[dbo].[OACT] T1" +
+                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
                        " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY itemName, T1.[Segment_1]";
         }
