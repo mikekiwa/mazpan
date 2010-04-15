@@ -230,7 +230,7 @@ public class EvaluacionService : System.Web.Services.WebService
     {
         if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
         {
-            return obtenerTabla("Socios", " SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OWHS] T1 JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE WhsCode='" + local + "' ");
+            return obtenerTabla("Socios", " SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE U_LTrabj='" + local + "' ");
         }
         else return null;
     }
@@ -303,8 +303,8 @@ public class EvaluacionService : System.Web.Services.WebService
     public DataTable getSocios(Usuario u, string local)
     {
         if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
-        {       
-            return obtenerTabla("Socios"," SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OWHS] T1 JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE WhsCode='" + local + "' ");
+        {
+            return obtenerTabla("Socios", " SELECT T2.CardName,T2.CardCode,T2.LicTradNum,T3.*,T4.* FROM " + SAP + ".[OCRD] T2 JOIN " + MAER + ".Clientes T3 ON T3.cliente=T2.CardCode LEFT JOIN " + MAER + ".[Seccion] T4 ON T4.id = T3.seccion WHERE U_LTrabj='" + local + "' ");
         }
         else return null;
     }
@@ -423,7 +423,7 @@ public class EvaluacionService : System.Web.Services.WebService
 
     private String getLocal(string cliente)
     {
-        String query  = "SELECT WhsName FROM "+SAP+".[OWHS] T1 JOIN "+SAP+".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj WHERE CardCode='"+cliente+"'";
+        String query = "SELECT WhsName,U_LTrabj FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj WHERE CardCode='" + cliente + "'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand select = new SqlCommand(query, selectConn);
@@ -432,7 +432,12 @@ public class EvaluacionService : System.Web.Services.WebService
         if (reader.Read())
         {
             if (!reader.IsDBNull(0)) return reader.GetString(0);
-            else return "";
+            else
+            {
+                if (!reader.IsDBNull(1) && reader.GetString(1).CompareTo("P01") == 0) return "Planta Curicó";
+                if (!reader.IsDBNull(1) && reader.GetString(1).CompareTo("P02") == 0) return "Planta Temuco";
+                return "";
+            }
         }
         else
         {

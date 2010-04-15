@@ -192,14 +192,32 @@ public class Service : System.Web.Services.WebService
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
                        " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY itemName";
         }
-        else
+        else if(sucursal.CompareTo("01") == 0)
         {
-            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000, T1.Segment_1" +
+            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000" +
                        " FROM [Maspan].[dbo].[OACT] T1" +
                        " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
                        " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
                        " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
-                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY itemName, T1.[Segment_1]";
+                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND (T1.[Segment_1]='01' OR T1.[Segment_1]='05') GROUP BY itemName";
+        }
+        else if (sucursal.CompareTo("23") == 0)
+        {
+            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000" +
+                       " FROM [Maspan].[dbo].[OACT] T1" +
+                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
+                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
+                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND (T1.[Segment_1]='23' OR T1.AcctCode='_SYS00000001166') GROUP BY itemName";
+        }
+        else 
+        {
+            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000" +
+                       " FROM [Maspan].[dbo].[OACT] T1" +
+                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
+                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
+                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND T1.[Segment_1]='"+sucursal+"' GROUP BY itemName";
         }
         DataTable dt = new DataTable();
         dt.TableName = "MES";
@@ -221,25 +239,47 @@ public class Service : System.Web.Services.WebService
         string query;
         if (sucursal.CompareTo("00") == 0)
         {
-            query = " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
-                     " FROM 		[Maspan].[dbo].BGT1					T1 " +
-                     " JOIN 		[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
-                     " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
-                     " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
-                     " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+            query =  " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
+                     " FROM 	[Maspan].[dbo].BGT1					T1 " +
+                     " JOIN 	[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                     " JOIN 	[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                     " JOIN 	[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                     " JOIN     [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
                      " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' " +
+                     " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName";
+        }
+        else if (sucursal.CompareTo("01") == 0)
+        {
+            query =  " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
+                     " FROM 	[Maspan].[dbo].BGT1					T1 " +
+                     " JOIN 	[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                     " JOIN 	[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                     " JOIN 	[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                     " JOIN     [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+                     " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' AND ([Segment_1]='01' OR [Segment_1]='05') " +
+                     " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName";
+        }
+        else if (sucursal.CompareTo("23") == 0)
+        {
+            query =  " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
+                     " FROM 	[Maspan].[dbo].BGT1					T1 " +
+                     " JOIN 	[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                     " JOIN 	[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                     " JOIN 	[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                     " JOIN     [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+                     " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' AND ([Segment_1]='23' OR T1.AcctCode='_SYS00000001166')" +
                      " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName";
         }
         else
         {
-            query = " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000, T5.Segment_1 " +
-                     " FROM 		[Maspan].[dbo].BGT1					T1 " +
-                     " JOIN 		[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
-                     " JOIN 		[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
-                     " JOIN 		[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
-                     " JOIN      [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
-                     " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' " +
-                     " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName,T5.Segment_1";
+            query =  " SELECT 	T4.itemName, SUM(T1.CredLTotal - T1.DebLTotal)/1000 " +
+                     " FROM 	[Maspan].[dbo].BGT1					T1 " +
+                     " JOIN 	[Maspan].[dbo].OBGT					T2		ON		T1.BudgId = T2.AbsId " +
+                     " JOIN 	[PracticaDB].[dbo].ItemCuenta		T3		ON		T1.acctcode=T3.cuenta " +
+                     " JOIN 	[PracticaDB].[dbo].Items			T4		ON		T4.id=T3.item " +
+                     " JOIN     [Maspan].[dbo].OACT                 T5      ON      T5.AcctCode=T1.acctcode" +
+                     " WHERE 	T2.FinancYear>='" + ano + "-01-01 00:00.000' AND T2.FinancYear<='" + ano + "-12-01 00:00.000' AND [Segment_1]='"+sucursal+"'" +
+                     " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName";
         }
 
         DataTable dt = new DataTable();
