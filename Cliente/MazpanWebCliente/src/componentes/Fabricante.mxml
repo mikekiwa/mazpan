@@ -32,7 +32,8 @@
             {
             	pais_ac = event.result.Tables.Paises.Rows.source as Array;
             	pais_ac.push("Otro");
-            	if(fabricante_ob==null || fabricante_ob.pais==null || fabricante_ob.pais=="") pais_cb.selectedIndex=0;
+            	pais_cb.dataProvider = pais_ac;
+            	if(fabricante_ob==null || fabricante_ob.pais==null || fabricante_ob.pais=="") pais_cb.text="CHILE";
             }
 			private function actualizarPais():void
 			{
@@ -57,7 +58,7 @@
 				fabricante.ano = ano_ti.text;
 				if(pais_cb.visible)
 				{
-					if(pais_cb.text.length>0)
+					if(pais_cb.text!=null && pais_cb.text.length>0)
 						fabricante.pais = pais_cb.text;
 					else
 						fabricante.pais = "CHILE";
@@ -86,6 +87,8 @@
 				cancelarPais_btn.visible=false;
 				fabricante=null;
 				fabricante_ob = new Object;
+				
+			 	pais_cb.text = "CHILE";
 			}
 		]]>
 	</mx:Script>

@@ -2,11 +2,11 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" verticalScrollPolicy="off" 
 	creationComplete="init()" xmlns:ns1="componentes.*">
 	
-	<mx:WebService id="CombosService" 		wsdl="{index.URL + 'CombosService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="TipoMaquina" 			result="tipoMaquinaResult(event)" 			fault="ErrorFaultHandler(event, 'TipoMaquina')"/>
+	<mx:WebService id="CombosService" wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="TipoMaquina" 	result="tipoMaquinaResult(event)" 	fault="ErrorFaultHandler(event, 'TipoMaquina')"/>
 	</mx:WebService>
 	
-	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="addElemento" 	result="addElementoResult(event)" 	fault="ErrorFaultHandler(event, 'addElemento')"/>
 	</mx:WebService>
 	
@@ -39,7 +39,7 @@
 			private function init():void
 			{
 				CombosService.TipoMaquina();
-				tabNavigator.initialize();	
+				//tabNavigator.initialize();	
 			}
 			private function tipoMaquinaResult(event:ResultEvent):void
             {
@@ -90,7 +90,6 @@
 					
 					//Hoja 5
 					if(actividadesMantencion_cmp!=null) maquina.mantenciones = actividadesMantencion_cmp.getMantenciones();
-					
 					
 					
 					ElementoService.addElemento(index.usuario, maquina);
@@ -152,7 +151,7 @@
 			}
 		]]>
 	</mx:Script>
-	<mx:TabNavigator id="tabNavigator" width="100%" height="420" horizontalCenter="0" fontWeight="normal" change="cargarUnion()">
+	<mx:TabNavigator id="tabNavigator" width="100%" height="420" horizontalCenter="0" fontWeight="normal" change="cargarUnion()" selectedIndex="1">
 		<mx:Canvas label="Datos Básicos" width="100%" height="100%" fontWeight="normal" fontStyle="normal">
 			<mx:Label x="53" y="10" text="Tipo Maquina"/>
 			<mx:ComboBox x="186" y="10" id="tipo_cb" dataProvider="{tipoMaquina_ac}" change="actualizarTipo(); revisar()"/>
