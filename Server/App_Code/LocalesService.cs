@@ -29,12 +29,24 @@ public class LocalesService : System.Web.Services.WebService
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
         String query = " SELECT WhsCode,WhsName FROM [Maspan].[dbo].[OWHS] WHERE location='4' ";
-
         da.SelectCommand = new SqlCommand(query, cn);
+
+        SqlConnection cn1 = new SqlConnection(coneccionString);
+        SqlDataAdapter da1 = new SqlDataAdapter();
+        String query1 = " SELECT 'P01' as WhsCode,'Planta Curicó' AS WhsName ";
+        da1.SelectCommand = new SqlCommand(query1, cn1);
+
+        SqlConnection cn2 = new SqlConnection(coneccionString);
+        SqlDataAdapter da2 = new SqlDataAdapter();
+        String query2 = " SELECT 'P02' as WhsCode,'Planta Temuco' AS WhsName ";
+        da2.SelectCommand = new SqlCommand(query2, cn2);
+
 
         try
         {
             da.Fill(dt);
+            da1.Fill(dt);
+            da2.Fill(dt);
         }
         finally
         {
@@ -52,7 +64,7 @@ public class LocalesService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM "+SAP+".[OWHS] T1 JOIN "+SAP+".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='"+DateTime.Now.Year+"-"+DateTime.Now.Month+"-"+DateTime.Now.Day+"' WHERE WhsCode='"+local+"' ";
+        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' WHERE U_LTrabj='" + local + "' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -282,7 +294,7 @@ public class LocalesService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' WHERE WhsCode='" + local + "' ";
+        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' WHERE U_LTrabj='" + local + "' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
