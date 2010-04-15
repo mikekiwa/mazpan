@@ -55,6 +55,7 @@
 				formato.decimalSeparatorTo=",";
             	
             	generar_btn.enabled = false;
+            	generar_btn2.enabled = false;
             	
             	Service.getSucursales();
             }
@@ -103,6 +104,7 @@
             	cargarOtros = false;
             	balanceCargado = false;
             	generar_btn.enabled = false;
+            	generar_btn2.enabled = false;
             	cargar_btn.enabled = false;
             	meses_cb.enabled = false;
 				var defaults:ITEMS = new ITEMS(items);defaults.default_values();
@@ -114,12 +116,65 @@
             public function trimSucursal(arreglo:Array):Array
             {
             	var salida:Array = new Array;
+            	var i:int=0;
+            	var j:int=0;
             	if(sucursales_ac[sucursales_cb.selectedIndex].Code!='00')
             	{
-	            	for(var i:int=0; i<arreglo.length; i++)
-	            	{
-	            		if(arreglo[i].Segment_1==sucursales_ac[sucursales_cb.selectedIndex].Code) salida.push(arreglo[i]);
-	            	}
+            		if(sucursales_ac[sucursales_cb.selectedIndex].Code!='01')//si no es curico
+            		{
+		            	if(sucursales_ac[sucursales_cb.selectedIndex].Code!='23')//si no es hualpen
+	            		{
+			            	for(i=0; i<arreglo.length; i++)
+			            	{
+			            		if(arreglo[i].Segment_1==sucursales_ac[sucursales_cb.selectedIndex].Code) salida.push(arreglo[i]);
+			            	}
+			            }
+			            else//es hualpen asi que junto hualpen y '00'
+			            {
+			            	for(i=0; i<arreglo.length; i++)
+			            	{
+			            		if(arreglo[i].Segment_1=="23" || arreglo[i].Segment_1=="00")
+				            	{
+				            		existe=false;
+			            			//Con es siguiente procedimiento procuro ver si el item ya existe en el arreglo de salida,
+			            			//ya que de existir es necesario sumar ambos valores.
+			            			for(j=0; j<salida.length && !existe; j++)
+			            			{
+			            				if(salida[j].itemName==arreglo[i].itemName)
+			            				{
+			            					existe = true;
+			            					salida[j].Column1 = int(salida[j].Column1)+int(arreglo[i].Column1);
+			            				}
+			            			}
+			            			if(!existe)
+			            				salida.push(arreglo[i]);
+			            		}
+			            	}
+			            }
+		            }
+		            else//es curico asi que junto curico y rauquen
+		            {
+		            	var existe:Boolean = false;
+		            	for(i=0; i<arreglo.length; i++)
+		            	{
+		            		if(arreglo[i].Segment_1=="01" || arreglo[i].Segment_1=="05")
+		            		{
+		            			existe=false;
+		            			//Con es siguiente procedimiento procuro ver si el item ya existe en el arreglo de salida,
+		            			//ya que de existir es necesario sumar ambos valores.
+		            			for(j=0; j<salida.length && !existe; j++)
+		            			{
+		            				if(salida[j].itemName==arreglo[i].itemName)
+		            				{
+		            					existe = true;
+		            					salida[j].Column1 = int(salida[j].Column1)+int(arreglo[i].Column1);
+		            				}
+		            			}
+		            			if(!existe)
+		            				salida.push(arreglo[i]);
+		            		}
+		            	}
+		            }
             	}
             	else
             	{
@@ -358,6 +413,7 @@
             	}
             	 
             	generar_btn.enabled = true;
+            	generar_btn2.enabled = true;
 				balanceCargado = true;
         		cargar_btn.enabled = true;
         		cargarOtros = true;
@@ -368,7 +424,13 @@
 			{
 				var pdf:FORMATO = new FORMATO();
 				//pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
-				pdf.generarTabla(items,tabla1,img,ano_var.toString(),"Estado de Resultado", sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+				pdf.generarTabla(items,tabla1,img,ano_var.toString(),"Estado de Resultado "+meses_cb.text, sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+			}
+			private function generarPDF2():void
+			{
+				var pdf:FORMATO = new FORMATO();
+				//pdf.generar(img,items, meses_cb.selectedIndex, meses_cb.text, ano.value);
+				pdf.generarTabla2(items,tabla1,img,ano_var.toString(),"Estado de Resultado "+meses_cb.text, sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 			}
             private function actualizarColumnas():void
             {
@@ -386,7 +448,6 @@
             		this.width = 468 + (meses_cb.selectedIndex +1) * 68;
             	else
             		this.width = 820;//12
-            	
             	
             	if(meses_cb.selectedIndex>=1)feb.visible=true; else feb.visible=false;
             	if(meses_cb.selectedIndex>=2)mar.visible=true; else mar.visible=false;
@@ -459,7 +520,8 @@
 		<mx:Label  text="Elija el año:" id="label1"/>
 		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" 		 id="ano"/>
 		<mx:Button label="Cargar"  click="cargar()" 					 	 id="cargar_btn"  	enabled="false" width="77"/>
-		<mx:Button label="Generar" click="generarPDF()" 					 id="generar_btn" 	enabled="true" width="77"/>
+		<mx:Button label="Generar 1" click="generarPDF()" 					 id="generar_btn" 	enabled="true" width="81"/>
+		<mx:Button label="Generar 2" click="generarPDF2()" 					 id="generar_btn2" 	enabled="true" width="81"/>
 	</mx:HBox>
 	
 	<estadoResultado:myDataGrid id="tabla1" y="38" width="100%" height="100%" dataProvider="{items}">

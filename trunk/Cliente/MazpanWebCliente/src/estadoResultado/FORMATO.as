@@ -5,6 +5,7 @@ package estadoResultado
 	import flash.display.DisplayObject;
 	
 	import mx.collections.ArrayCollection;
+	import mx.formatters.NumberFormatter;
 	
 	import org.alivepdf.colors.RGBColor;
 	import org.alivepdf.data.Grid;
@@ -30,6 +31,8 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 	public class FORMATO
 	{
 		private var pdf:PDF;
+		private var formato:NumberFormatter = new NumberFormatter();
+		
 		
 		public function FORMATO()
 		{
@@ -54,7 +57,7 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 			pdf.addImage(img,null,0,0);
 			pdf.setFontSize(25);
 			pdf.setMargins(5,7,5,7);
-			pdf.addText(titulo+" año "+ano,90,20);
+			pdf.addText(titulo+" "+ano,90,20);
 			pdf.addText(sucursal,110,30);
 			
 			pdf.setFontSize(8);
@@ -141,7 +144,195 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
 			}
 			
 			
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"Tabla.pdf");
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER1.pdf");
+		}
+		
+		private function removeFormatting(e:String):String
+		{
+			var array:Array;
+			array = e.split(".");
+			return array.join("");
+		}
+		public function generarTabla2(arreglo:Array,tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
+		{
+			formato.precision=0;
+			formato.useThousandsSeparator=true;
+			formato.thousandsSeparatorFrom=".";
+			formato.thousandsSeparatorTo=".";
+			formato.decimalSeparatorFrom=",";
+			formato.decimalSeparatorTo=",";
+			
+			
+			pdf.addImage(img,null,0,0);
+			pdf.setFontSize(25);
+			pdf.setMargins(5,7,5,7);
+			pdf.addText(titulo+" "+ano,90,20);
+			pdf.addText(sucursal,110,30);
+			
+			pdf.setFontSize(8);
+			
+			var deltaX:int;
+			if(meses==0) deltaX = 50; else deltaX = 30;
+			
+			pdf.setXY(deltaX,30);
+			pdf.writeText(2,"\n");
+			pdf.addCell(deltaX, 5);
+			pdf.addCell(50, 5,"Cuenta", 1);
+			
+			if(meses==0){ pdf.addCell(20, 5,"ENE", 1,0,Align.CENTER);}
+			if(meses==1){ pdf.addCell(20, 5,"ENE", 1,0,Align.CENTER);pdf.addCell(20, 5,"FEB", 1,0,Align.CENTER);}
+			if(meses==2){ pdf.addCell(20, 5,"FEB", 1,0,Align.CENTER);pdf.addCell(20, 5,"MAR", 1,0,Align.CENTER);}
+			if(meses==3){ pdf.addCell(20, 5,"MAR", 1,0,Align.CENTER);pdf.addCell(20, 5,"ABR", 1,0,Align.CENTER);}
+			if(meses==4){ pdf.addCell(20, 5,"ABR", 1,0,Align.CENTER);pdf.addCell(20, 5,"MAY", 1,0,Align.CENTER);}
+			if(meses==5){ pdf.addCell(20, 5,"MAY", 1,0,Align.CENTER);pdf.addCell(20, 5,"JUN", 1,0,Align.CENTER);}
+			if(meses==6){ pdf.addCell(20, 5,"JUN", 1,0,Align.CENTER);pdf.addCell(20, 5,"JUL", 1,0,Align.CENTER);}
+			if(meses==7){ pdf.addCell(20, 5,"JUL", 1,0,Align.CENTER);pdf.addCell(20, 5,"AGO", 1,0,Align.CENTER);}
+			if(meses==8){ pdf.addCell(20, 5,"AGO", 1,0,Align.CENTER);pdf.addCell(20, 5,"SEP", 1,0,Align.CENTER);}
+			if(meses==9){ pdf.addCell(20, 5,"SEP", 1,0,Align.CENTER);pdf.addCell(20, 5,"OCT", 1,0,Align.CENTER);}
+			if(meses==10){ pdf.addCell(20, 5,"OCT", 1,0,Align.CENTER);pdf.addCell(20, 5,"NOV", 1,0,Align.CENTER);}
+			if(meses==11){ pdf.addCell(20, 5,"NOV", 1,0,Align.CENTER);pdf.addCell(20, 5,"DIC", 1,0,Align.CENTER);}
+			
+			pdf.addCell(20, 5,"P. MES", 1,0,Align.CENTER);
+			pdf.addCell(20, 5,"DESV %", 1,0,Align.CENTER);
+			pdf.addCell(20, 5);
+			
+			pdf.addCell(20, 5,"ACUM",1,0,Align.CENTER);
+			pdf.addCell(20, 5,"PPTO", 1,0,Align.CENTER);
+			pdf.addCell(20, 5,"DESV %", 1,0,Align.CENTER);
+			pdf.writeText(5,"\n");
+          	
+          	
+          	for(var i:int=0; i<arreglo.length; i++)
+			{
+				pdf.addCell(deltaX, 5);
+				if(i==31)
+				{
+					var aux1:Number=0;
+					var aux2:Number=0;
+					var desv:Number=0;
+						
+					pdf.addCell(50, 5,arreglo[i].itemName, 1);
+					if(meses==0){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
+					if(meses==1){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
+					if(meses==2){ pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
+					if(meses==3){ pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
+					if(meses==4){ pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
+					if(meses==5){ pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
+					if(meses==6){ pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
+					if(meses==7){ pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
+					if(meses==8){ pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
+					if(meses==9){ pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
+					if(meses==10){ pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
+					if(meses==11){ pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].DIC, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
+					
+					if(arreglo[i].PPTO==0) aux1 = 0;
+					else
+					{ 
+						aux2 = Number(removeFormatting(arreglo[i].PPTO)) as Number;
+						desv = aux1 / aux2;
+						desv = desv - 1;
+						desv = desv * 1000;
+						desv = Number(formato.format(Math.round(desv)/10)) as Number;
+					}
+					pdf.addCell(20, 5,arreglo[i].MES, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,desv+"", 1,0,Align.CENTER);
+					pdf.addCell(20, 5);
+					
+					pdf.addCell(20, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+				}
+				else if(i!=0 && i!=5 && i!=6 && i!=13 && i!=14 && i!=15 && i!=25 && i!=26 && i!=30 && i!=32)
+				{
+					var aux1:Number=0;
+					var aux2:Number=0;
+					var desv:Number=0;
+						
+					pdf.addCell(50, 5,arreglo[i].itemName, 1);
+					if(meses==0){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
+					if(meses==1){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
+					if(meses==2){ pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
+					if(meses==3){ pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
+					if(meses==4){ pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
+					if(meses==5){ pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
+					if(meses==6){ pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
+					if(meses==7){ pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
+					if(meses==8){ pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
+					if(meses==9){ pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
+					if(meses==10){ pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
+					if(meses==11){ pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].DIC, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
+					
+					if(arreglo[i].PPTOMENSUAL[meses]==0) aux1 = 0;
+					else
+					{ 
+						aux2 = Number(arreglo[i].PPTOMENSUAL[meses]) as Number;
+						desv = aux1 / aux2;
+						desv = desv - 1;
+						desv = desv * 1000;
+						desv = Number(formato.format(Math.round(desv)/10)) as Number;
+					}
+					pdf.addCell(20, 5,arreglo[i].MES, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,desv+"", 1,0,Align.CENTER);
+					pdf.addCell(20, 5);
+					
+					pdf.addCell(20, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					
+				}
+				else if(i!=0 && i!=6 && i!=15)
+				{
+					var aux1:Number=0;
+					var aux2:Number=0;
+					var desv:Number=0;
+					
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+					pdf.addCell(50, 5,arreglo[i].itemName, 1);
+					if(meses==0){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ENE)) as Number;}
+					if(meses==1){ pdf.addCell(20, 5,arreglo[i].ENE, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].FEB)) as Number;}
+					if(meses==2){ pdf.addCell(20, 5,arreglo[i].FEB, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAR)) as Number;}
+					if(meses==3){ pdf.addCell(20, 5,arreglo[i].MAR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].ABR)) as Number;}
+					if(meses==4){ pdf.addCell(20, 5,arreglo[i].ABR, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].MAY)) as Number;}
+					if(meses==5){ pdf.addCell(20, 5,arreglo[i].MAY, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUN)) as Number;}
+					if(meses==6){ pdf.addCell(20, 5,arreglo[i].JUN, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].JUL)) as Number;}
+					if(meses==7){ pdf.addCell(20, 5,arreglo[i].JUL, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].AGO)) as Number;}
+					if(meses==8){ pdf.addCell(20, 5,arreglo[i].AGO, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].SEP)) as Number;}
+					if(meses==9){ pdf.addCell(20, 5,arreglo[i].SEP, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].OCT)) as Number;}
+					if(meses==10){ pdf.addCell(20, 5,arreglo[i].OCT, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].NOV)) as Number;}
+					if(meses==11){ pdf.addCell(20, 5,arreglo[i].NOV, 1,0,Align.RIGHT);pdf.addCell(20, 5,arreglo[i].DIC, 1,0,Align.RIGHT);aux1=Number(removeFormatting(arreglo[i].DIC)) as Number;}
+					
+					if(arreglo[i].PPTO==0) aux1 = 0;
+					else
+					{ 
+						aux2 = Number(removeFormatting(arreglo[i].PPTO)) as Number;
+						desv = aux1/aux2;
+						desv = desv - 1;
+						desv = desv * 1000;
+						desv = Number(formato.format(Math.round(desv)/10)) as Number;
+					}
+					pdf.addCell(20, 5,arreglo[i].MES, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,desv+"", 1,0,Align.CENTER);
+					pdf.addCell(20, 5);
+					
+					pdf.addCell(20, 5,arreglo[i].REAL, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,arreglo[i].PPTO, 1,0,Align.RIGHT);
+					pdf.addCell(20, 5,arreglo[i].DESV, 1,0,Align.RIGHT);
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+				}
+				else
+				{
+					pdf.writeText(1,"\n");
+					pdf.addCell(deltaX, 5);
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+					pdf.addCell(50, 5,arreglo[i].itemName, 1);
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+				}
+				
+				pdf.writeText(5,"\n");
+			}
+			
+			
+          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER2.pdf");
 		}
 
 		public function generar(array:ArrayCollection, fecha:String):void
@@ -165,16 +356,26 @@ myPdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE,
           	for(var i:int=0; i<array.length; i++)
           	{
           		arr.push(array.getItemAt(i));
+          		arr[i].codigo = to20(arr[i].codigo);
           	}
           	
-          	var grid:Grid = new Grid(arr, 0, 0, new RGBColor (0x9BAFB9),new RGBColor (0xDDDDDD),new RGBColor (0), false, new RGBColor (0xCCCCCC),0,Joint.BEVEL);
+          	var grid:Grid = new Grid(arr, 0, 0, new RGBColor (0x9BAFB9),new RGBColor (0xDDDDDD),new RGBColor (0), false, new RGBColor (0xCCCCCC),1,Joint.BEVEL);
           	grid.columns=columnas;
           	
           	pdf.setFontSize(22);
-          	pdf.addText("Actividades de Mantecion "+fecha, 20, 20);
+          	pdf.writeText(20,"Actividades de Mantención "+fecha+"\n");
           	pdf.setFontSize(10);
-          	pdf.addGrid(grid, 0, 18, false);
+          	pdf.addGrid(grid, 0, 0, true);
+          	
           	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "estadoResultado.pdf");
+		}
+		private function to20(codigo:String):String
+		{
+			for(; codigo.length<20;)
+			{
+				codigo += " ";
+			}
+			return codigo;
 		}
 		public function solicitudes(array:Array, fecha:String):void
 		{

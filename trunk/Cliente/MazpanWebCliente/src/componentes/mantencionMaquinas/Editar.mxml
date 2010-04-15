@@ -33,6 +33,7 @@
 			private var recepcion_ac:ArrayCollection = new ArrayCollection(["Nueva","Usada"]);
 			[Bindable]
 			private var machine:Object;
+			private var codigo:String="";
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -95,7 +96,7 @@
 					else maquina.subordinados = machine.subordinados;
 					
 					
-					ElementoService.editElemento(index.usuario, maquina);
+					ElementoService.editElemento(index.usuario, maquina, codigo);
 				}
 				else
 				{
@@ -105,6 +106,7 @@
 			}
 			public function clean():void
 			{
+				codigo = "";
 				if(codigo_ti!=null) codigo_ti.text = "";
 				if(nombre_ti!=null) nombre_ti.text = "";
 				if(tipo_ti!=null) tipo_ti.text = "";
@@ -143,6 +145,7 @@
 			{
 //hacer esto despues de cargar los tipo de componentes y variables de sistema
 //no se sis se puedea porq no se en que momento podria llegar a la funcion el parametro, y quisa no carge el elemento.				
+				codigo = _maq.codigo;
 				ElementoService.getElemento(_maq);
 				agregar_btn.enabled = true;
 			}
@@ -168,7 +171,7 @@
 			<mx:TextInput x="186" y="10" width="319" id="tipo_ti" visible="false" maxChars="50"/>
 			<mx:Image x="512" y="10" width="22" height="22" source="iconos/cancelar.png" id="cancelarTipo_btn" visible="false" click="tipo_cb.selectedIndex=0; actualizarTipo()"/>
 			<mx:Label x="53" y="38" text="Codigo"/>
-			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20" text="{machine.codigo}" editable="false"/>
+			<mx:TextInput x="186" y="36" id="codigo_ti" maxChars="20" text="{machine.codigo}"/>
 			<mx:Label x="53" y="66" text="Puesta en Marcha"/>
 			<mx:TextInput x="186" y="64" width="175" id="puestaMarcha_df" text="{machine.puestaMarcha}" editable="false"/>
 			<mx:Label x="53" y="94" text="Nombre"/>

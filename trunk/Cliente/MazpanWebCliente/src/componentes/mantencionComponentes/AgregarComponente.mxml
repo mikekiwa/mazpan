@@ -43,7 +43,7 @@
 			private function init():void
 			{
 				CombosService.TipoComponente();
-				tabNavigator.initialize();
+				//tabNavigator.initialize();
 			}
 			private function tipoComponenteResult(event:ResultEvent):void
             {
@@ -172,7 +172,7 @@
 			<mx:Label x="135.5" y="114" text="Sistema"/>
 			<mx:ComboBox x="268.5" y="112" id="sistema_cb" dataProvider="{sistema_ac}" change="revisar()"/>
 			<mx:Label x="137.5" y="150" text="Nombre"/>
-			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" change="revisar()"/>
+			<mx:TextInput x="268.5" y="148" width="349" id="nombre_ti" change="revisar()" maxChars="50"/>
 			<mx:Label x="137.5" y="184" text="Costo"/>
 			<mx:TextInput x="268.5" y="182" restrict="0-9" id="costo_ti" change="revisar()"/>
 			<mx:Label x="135.5" y="212" text="Puesta en Marcha (*)"/>
