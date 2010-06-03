@@ -49,9 +49,17 @@ public class Flujo
     private DataTable flujoDic;
     private DataTable pptoDic;
 
+    private int m;//mes numero
+
 	public Flujo()
 	{
 	}
+
+    public int MESNUMERO
+    {
+        set { m = value; }
+        get { return m; }
+    }
 
     public DataTable FLUJOENE
     {

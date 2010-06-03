@@ -59,7 +59,7 @@ public class UsuarioService : System.Web.Services.WebService
     {
         SqlConnection cn = new SqlConnection(coneccionString);
         cn.Open();
-        string query = "SELECT T1.privilegio,T2.planta,T1.rut_persona FROM PracticaDb.dbo.Usuario T1 JOIN PracticaDb.dbo.Personal T2 ON T1.rut_persona=T2.rut WHERE T1.userName='" + userName + "' AND T1.password='" + password + "'";
+        string query = "SELECT T1.estadoResultado+T1.amarre+T1.general+T1.agentesExternos+T1.personal+T1.mantenciones+T1.planMantecion+T1.ventas+T1.locales+T1.configurarEvaluacion+T1.evaluacion+T1.sistema as privilegio,T2.planta,T1.rut_persona FROM PracticaDb.dbo.Usuario T1 JOIN PracticaDb.dbo.Personal T2 ON T1.rut_persona=T2.rut WHERE T1.userName='" + userName + "' AND T1.password='" + password + "'";
         SqlCommand selectUsuarios = new SqlCommand(query, cn);
 
         SqlDataReader reader = selectUsuarios.ExecuteReader();
