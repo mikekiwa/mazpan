@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460"
+	xmlns:mc="misClases.*">
+	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true" requestTimeout="30">
+		<mx:operation name="getReparaciones"	result="getReparacionesResult(event)" fault="ErrorFaultHandler(event, 'getReparaciones')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static var nombre:String = "InformeReparaciones";
+			
+			[Bindable]
+			private var reparaciones_ac:Array = new Array;
+			private var mes:int;
+			private var ano:int;
+			private var meses:Array = index.meses as Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				reparaciones_ac = new Array;
+			}
+			private function cargar():void
+			{
+				mes = meses_cb.selectedIndex + 1;
+				ano = ano_ns.value;
+				ElementoService.getReparaciones(index.usuario,mes,ano);
+			}
+			private function getReparacionesResult(event:ResultEvent):void
+			{
+				reparaciones_ac = event.result.Tables.Reparaciones.Rows.source as Array;
+			}
+			private function exportar():void
+			{
+				if(reparaciones_ac.length)
+				{
+					var pdf:LAYOUT_MANTENCIONES = new LAYOUT_MANTENCIONES;
+					pdf.generarReparaciones(reparaciones_ac, index.meses[mes-1], ano.toString());
+				} 
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox x="10" y="10" width="755">
+		<mx:Label x="10" y="10" text="Seleccione Periodo"/>
+		<mx:Label text="Mes"/>
+		<mx:ComboBox dataProvider="{index.meses}" id="meses_cb"/>
+		<mx:Label text="Año"/>
+		<mx:NumericStepper minimum="2010" maximum="9999" id="ano_ns"/>
+		<mx:Button x="184" y="8" label="Cargar" width="76" click="cargar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="10" y="40" width="755" height="380" dataProvider="{reparaciones_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Actividad" dataField="actividad"/>
+			<mx:DataGridColumn headerText="Fecha" dataField="realizada"/>
+			<mx:DataGridColumn headerText="Maquina" dataField="codigo"/>
+			<mx:DataGridColumn headerText="Frecuencia" dataField="frecuencia"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="689" y="428" label="Exportar" id="exportar_btn" click="exportar()"/>
+</mx:Canvas>

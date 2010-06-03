@@ -26,6 +26,7 @@
 			private function getItemsResult(event:ResultEvent):void
             {
             	items = event.result.Tables.Items.Rows.source as Array;
+            	
             	dataProvider = new ITEMS(items).getItemsContables();
 			    selectedIndex=0;
             }

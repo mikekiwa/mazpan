@@ -6,6 +6,10 @@
 
 	<mx:Script>
 		<![CDATA[
+			import componentes.planMantencion.Informes;
+			import componentes.planMantencion.DuracionTurno;
+			import componentes.planMantencion.InformeFallas;
+			import componentes.planMantencion.Fallas;
 			import componentes.planMantencion.ListaSolicitudes;
 			import componentes.planMantencion.Plan;
 			import eventos.ComplexEvent;
@@ -20,12 +24,17 @@
 			private var nombre:String = "MenuPlanMantencion";
 			
 			[Bindable]
-			private var visibles:Array = [false,false];
+			private var visibles:Array = [false,false,false,false,false];
+			
+			public static const bits:int  = 6;
 			
 			public function privilegios(privilegios:Array, inicio:int):void
 			{
 				if(privilegios[inicio]=='1') visibles[0] = true;
 				if(privilegios[inicio+1]=='1') visibles[1] = true;
+				if(privilegios[inicio+2]=='1') visibles[2] = true;
+				if(privilegios[inicio+3]=='1') visibles[3] = true;
+				if(privilegios[inicio+4]=='1') visibles[4] = true;
 			}
 			private function goState(destino:String):void
 			{
@@ -36,4 +45,7 @@
 	
 	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Actividades" width="100" click="goState(Plan.nombre)"/>
 	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Solicitudes" width="100" click="goState(ListaSolicitudes.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Fallas"		 width="100" click="goState(Fallas.nombre)"/>
+	<mx:LinkButton visible="{visibles[3]}" x="10" y="100" label="Informes"	 width="100" click="goState(Informes.nombre)"/>
+	<mx:LinkButton visible="{visibles[4]}" x="10" y="130" label="Turnos"	 width="100" click="goState(DuracionTurno.nombre)"/>
 </mx:Canvas>

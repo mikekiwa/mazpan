@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Fallas" backgroundColor="#cccccc" 
+	xmlns:ns1="componentes.planMantencion.*">
+	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="allElementos" result="allElementosResult(event)" fault="ErrorFaultHandler(event, 'allElementos')"/>
+	</mx:WebService>
+
+	<mx:states>
+		<mx:State name="FallasMaquina">
+			<mx:RemoveChild target="{canvas1}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:FallasMaquina id="fallasMaquina_cmp" complexClick="atras(event)"/>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+	
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static var nombre:String = "Fallas";
+			
+			[Bindable]
+			private var maquinas_ac:Array = new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				currentState = '';
+				ElementoService.allElementos(index.usuario,"MAQ");
+			}
+			private function allElementosResult(event:ResultEvent):void
+			{
+				maquinas_ac = event.result.Tables.Elementos.Rows.source as Array;
+			}
+			private function agregarFalla():void
+			{
+				if(tabla.selectedIndex!=-1)
+				{
+					currentState = FallasMaquina.nombre;
+					fallasMaquina_cmp.cargarFallasMaquina(tabla.selectedItem);
+				}
+				else
+				{
+					Alert.show("Antes debe seleccionar una Máquina","Mensaje");
+				}
+			}
+			private function atras(event:ComplexEvent):void
+			{
+				init();
+			}
+		]]>
+	</mx:Script>
+	<mx:Canvas id="canvas1">
+		<mx:DataGrid id="tabla" width="775" x="0" y="36" dataProvider="{maquinas_ac}" height="384">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Código"  	dataField="codigo" 		width="160"/>
+				<mx:DataGridColumn headerText="Nombre" 		dataField="nombre" 		width="400"/>
+				<mx:DataGridColumn headerText="Descripción" dataField="descripcion" width="300"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:Label x="10" y="10" text="Lista de Maquinas:" fontWeight="bold"/>
+		<mx:Button x="662" y="428" label="Agregar Falla" click="agregarFalla()"/>
+	</mx:Canvas>
+</mx:Panel>

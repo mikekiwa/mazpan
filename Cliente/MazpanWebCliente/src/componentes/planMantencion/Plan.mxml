@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="775" height="460" 
-	backgroundColor="#cccccc" creationComplete="init()" xmlns:ns1="componentes.*">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" 
+	backgroundColor="#cccccc" xmlns:ns1="componentes.*" title="Plan de Actividades">
 
 	<mx:WebService id="ElementoService" 		wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="getActividades" 		result="getActividadesResult(event)" 		fault="ErrorFaultHandler(event, 'getActividades')"/>
@@ -58,6 +58,7 @@
             		obj.codigo = aux[i].codigo;
             		var fecha:Date = aux[i].planificada;
             		obj.planificada = index.dias.getItemAt(fecha.day) + " " + fecha.getDate() + " " + index.meses.getItemAt(fecha.getMonth());
+            		obj.realizada = false;
             		actividadesDelPlan_ac.addItem(obj);
             	}
 			}
@@ -101,8 +102,39 @@
 			}
 			private function exportar():void
 			{
-				var pdf:FORMATO = new FORMATO();
-				pdf.generar(actividadesDelPlan_ac, fecha);
+				if(actividadesDelPlan_ac.length>0)
+				{
+					var pdf:FORMATO = new FORMATO();
+					pdf.actividades(actividadesDelPlan_ac, fecha);
+				}
+				else
+				{
+					Alert.show("No existen actividades por realizar","Mensaje");
+				}
+			}
+			private function todas():void
+			{
+				for(var i:int=0; i<actividadesDelPlan_ac.length; i++)
+				{
+					actividadesDelPlan_ac[i].realizada = true;
+				}
+				actividades_dg.dataProvider = actividadesDelPlan_ac;
+			}
+			private function ninguna():void
+			{
+				for(var i:int=0; i<actividadesDelPlan_ac.length; i++)
+				{
+					actividadesDelPlan_ac[i].realizada = false;
+				}
+				actividades_dg.dataProvider = actividadesDelPlan_ac;
+			}
+			private function invertir():void
+			{
+				for(var i:int=0; i<actividadesDelPlan_ac.length; i++)
+				{
+					actividadesDelPlan_ac[i].realizada = !(actividadesDelPlan_ac[i].realizada);
+				}
+				actividades_dg.dataProvider = actividadesDelPlan_ac;
 			}
 		]]>
 	</mx:Script>
@@ -110,7 +142,7 @@
 	<mx:Image x="10" y="10" width="56" height="55" source="iconos/save.png" 	id="save_img"	 click="realizar()"/>
 	<mx:Image x="74" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
 	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"	 click="exportar()"/>
-	<mx:DataGrid x="10" y="78" width="735" height="332" dataProvider="{actividadesDelPlan_ac}">
+	<mx:DataGrid x="0" y="106" width="775" height="354" dataProvider="{actividadesDelPlan_ac}" id="actividades_dg">
 		<mx:columns>
 			<mx:DataGridColumn id="colse2" headerText="" width="20" textAlign="center" sortable="false">
 				<mx:itemRenderer>
@@ -119,10 +151,13 @@
 					</mx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Nombre"		dataField="nombre" 		width="100" sortable="false"/>
-			<mx:DataGridColumn headerText="Actividad"	dataField="actividad" 	width="200" sortable="false"/>
-			<mx:DataGridColumn headerText="Planificada"	dataField="planificada" width="100" sortable="false"/>
-			<mx:DataGridColumn headerText="Frecuencia" 	dataField="frecuencia" 	width="50" 	sortable="false"/>
+			<mx:DataGridColumn headerText="Nombre"		dataField="nombre" 		width="230" sortable="false"/>
+			<mx:DataGridColumn headerText="Actividad"	dataField="actividad" 	width="290" sortable="false"/>
+			<mx:DataGridColumn headerText="Planificada"	dataField="planificada" width="135" sortable="false"/>
+			<mx:DataGridColumn headerText="Frecuencia" 	dataField="frecuencia" 	width="100" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
+	<mx:LinkButton x="0" y="76" label="Todas" color="#0000FF" click="todas()"/>
+	<mx:LinkButton x="61" y="76" label="Ninguna" color="#0000FF" click="ninguna()"/>
+	<mx:LinkButton x="135" y="76" label="Invertir" color="#0000FF" click="invertir()"/>
 </mx:Panel>

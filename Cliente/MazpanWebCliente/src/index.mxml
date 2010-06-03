@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%" 
-	creationComplete="init()" backgroundColor="#999999"
+	creationComplete="init()" backgroundColor="#999999" scriptTimeLimit="120"
 	xmlns:ns1="componentes.*" 
 	xmlns:ns2="componentes.mantencionMaquinas.*" 
 	xmlns:ns3="componentes.Acordeon.*" 
@@ -59,7 +59,7 @@
 		<mx:State name="SolicitudesTrabajo">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns6:SolicitudesTrabajo id="solicitud_cmp"/>
+				<ns6:SolicitudesTrabajo id="solicitudesTrabajo_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="AgentesExternos">
@@ -80,7 +80,6 @@
 				<ns5:Usuarios id="usuarios_cmp"/>
 			</mx:AddChild>
 		</mx:State>
-		
 		<mx:State name="EstadoResultado">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
@@ -231,6 +230,48 @@
 				<ns14:Evaluaciones id="evaluaciones_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="NivelSucursal">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:NivelSucursal id="nivelSucursal_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="MOperacional">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:MOperacional id="mOperacional_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Actividades">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns6:Actividades id="actividades_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Fallas">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns7:Fallas id="fallas_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Informes">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns7:Informes id="informes_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="Solicitudes">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns6:Solicitudes id="solicitudes_cmp"/>
+			</mx:AddChild>
+		</mx:State>
+		<mx:State name="DuracionTurno">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns7:DuracionTurno id="duracionTurno_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 	
 	
@@ -249,12 +290,11 @@
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			
-			
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
 			[Bindable]
-			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
+			public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
+			//public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]
@@ -306,7 +346,7 @@
 					if(event.stateDestination == AgentesExternos.nombre) agentesExternos_cmp.init();
 					if(event.stateDestination == Personal.nombre) personal_cmp.init();
 					if(event.stateDestination == Tecnicos.nombre) tecnicos_cmp.init();
-					if(event.stateDestination == SolicitudesTrabajo.nombre) solicitud_cmp.init();
+					if(event.stateDestination == SolicitudesTrabajo.nombre) solicitudesTrabajo_cmp.init();
 					if(event.stateDestination == Usuarios.nombre) usuarios_cmp.init();
 					if(event.stateDestination == Plan.nombre) plan_cmp.init();
 					if(event.stateDestination == ListaSolicitudes.nombre) listaSolicitudes_cmp.init();
@@ -326,6 +366,13 @@
 					if(event.stateDestination == TrabajadoresSeccion.nombre) trabajadoresSeccion_cmp.init();
 					if(event.stateDestination == Evaluar.nombre) evaluar_cmp.init();
 					if(event.stateDestination == Evaluaciones.nombre) evaluaciones_cmp.init();
+					if(event.stateDestination == NivelSucursal.nombre) nivelSucursal_cmp.init();
+					if(event.stateDestination == MOperacional.nombre) mOperacional_cmp.init();
+					if(event.stateDestination == Actividades.nombre) actividades_cmp.init();
+					if(event.stateDestination == Fallas.nombre) fallas_cmp.init();
+					if(event.stateDestination == Informes.nombre) informes_cmp.init();
+					if(event.stateDestination == Solicitudes.nombre) solicitudes_cmp.init();
+					if(event.stateDestination == DuracionTurno.nombre) duracionTurno_cmp.init();
 				}
 				else
 				{
@@ -358,7 +405,7 @@
 				}
 			}
 			
-			//<mx:Style source="Estilo.css"/>	
+			//<mx:Style source="Estilo.css"/>
 		]]>
 	</mx:Script>
 	
@@ -376,5 +423,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 15.15.04.10"/>
+	<mx:Label x="525" y="10" text="Versión 22.20.05.10"/>
 </mx:Application>

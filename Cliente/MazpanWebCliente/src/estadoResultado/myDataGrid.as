@@ -24,7 +24,7 @@ package estadoResultado
 			if( dataIndex < dp.length ) item = dp.getItemAt(dataIndex);
 			if( item != null )
 			{
-			 	if(dataIndex==5 || dataIndex==13 || dataIndex==14 || dataIndex==25 || dataIndex==26 || dataIndex==30 || dataIndex==32) color = 0xAAAAAA;
+			 	if(dataIndex==ITEMS.VENTASNETAS || dataIndex==ITEMS.COSTOSTOTALES || dataIndex==ITEMS.MARGENCOMERCIAL || dataIndex==ITEMS.TOTALGASTOSADMINISTRATIVOS || dataIndex==ITEMS.MARGENOPERACIONAL || dataIndex==ITEMS.RESULTADOANTESDEIMPUESTO || dataIndex==ITEMS.RESULTADO) color = 0xAAAAAA;
 			 	
 			 	item.ENE = formato.format(item.ENE);
 			 	item.FEB = formato.format(item.FEB);

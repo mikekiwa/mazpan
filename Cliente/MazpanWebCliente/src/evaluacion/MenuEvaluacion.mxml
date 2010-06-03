@@ -20,6 +20,8 @@
 			[Bindable]
 			private var visibles:Array = [false,false];
 			
+			public static const bits:int  = 3;
+			
 			public function privilegios(privilegios:Array, inicio:int):void
 			{
 				if(privilegios[inicio]=='1') visibles[0] = true;

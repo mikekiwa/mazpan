@@ -1,7 +1,5 @@
 package estadoResultado
 {
-	import flash.media.ID3Info;
-	
 	import mx.formatters.NumberFormatter;
 	
 	public class ITEMS
@@ -15,37 +13,38 @@ package estadoResultado
 		public static const COSTOSINSUMOSZONAS:int = 7;
 		public static const COSTOSINSUMOSPANADERIA:int = 8;
 		public static const MOOPERATIVA:int = 9;
-		public static const GASTOSENERGIA:int = 10;
-		public static const MANTENCION:int = 11;
-		public static const ASEO:int = 12;
-		public static const REMUNERACIONES:int = 16;
-		public static const INDEMNIZACIONES:int = 17;
-		public static const MANTENCIONYARRIENDO:int = 18;
-		public static const ADMINISTRACION:int = 19;
-		public static const TRANSPORTESFLETES:int = 20;
-		public static const GESTIONVENTAS:int = 21;
-		public static const ASESORIAS:int = 22;
-		public static const ADMINISTRACIONCAS:int = 23;
-		public static const DEPRECIACIONES:int = 24;
-		public static const GASTOSFINANCIEROS:int = 27;
-		public static const CORRECCIONMONETARIA:int = 28;
-		public static const OTROSINGRESOSYGASTOS:int = 29;
-		public static const IMPUESTOALARENTA:int = 31;
+		public static const MERMASYAJUSTEDEINVENTARIO:int = 10;
+		public static const GASTOSENERGIA:int = 11;
+		public static const MANTENCION:int = 12;
+		public static const ASEO:int = 13;
+		public static const REMUNERACIONES:int = 17;
+		public static const INDEMNIZACIONES:int = 18;
+		public static const MANTENCIONYARRIENDO:int = 19;
+		public static const ADMINISTRACION:int = 20;
+		public static const TRANSPORTESFLETES:int = 21;
+		public static const GESTIONVENTAS:int = 22;
+		public static const ASESORIAS:int = 23;
+		public static const ADMINISTRACIONCAS:int = 24;
+		public static const DEPRECIACIONES:int = 25;
+		public static const GASTOSFINANCIEROS:int = 28;
+		public static const CORRECCIONMONETARIA:int = 29;
+		public static const OTROSINGRESOSYGASTOS:int = 30;
+		public static const IMPUESTOALARENTA:int = 32;
 		public static const MAXVALUE:int = 999999;
 		
 		//Constantes de resultado
 		public static const VENTASNETAS:int = 5;
-		public static const COSTOSTOTALES:int = 13;
-		public static const MARGENCOMERCIAL:int = 14;
-		public static const TOTALGASTOSADMINISTRATIVOS:int = 25;
-		public static const MARGENOPERACIONAL:int = 26;
-		public static const RESULTADOANTESDEIMPUESTO:int = 30;
-		public static const RESULTADO:int = 32;
+		public static const COSTOSTOTALES:int = 14;
+		public static const MARGENCOMERCIAL:int = 15;
+		public static const TOTALGASTOSADMINISTRATIVOS:int = 26;
+		public static const MARGENOPERACIONAL:int = 27;
+		public static const RESULTADOANTESDEIMPUESTO:int = 31;
+		public static const RESULTADO:int = 33;
 		
 		//Contantes de titulo
 		public static const VENTAS:int = 0;
 		public static const COSTOS:int = 6;
-		public static const GASTOSADMISTRATIVOS:int = 15;
+		public static const GASTOSADMISTRATIVOS:int = 16;
 		
 		
 		private var formato:NumberFormatter = new NumberFormatter();
@@ -55,7 +54,7 @@ package estadoResultado
 		 */ 
 		public function ITEMS(_datos:Array)
 		{
-			this.datos = _datos;
+			datos = _datos;
 			formato.precision=0;
 			formato.useThousandsSeparator=true;
 			formato.thousandsSeparatorFrom=".";
@@ -72,7 +71,8 @@ package estadoResultado
 			if(itemIndex==RAPELCLIENTE) return COSTOSINSUMOSZONAS;
 			if(itemIndex==COSTOSINSUMOSZONAS) return COSTOSINSUMOSPANADERIA;
 			if(itemIndex==COSTOSINSUMOSPANADERIA) return MOOPERATIVA;
-			if(itemIndex==MOOPERATIVA) return GASTOSENERGIA;
+			if(itemIndex==MOOPERATIVA) return MERMASYAJUSTEDEINVENTARIO;
+			if(itemIndex==MERMASYAJUSTEDEINVENTARIO) return GASTOSENERGIA;
 			if(itemIndex==GASTOSENERGIA) return MANTENCION;
 			if(itemIndex==MANTENCION) return ASEO;
 			if(itemIndex==ASEO) return REMUNERACIONES;
@@ -127,7 +127,8 @@ package estadoResultado
 				if(item==COSTOSTOTALES)return COSTOSINSUMOSZONAS;
 				if(item==COSTOSINSUMOSZONAS)return COSTOSINSUMOSPANADERIA;
 				if(item==COSTOSINSUMOSPANADERIA)return MOOPERATIVA;
-				if(item==MOOPERATIVA)return GASTOSENERGIA;
+				if(item==MOOPERATIVA)return MERMASYAJUSTEDEINVENTARIO;
+				if(item==MERMASYAJUSTEDEINVENTARIO)return GASTOSENERGIA;
 				if(item==GASTOSENERGIA)return MANTENCION;
 				if(item==MANTENCION)return ASEO;
 				if(item==ASEO)return MAXVALUE;
@@ -239,7 +240,53 @@ package estadoResultado
 			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))	ppto += Number(removeFormatting(datos[i].PPTO)) as int;
 			datos[item].PPTO = formato.format(ppto);
 			
+			var pptoEne:int = 0;
+			var pptoFeb:int = 0;
+			var pptoMar:int = 0;
+			var pptoAbr:int = 0;
+			var pptoMay:int = 0;
+			var pptoJun:int = 0;
+			var pptoJul:int = 0;
+			var pptoAgo:int = 0;
+			var pptoSep:int = 0;
+			var pptoOct:int = 0;
+			var pptoNov:int = 0;
+			var pptoDic:int = 0;
+			
+			for(i=sig(item,item); i!=MAXVALUE; i=sig(i,item))
+			{
+				if(datos[i].PPTOMENSUAL!=null) 
+				{
+					pptoEne += Number(removeFormatting(datos[i].PPTOMENSUAL[0])) as int;
+					pptoFeb += Number(removeFormatting(datos[i].PPTOMENSUAL[1])) as int;
+					pptoMar += Number(removeFormatting(datos[i].PPTOMENSUAL[2])) as int;
+					pptoAbr += Number(removeFormatting(datos[i].PPTOMENSUAL[3])) as int;
+					pptoMay += Number(removeFormatting(datos[i].PPTOMENSUAL[4])) as int;
+					pptoJun += Number(removeFormatting(datos[i].PPTOMENSUAL[5])) as int;
+					pptoJul += Number(removeFormatting(datos[i].PPTOMENSUAL[6])) as int;
+					pptoAgo += Number(removeFormatting(datos[i].PPTOMENSUAL[7])) as int;
+					pptoSep += Number(removeFormatting(datos[i].PPTOMENSUAL[8])) as int;
+					pptoOct += Number(removeFormatting(datos[i].PPTOMENSUAL[9])) as int;
+					pptoNov += Number(removeFormatting(datos[i].PPTOMENSUAL[10])) as int;
+					pptoDic += Number(removeFormatting(datos[i].PPTOMENSUAL[11])) as int;
+				}
 			}
+			var pptoMensual:Array = [0,0,0,0,0,0,0,0,0,0,0,0];	
+			
+			pptoMensual[0] = formato.format(pptoEne);
+			pptoMensual[1] = formato.format(pptoFeb);
+			pptoMensual[2] = formato.format(pptoMar);
+			pptoMensual[3] = formato.format(pptoAbr);
+			pptoMensual[4] = formato.format(pptoMay);
+			pptoMensual[5] = formato.format(pptoJun);
+			pptoMensual[6] = formato.format(pptoJul);
+			pptoMensual[7] = formato.format(pptoAgo);
+			pptoMensual[8] = formato.format(pptoSep);
+			pptoMensual[9] = formato.format(pptoOct);
+			pptoMensual[10] = formato.format(pptoNov);
+			pptoMensual[11] = formato.format(pptoDic);
+			datos[item].PPTOMENSUAL = pptoMensual;
+		}
 		public function CALCULAR_IMPUESTO():void
 		{
 			SET(IMPUESTOALARENTA);
@@ -285,7 +332,6 @@ package estadoResultado
 			
 			var ppto:Number = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].PPTO)) as Number;
 			datos[IMPUESTOALARENTA].PPTO = formato.format(Math.round(ppto));
-			
 		}
 		public function CALCULAR_OTROS(numColumns:int):void
 		{
@@ -316,7 +362,11 @@ package estadoResultado
    			
    			var realAcum:int = -0.17 * Number(removeFormatting(datos[RESULTADOANTESDEIMPUESTO].REAL)) as Number;
    			datos[IMPUESTOALARENTA].REAL = formato.format(realAcum);
+   			
    			calcularREAL(RESULTADO);
+   			
+   			
+   			
    			calcularDESV();
   		}
   		private function calcularREAL(item:int):void
@@ -365,6 +415,7 @@ package estadoResultado
 			salida.push(datos[COSTOSINSUMOSZONAS].itemName);
 			salida.push(datos[COSTOSINSUMOSPANADERIA].itemName);
 			salida.push(datos[MOOPERATIVA].itemName);
+			salida.push(datos[MERMASYAJUSTEDEINVENTARIO].itemName);
 			salida.push(datos[GASTOSENERGIA].itemName);
 			salida.push(datos[MANTENCION].itemName);
 			salida.push(datos[ASEO].itemName);
