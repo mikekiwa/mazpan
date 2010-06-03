@@ -646,5 +646,216 @@ public class ElementoService : System.Web.Services.WebService
             else return -2;
         else return -1;
     }
+
+    [WebMethod]
+    public Falla getHoras(Usuario u, string fecha)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            DateTime f = toDateTime(fecha);
+            SqlConnection cn = new SqlConnection(coneccionString);
+            cn.Open();
+            string query = "SELECT TOP 1 id,horas FROM [PracticaDb].[dbo].[DuracionTurno] WHERE [fecha]<='"+f.Year+"-"+f.Month+"-"+f.Day+"' ORDER BY [fecha] DESC";
+            SqlCommand consulta = new SqlCommand(query, cn);
+
+            SqlDataReader reader = consulta.ExecuteReader();
+
+            Falla salida = new Falla();
+            
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0)) salida.id = reader.GetInt32(0)+""; else salida.id = "";
+                if (!reader.IsDBNull(1)) salida.hora = reader.GetInt32(1)+""; else salida.id = "";
+            }
+            cn.Close();
+            return salida;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    [WebMethod]
+    public int addFalla(Usuario u, Falla f)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            DateTime f1 = toDateTime(f.fecha);
+            string fecha = f1.Year + "-" + f1.Month + "-" + f1.Day;
+            return Ejecutar("INSERT INTO [PracticaDb].[dbo].[Fallas] (falla,fecha,horas,codigo,turno) VALUES ('"+f.nombre+"','"+fecha+"','"+f.hora+"','"+f.codigo+"','"+f.turno+"')");
+        }
+        else
+        {
+            return 666;
+        }
+    }
+
+    public bool existe(string from, string where)
+    {
+        String query = " SELECT COUNT(*) FROM " + from + " WHERE " + where + " ";
+        SqlConnection selectConn = new SqlConnection(coneccionString);
+        selectConn.Open();
+        SqlCommand select = new SqlCommand(query, selectConn);
+        SqlDataReader reader = select.ExecuteReader();
+
+        if (reader.Read())
+        {
+            if (reader.GetInt32(0) == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    private DataTable obtenerTabla(string nombre, string query)
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = nombre;
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+   
+
+    [WebMethod]
+    public DataTable allFallas(Usuario u, Elemento e)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Fallas", "SELECT falla, horas, convert(varchar(50),fecha, 111) as fecha FROM [PracticaDb].[dbo].[Fallas] WHERE codigo='" + e.codigo + "'");
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    [WebMethod]
+    public DataTable allTurnos(Usuario u)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            return obtenerTabla("Turnos", "SELECT horas, convert(varchar(50),fecha, 103) as fecha, motivoCambio FROM [PracticaDb].[dbo].[DuracionTurno]");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    [WebMethod]
+    public int addTurno(Usuario u, string horas, string motivoCambio)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            DateTime t = DateTime.Now;
+            string fecha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
+            return Ejecutar("INSERT INTO [PracticaDb].[dbo].[DuracionTurno] (horas, fecha, motivoCambio, visible) VALUES ('"+horas+"','"+fecha+"','"+motivoCambio+"','True')");
+        }
+        else
+        {
+            return 666;
+        }
+    }
+    [WebMethod]
+    public DataTable allFallasPeriodo(Usuario u, string desde, string hasta)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            DateTime t1 = toDateTime(desde);
+            DateTime t2 = toDateTime(hasta);
+
+            string f1 = t1.Year + "-" + t1.Month + "-" + t1.Day + " 00:00.000";
+            string f2 = t2.Year + "-" + t2.Month + "-" + t2.Day + " 00:00.000";
+
+            return obtenerTabla("FallasPeriodo", "SELECT T1.falla,convert(varchar(50),T1.fecha, 103) as fecha, T1.horas, T2.id as grupo, T2.horas as turno, 1-convert(numeric(12,2),T1.horas/T2.horas) as efectividad, T3.* FROM [PracticaDb].[dbo].[Fallas] T1 JOIN [PracticaDb].[dbo].[DuracionTurno] T2 ON T1.turno=T2.id JOIN [PracticaDb].[dbo].[Elemento] T3 ON T3.codigo=T1.codigo WHERE T1.fecha>='" + f1 + "' AND T1.fecha<='" + f2 + "' ORDER BY T2.id, T1.codigo ");
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    [WebMethod]
+    public List<Maquinas> getMaquinas(Usuario u, List<string> fechas)
+    {
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        {
+            List<Maquinas> ms = new List<Maquinas>();
+
+            DateTime t;
+            string f;
+
+            
+            string query;
+
+            foreach (string fecha in fechas)
+            {
+                t = toDateTime(fecha);
+                f = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
+                query = "SELECT '"+fecha+"' as fecha ,COUNT(*) as maquinas FROM [PracticaDb].[dbo].[Elemento] WHERE puestaMarcha<='"+f+"' ";
+                SqlConnection cn = new SqlConnection(coneccionString);
+                cn.Open();
+                SqlCommand consulta = new SqlCommand(query, cn);
+                SqlDataReader reader = consulta.ExecuteReader();
+                
+                Maquinas m = new Maquinas();
+                
+                while (reader.Read())
+                {
+                    if (!reader.IsDBNull(0)) m.fecha = reader.GetString(0); else m.fecha = "";
+                    if (!reader.IsDBNull(1)) m.maquinas = reader.GetInt32(1) + ""; else m.maquinas = "0";
+                    ms.Add(m);
+                }
+                cn.Close();
+            }
+            
+
+            return ms;
+        }
+        else
+        {
+            return null;
+        }
+    }
+    [WebMethod]
+    public DataTable getReparaciones(Usuario u, int mes, int ano)
+    {
+        
+        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
+        { 
+            DateTime f1 = new DateTime(ano,mes,1);
+            DateTime f2 = f1.AddMonths(1);
+
+            string desde = f1.Year + "-" + f1.Month + "-" + f1.Day + " 00:00.000";
+            string hasta = f2.Year + "-" + f2.Month + "-" + f2.Day + " 00:00.000";
+            string query = "SELECT T1.frecuencia, T1.actividad, convert(varchar,planificada,105) as planificada, convert(varchar,realizada,105) as realizada, T2.codigo,T2.nombre,T2.condicionRecepcion  FROM [PracticaDb].[dbo].[Plan] T1 JOIN [PracticaDb].[dbo].[Elemento] T2 ON T1.codigo=T2.codigo WHERE realizada>='" + desde + "' AND realizada<'" + hasta + "' ";
+            return obtenerTabla("Reparaciones", query); ;
+        }
+        else
+        {
+            return null;
+        }
+    }
 }
 
