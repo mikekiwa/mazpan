@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Definición Zonas-Panaderías">
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true" requestTimeout="60">
+		<mx:operation name="getSucursales2" result="getSucursales2Result(event)"	fault="ErrorFaultHandler(event, 'getSucursales2')"/>
+		<mx:operation name="cambiarNivel" 	result="cambiarNivelResult(event)"		fault="ErrorFaultHandler(event, 'cambiarNivel')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "NivelSucursal";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var sucursales_ac:Array =  new Array();
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				Service.getSucursales2(index.usuario);
+			}
+			private function getSucursales2Result(event:ResultEvent):void
+            {
+            	sucursales_ac = event.result.Tables.Sucursales.Rows.source as Array;
+            }
+            private const PANADERIA:int = 1;
+            private const ZONA:int = 2;
+            private var nivel:int;
+            private var datosParaGuardar:Array;
+            
+            private function guardar(level:int):void
+            {
+            	nivel=level;
+            	datosParaGuardar = new Array();
+	          	for(var i:int=0;i< sucursales_ac.length;i++)
+	          		if(sucursales_ac[i].ok) datosParaGuardar.push(sucursales_ac[i].Code);
+          		
+          		if(datosParaGuardar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(datosParaGuardar.length==1) Alert.show("¿Está seguro que desea cambiar nivel de la sucursal seleccionada?","Cambiar nivel", 3, this, guardarClick);
+                	else Alert.show("¿Está seguro que desea cambiar nivel de las "+datosParaGuardar.length+" sucursales seleccionadas?","Cambiar nivel", 3, this, guardarClick);	
+            	}
+                else Alert.show("Debe seleccionar al menos una Sucursal para poder proceder");
+            }
+            private function guardarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		Service.cambiarNivel(index.usuario, datosParaGuardar, nivel);
+				}
+			}
+			private function cambiarNivelResult(event:ResultEvent):void
+            {
+            	if(event.result == 1)
+				{
+					init();//Cargo nuevamente las sucursales para ver los cambios
+					trace("Datos Guardados exitosamente");
+				}
+				else if(event.result == -1)
+				{
+				 	trace("Es posible que otro usuario este trabajando en sobre lo mismo, los cambios no han sido efectuados en su totalidad","Ocurrio un suceso inesperado de baja importancia");
+				}
+				else
+				{
+					trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
+				}
+            }
+		]]>
+	</mx:Script>
+	
+	<mx:DataGrid x="10" y="10" width="755" height="410" dataProvider="{sucursales_ac}">
+		<mx:columns>
+			<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingRight="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.ok=!data.ok}" selected="{data.ok}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Código" dataField="Code" width="50"/>
+			<mx:DataGridColumn headerText="Nombre" dataField="Name" width="252"/>
+			<mx:DataGridColumn headerText="Abreviatura" dataField="ShortName" width="150"/>
+			<mx:DataGridColumn headerText="Nivel" dataField="Nivel" width="283"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label x="176" y="432" text="Presione uno de los botones para cambiar las sucursales seleccionadas" fontStyle="italic"/>
+	<mx:Button x="681" y="428" label="Panadería" click="guardar(PANADERIA)"/>
+	<mx:Button x="589" y="428" label="Zona" width="84" click="guardar(ZONA)"/>
+</mx:Panel>

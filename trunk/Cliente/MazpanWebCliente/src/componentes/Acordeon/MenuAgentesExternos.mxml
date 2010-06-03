@@ -23,6 +23,8 @@
 			[Bindable]
 			private var visibles:Array = [false,false];
 			
+			public static const bits:int  = 3;
+			
 			private function goState(destino:String):void
 			{
 				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null)); 

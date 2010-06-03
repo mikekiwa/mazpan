@@ -31,7 +31,7 @@
 			[Bindable]
 			private var tipoComponente_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]
-			private var sistema_ac:ArrayCollection = new ArrayCollection(["Macánico","Eléctrico","Hidráulico","Neumático","Manual"]);
+			private var sistema_ac:ArrayCollection = new ArrayCollection(["Mecánico","Eléctrico","Hidráulico","Neumático","Manual"]);
 			[Bindable]
 			private var especificaciones_ac:ArrayCollection = new ArrayCollection();
 			[Bindable]

@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="120" height="200">
+
 	<mx:Metadata>
 			[Event(name="complexClick",type="eventos.ComplexEvent")]
 	</mx:Metadata>
 
 	<mx:Script>
 		<![CDATA[
+			import componentes.general.Solicitudes;
+			import componentes.general.Actividades;
 			import componentes.general.SolicitudesTrabajo;
 			import eventos.ComplexEvent;
 			
@@ -19,7 +22,9 @@
 			private var nombre:String = "MenuGeneral";
 			
 			[Bindable]
-			private var visibles:Array = [false];
+			private var visibles:Array = [false,false,false];
+			
+			public static const bits:int  = 4;
 			
 			private function goState(destino:String):void
 			{
@@ -29,9 +34,12 @@
 			{
 				if(privilegios[inicio]=='1') visibles[0] = true;
 				if(privilegios[inicio+1]=='1') visibles[1] = true;
+				if(privilegios[inicio+2]=='1') visibles[2] = true;
 			}
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Solicitudes" width="100" click="goState(SolicitudesTrabajo.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Solicitar" width="100" click="goState(SolicitudesTrabajo.nombre)"/>
+	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Actividades" width="100" click="goState(Actividades.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Solicitudes" width="100" click="goState(Solicitudes.nombre)"/>
 </mx:Canvas>

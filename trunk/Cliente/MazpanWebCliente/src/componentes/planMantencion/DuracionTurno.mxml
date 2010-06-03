@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Duracion Turno">
+	
+	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 		result="getFechaResult(event)"		fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="addTurno" 	result="addTurnoResult(event)" 	fault="ErrorFaultHandler(event, 'addTurno')"/>
+		<mx:operation name="allTurnos" 	result="allTurnosResult(event)" fault="ErrorFaultHandler(event, 'allTurnos')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "DuracionTurno";
+			
+			[Bindable]
+			private var duracionTurnos_ac:Array = new Array;
+			[Bindable]
+			private var hoy:String = "";
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+            {
+            	CombosService.getFecha();
+            }
+            private function getFechaResult(event:ResultEvent):void	
+            {
+            	hoy = event.result as String;
+            	ElementoService.allTurnos(index.usuario);
+            }
+            private function allTurnosResult(event:ResultEvent):void
+            {
+            	duracionTurnos_ac = event.result.Tables.Turnos.Rows.source as Array;
+            }
+			private function agregar():void
+			{
+				if(motivoCambio_ti.text.length>0)
+				{
+					ElementoService.addTurno(index.usuario, horas_ns.value, motivoCambio_ti.text);
+					horas_ns.value = 0.1;
+					motivoCambio_ti.text = "";
+				}
+			}
+			private function addTurnoResult(event:ResultEvent):void
+			{
+				if(event.result==1)
+				{
+					init();
+				}
+				else
+				{
+					trace("No es posible proceder por ahora");
+				}
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:DataGrid x="10" y="36" width="755" height="308" dataProvider="{duracionTurnos_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Horas de Trabajo" dataField="horas" width="120"/>
+			<mx:DataGridColumn headerText="Fecha Inicio" dataField="fecha" width="120"/>
+			<mx:DataGridColumn headerText="Motivo Cambio" dataField="motivoCambio"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label x="10" y="10" text="Duracion de turnos al:"/>
+	<mx:Label x="147" y="10" text="{hoy}"/>
+	<mx:Canvas x="10" y="352" width="755" height="98" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Agregar nueva duración del turno"/>
+		<mx:Label x="10" y="36" text="Duración:"/>
+		<mx:Label x="146" y="36" text="Motivo Cambio:"/>
+		<mx:NumericStepper minimum="0.1" maximum="24" stepSize="0.1" x="76" y="34" id="horas_ns"/>
+		<mx:TextInput x="247" y="34" width="496" maxChars="50" id="motivoCambio_ti"/>
+		<mx:Button x="670" y="64" label="Agregar" click="agregar()"/>
+		<mx:Label x="253" y="68" text="Fecha de inicio corresponde a fecha de sistema" fontStyle="italic"/>
+	</mx:Canvas>
+	
+</mx:Panel>

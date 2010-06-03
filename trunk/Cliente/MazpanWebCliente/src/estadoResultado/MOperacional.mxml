@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Margen Operacional Consolidado">
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true" requestTimeout="60">
+		<mx:operation name="getSucursales2" result="getSucursales2Result(event)"	fault="ErrorFaultHandler(event, 'getSucursales2')"/>
+		<mx:operation name="getMOC" 		result="getMOCResult(event)"			fault="ErrorFaultHandler(event, 'getMOC')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.collections.ArrayCollection;
+			import mx.rpc.events.FaultEvent;
+			
+			public static const nombre:String = "MOperacional";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var sucursales_ac:Array =  new Array();
+			[Bindable]
+            private var meses_ac:ArrayCollection = index.meses;
+            
+            private var ano:int = 2010;
+            private var mes:int = 1;
+            
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            	cargar_btn.enabled = false;
+            	pdf_btn.enabled = false;
+            }
+			public function init():void
+			{
+				cargar_btn.enabled = false;
+				pdf_btn.enabled = false;
+				Service.getSucursales2(index.usuario);
+			}
+			private function getSucursales2Result(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Sucursales.Rows.source as Array;
+            	var nivel:String = aux[i].Nivel;
+            	for(var i:int=0; i<aux.length;i++)
+            	{
+            		if(aux[i].Nivel!=nivel)
+            		{
+            			var total:Object = new Object;
+            			total.Name = "                TOTAL "+nivel;
+            			total.Nivel = "Total";
+            			sucursales_ac.push(total);
+            			
+            			nivel=aux[i].Nivel;
+            		} 
+            		sucursales_ac.push(aux[i]);
+            	}
+            	var total2:Object = new Object;
+    			total2.Name = "                TOTAL "+nivel;
+    			total2.Nivel = "Total";
+    			sucursales_ac.push(total2);
+    			
+            	tabla.dataProvider = sucursales_ac;
+            	cargar_btn.enabled = true;
+            }
+            private function cargar():void
+            {
+            	cargar_btn.enabled = false;
+            	ano = ano_ns.value;
+            	mes = mes_cb.selectedIndex+1;
+            	Service.getMOC(index.usuario, sucursales_ac[0].Code, mes, ano);
+            }
+            private function getMOCResult(event:ResultEvent):void
+            {
+            	
+            }
+		]]>
+	</mx:Script>
+	<mx:HBox x="0" y="0" width="775">
+		<mx:Label text="Seleccione Mes:"/>
+		<mx:ComboBox dataProvider="{meses_ac}" id="mes_cb"/>
+		<mx:Label text="Seleccione Año:"/>
+		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" id="ano_ns"/>
+		<mx:Button label="Cargar" width="72" click="cargar()" id="cargar_btn" enabled="false"/>
+	</mx:HBox>
+	<mx:DataGrid x="10" y="30" width="755" height="382" dataProvider="{sucursales_ac}" id="tabla">
+		<mx:columns>
+			<mx:DataGridColumn headerText="" dataField="Name" sortable="false"/>
+			<mx:DataGridColumn headerText="Margen Operacional 1 M$" dataField="Valor" sortable="false" textAlign="right"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="693" y="428" label="PDF" width="72" id="pdf_btn" enabled="false"/>
+</mx:Panel>

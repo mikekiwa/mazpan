@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Lista de Solicitudes"
-	backgroundColor="#cccccc" creationComplete="init()">
+	backgroundColor="#cccccc">
 	
 	<mx:WebService id="SolicitudService" 		wsdl="{index.URL + 'SolicitudService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="listSolicitudes" 		result="listSolicitudesResult(event)" 	 	fault="ErrorFaultHandler(event, 'listSolicitudes')"/>
@@ -52,8 +52,15 @@
 			}	
 			private function exportar():void
 			{
-				var pdf:FORMATO = new FORMATO();
-				pdf.solicitudes(solicitudes_ac, fecha);
+				if(solicitudes_ac.length>0)
+				{
+					var pdf:FORMATO = new FORMATO();
+					pdf.solicitudes(solicitudes_ac, fecha);
+				}
+				else
+				{
+					Alert.show("No existen solicitudes pendientes","Mensaje");
+				}
 			}
 			private function realizar():void
 			{
@@ -93,13 +100,34 @@
 				 	trace("Imposible responder a la solicitud en estos momentos, por favor intente mas tarde");
 				}
 			}
+			private function todas():void
+			{
+				for(var i:int=0; i<solicitudes_ac.length; i++)
+				{
+					solicitudes_ac[i].hecha = true;
+				}
+			}
+			private function ninguna():void
+			{
+				for(var i:int=0; i<solicitudes_ac.length; i++)
+				{
+					solicitudes_ac[i].hecha = false;
+				}
+			}
+			private function invertir():void
+			{
+				for(var i:int=0; i<solicitudes_ac.length; i++)
+				{
+					solicitudes_ac[i].hecha = !(solicitudes_ac[i].hecha);
+				}
+			}
 		]]>
 	</mx:Script>
 	
 	<mx:Image x="10" y="10" width="56" height="55" source="iconos/save.png" 	id="save_img"	 click="realizar()"/>
 	<mx:Image x="74" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
 	<mx:Image x="138" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"	 click="exportar()"/>
-	<mx:DataGrid x="10" y="78" width="755" height="372" dataProvider="{solicitudes_ac}">
+	<mx:DataGrid x="0" y="106" width="775" height="354" dataProvider="{solicitudes_ac}">
 		<mx:columns>
 			<mx:DataGridColumn id="colse2" headerText="" width="20" textAlign="center" sortable="false">
 				<mx:itemRenderer>
@@ -116,4 +144,7 @@
 			<mx:DataGridColumn headerText="Especialidad" dataField="especialidad"/>
 		</mx:columns>
 	</mx:DataGrid>
+	<mx:LinkButton x="0" y="76" label="Todas" color="#0000FF" click="todas()"/>
+	<mx:LinkButton x="61" y="76" label="Ninguna" color="#0000FF" click="ninguna()"/>
+	<mx:LinkButton x="135" y="76" label="Invertir" color="#0000FF" click="invertir()"/>
 </mx:Panel>

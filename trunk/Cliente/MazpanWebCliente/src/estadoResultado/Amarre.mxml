@@ -42,6 +42,7 @@
 			private function getItemsResult(event:ResultEvent):void
             {
             	items = event.result.Tables.Items.Rows.source as Array;
+            	
             	itemsCombo = new ITEMS(items).getItemsContables();
 				itemsCombo.push(items[ITEMS.IMPUESTOALARENTA].itemName);
 				if(items_cb!=null) items_cb.selectedIndex=0;
@@ -87,7 +88,7 @@
             	{
             		var id:int=888;
             		for(var i:int=0; i<items.length; i++) 
-            			if(items_cb.text == items[i].itemName) id=i+1;
+            			if(items_cb.text == items[i].itemName) id=items[i].id;
             		
         			if(id!=888) Service.guardar(datosParaGuardar, id);
         			else trace("Imposible proceder por ahora, intentelo más tarde.");

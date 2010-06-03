@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460"
+	xmlns:misClases="misClases.*">
+	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getHoras" 	result="getHorasResult(event)" 	fault="ErrorFaultHandler(event, 'getHoras')"/>
+		<mx:operation name="addFalla" 	result="addFallaResult(event)" 	fault="ErrorFaultHandler(event, 'addFalla')"/>
+		<mx:operation name="allFallas" 	result="allFallasResult(event)" fault="ErrorFaultHandler(event, 'allFallas')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+   	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.charts.DateTimeAxis;
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.ResultEvent;
+			import eventos.ComplexEvent;
+		
+			public static const nombre:String = "FallasMaquina";
+		
+			[Bindable]
+			private var maquina:Object = new Object;
+			[Bindable]
+			private var horas:Object = new Object;
+			[Bindable]
+			private var fallas_ac:Array = new Array;
+			/*
+			 *Falta ver si estamos en la jornada de trabajo correspondiente
+			 *mostrar cuantas horas falla sobre el total de hora que se ocupa la maquina
+			 *mostrar mas datos de la maquina 
+			 */
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function cargarFallasMaquina(_maquina:Object):void
+			{
+				agregar_btn.enabled = false;
+				maquina = _maquina;
+				cargarFallas();
+			}
+			private function goState(destino:String):void
+			{
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK, destino, nombre, null));
+			}
+			private function cargarHora():void
+			{
+				agregar_btn.enabled = false;
+				ElementoService.getHoras(index.usuario,fecha_df.text);
+			}
+			private function getHorasResult(event:ResultEvent):void
+			{
+				horas = event.result as Object;
+				if(horas!=null && horas.hora!=null && horas.hora!="") agregar_btn.enabled = true;
+				else Alert.show("No existe definido las horas de operación de las maquinas para esta fecha","Mensaje");
+			}
+			private function agregar():void
+			{
+				var falla:Object = new Object;
+				falla.nombre = falla_ti.text;
+				falla.hora   = horas_ns.value;
+				falla.fecha  = fecha_df.text;
+				falla.turno  = horas.id;
+				falla.codigo = maquina.codigo;
+				clear();
+				ElementoService.addFalla(index.usuario, falla);				
+			}
+			private function addFallaResult(event:ResultEvent):void
+			{
+				if(event.result==1)
+				{
+					cargarFallas();
+				}
+				else
+				{
+					Alert.show("Imposible proceder por ahora");
+				}
+			}
+			private function allFallasResult(event:ResultEvent):void
+			{
+				fallas_ac = event.result.Tables.Fallas.Rows.source as Array;
+			}
+			private function cargarFallas():void
+			{
+				fallas_ac = new Array;
+				ElementoService.allFallas(index.usuario, maquina);
+			}
+			private function clear():void
+			{
+				falla_ti.text = "";
+				horas_ns.value = 0.1;
+				fecha_df.text = "";
+				horas = new Object;
+				agregar_btn.enabled = false;
+			}
+			private function exportar():void
+			{
+				var pdf:LAYOUT_MANTENCIONES = new LAYOUT_MANTENCIONES();
+				pdf.generar(fallas_ac, maquina);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label text="Maquina:" x="10" y="10"/>
+	<mx:Label text="{maquina.nombre}" x="75" y="10"/>
+	<mx:Canvas x="10" y="36" width="755" height="68" borderStyle="solid">
+		<mx:Label text="Agregar Falla" fontWeight="bold" x="10" y="10"/>
+		<mx:TextInput width="509" maxChars="50" x="100" y="6" id="falla_ti"/>
+		<mx:Label text="Fecha:" x="100" y="40"/>
+		<misClases:myDateField x="150" y="36" id="fecha_df" change="cargarHora()"/>
+		<mx:Label text="Horas Detenida:" x="248" y="40"/>
+		<mx:NumericStepper minimum="0.1" maximum="24" stepSize="0.1" x="352" y="36" id="horas_ns"/>
+		<mx:Label x="422" y="40" text="Horas diarias de Operación:"/>
+		<mx:Label x="591" y="40" text="{horas.hora}"/>
+		<mx:Button label="Agregar" x="672" y="36" id="agregar_btn" enabled="false" click="agregar()"/>
+	</mx:Canvas>
+	<mx:DataGrid x="10" y="112" width="755" height="308" id="tabla" dataProvider="{fallas_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Falla" dataField="falla"/>
+			<mx:DataGridColumn headerText="Fecha" dataField="fecha"/>
+			<mx:DataGridColumn headerText="Horas" dataField="horas"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="605" y="428" label="Atras" width="76" click="goState('')"/>
+	<mx:Button x="689" y="428" label="Exportar" click="exportar()"/>
+	
+</mx:Canvas>

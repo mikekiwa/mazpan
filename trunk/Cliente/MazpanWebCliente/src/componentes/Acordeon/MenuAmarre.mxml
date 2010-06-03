@@ -19,7 +19,9 @@
 			private var nombre:String = "AmarreCuentas";
 			
 			[Bindable]
-			private var visibles:Array = [false,false];
+			private var visibles:Array = [false,false,false];
+			
+			public static const bits:int  = 4;
 			
 			private function goState(destino:String):void
 			{
@@ -29,10 +31,12 @@
 			{
 				if(privilegios[inicio]=='1') visibles[0] = true;
 				if(privilegios[inicio+1]=='1') visibles[1] = true;
+				if(privilegios[inicio+2]=='1') visibles[2] = true;
 			}
 		]]>
 	</mx:Script>
 	
 	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Amarre" 	width="100" click="goState(Amarre.nombre)"/>
 	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Revisar" 	width="100" click="goState(Revisar.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Sucursales" width="100" click="goState(NivelSucursal.nombre)"/>
 </mx:Canvas>

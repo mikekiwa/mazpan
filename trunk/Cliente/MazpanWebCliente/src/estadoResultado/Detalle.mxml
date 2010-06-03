@@ -22,7 +22,7 @@
 			public static const nombre:String = "Detalle";//correspondiente al estado en que se debiera colocar
 			
 			[Bindable]
-			private var total:String = "Total: 0 [M$]";; 
+			private var total:String = "Total: 0 [M$]";
 			[Bindable]
 			private var detalle_ac:Array;
 			[Bindable]
@@ -56,6 +56,7 @@
 			private function getItemsResult(event:ResultEvent):void
             {
             	items = event.result.Tables.Items.Rows.source as Array;
+            	
             	itemsCombo = new ITEMS(items).getItemsContables();
 				if(items_cb!=null) items_cb.selectedIndex=0;
 				
@@ -107,10 +108,8 @@
             		var j:int = detalle_ac[i].Column1;
             		aux += j;
             	}
-            	var r:int = (aux + 500) / 1000;
-            	var totalString:String = r + "";
             	
-            	total = "Total: "+ formato.format(r.toString()) + " [M$]";
+            	total = "Total: "+ formato.format(aux.toString()) + " [M$]";
             	
             	inicializado=true;
             }
@@ -118,9 +117,10 @@
 			private function cambiarDetalle():void
             {
             	detalle_ac = new Array();
+            	total = "Total: 0 [M$]"; 
 				var id:int=888;
 				for(var i:int=0; i<items.length; i++)
-            		if(items_cb.text == items[i].itemName) id=i+1;
+            		if(items_cb.text == items[i].itemName) id=items[i].id;
             		          	
             	Service.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,id, meses_cb.selectedIndex+1,ano_ns.value);
             }

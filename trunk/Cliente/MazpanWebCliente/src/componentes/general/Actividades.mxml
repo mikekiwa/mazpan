@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Actividades de Mantención"
+	backgroundColor="#cccccc" xmlns:ns1="componentes.*">
+
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getActividades" result="getActividadesResult(event)" fault="ErrorFaultHandler(event, 'getActividades')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="CombosService" wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getFecha" 		result="getFechaResult(event)" 		 fault="ErrorFaultHandler(event, 'getFecha')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import estadoResultado.FORMATO;
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static var nombre:String = "Actividades";
+			
+			[Bindable]
+			private var actividadesDelPlan_ac:ArrayCollection = new ArrayCollection();
+			
+			private var fecha:String = "";
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				fecha = "";
+				CombosService.getFecha();
+			}
+			private function getFechaResult(event:ResultEvent):void
+			{
+				fecha = event.result as String;
+				ElementoService.getActividades(index.usuario);
+			}
+			private function getActividadesResult(event:ResultEvent):void
+			{
+				var aux:Array = event.result.Tables.Plan.Rows.source as Array;
+				actividadesDelPlan_ac = new ArrayCollection();
+				
+				for(var i:int=0; i<aux.length; i++)
+            	{
+            		var obj:Object = new Object();
+            		obj.nombre = aux[i].nombre;
+            		obj.id = aux[i].id;	
+            		obj.actividad = aux[i].actividad;
+            		obj.mantencion = aux[i].mantencion;
+            		obj.frecuencia = aux[i].frecuencia;
+            		obj.codigo = aux[i].codigo;
+            		var fecha:Date = aux[i].planificada;
+            		obj.planificada = index.dias.getItemAt(fecha.day) + " " + fecha.getDate() + " " + index.meses.getItemAt(fecha.getMonth());
+            		actividadesDelPlan_ac.addItem(obj);
+            	}
+			}
+			private function exportar():void
+			{
+				if(actividadesDelPlan_ac.length>0)
+				{
+					var pdf:FORMATO = new FORMATO();
+					pdf.actividades(actividadesDelPlan_ac, fecha);
+				}
+				else
+				{
+					Alert.show("No existen actividades por realizar","Mensaje");
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:Image x="10" y="10" width="56" height="55" source="iconos/refresh.png" 	id="refresh_img" click="init()"/>
+	<mx:Image x="74" y="10" width="56" height="55" source="iconos/pdf.png" 	id="pdf_img"	 click="exportar()"/>
+	<mx:DataGrid x="0" y="73" width="775" height="387" dataProvider="{actividadesDelPlan_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Nombre"		dataField="nombre" 		width="100" sortable="false"/>
+			<mx:DataGridColumn headerText="Actividad"	dataField="actividad" 	width="200" sortable="false"/>
+			<mx:DataGridColumn headerText="Planificada"	dataField="planificada" width="100" sortable="false"/>
+			<mx:DataGridColumn headerText="Frecuencia" 	dataField="frecuencia" 	width="50" 	sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>

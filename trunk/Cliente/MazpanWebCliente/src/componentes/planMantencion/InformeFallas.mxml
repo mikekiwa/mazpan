@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" 
+	xmlns:mc="misClases.*">
+	
+	<mx:WebService id="ElementoService" wsdl="{index.URL + 'ElementoService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="allFallasPeriodo" 	result="allFallasPeriodoResult(event)" fault="ErrorFaultHandler(event, 'allFallasPeriodo')"/>
+		<mx:operation name="getMaquinas" 		result="getMaquinasResult(event)" fault="ErrorFaultHandler(event, 'getMaquinas')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static var nombre:String = "InformeFallas";
+			
+			[Bindable]
+			private var fallasPeriodo_ac:Array = new Array; 
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				fallasPeriodo_ac = new Array;
+			}
+			public function cargar():void
+			{
+				if(desde_df.text.length>0 && hasta_df.text.length>0)
+				{
+					ElementoService.allFallasPeriodo(index.usuario,desde_df.text,hasta_df.text);
+				}
+			}
+			private function allFallasPeriodoResult(event:ResultEvent):void
+			{
+				fallasPeriodo_ac = event.result.Tables.FallasPeriodo.Rows.source as Array;
+				var fechas:Array = new Array;
+				for(var i:int=0; i<fallasPeriodo_ac.length; i++)
+				{
+					fechas.push(fallasPeriodo_ac[i].fecha);
+				}
+				ElementoService.getMaquinas(index.usuario,fechas);
+			}
+			private function getMaquinasResult(event:ResultEvent):void
+			{
+				var aux:Array = event.result.source as Array;
+				var i:int;
+				for(i=0; i<aux.length; i++)
+				{
+					fallasPeriodo_ac[i].maquinas = aux[i].maquinas;
+				}
+				
+				aux = new Array;
+				var grupo:int = fallasPeriodo_ac[0].grupo;
+				for(i=0;i<fallasPeriodo_ac.length; i++)
+				{
+					if(grupo!=fallasPeriodo_ac[i].grupo)
+					{
+						aux.push(new Object);
+						grupo = fallasPeriodo_ac[i].grupo;
+					}
+					aux.push(fallasPeriodo_ac[i]);
+				}
+				fallasPeriodo_ac = aux;
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox x="10" y="10" width="765">
+		<mx:Label text="Seleccione un periodo" fontWeight="bold"/>
+		<mx:Label text="Desde:"/>
+		<mc:myDateField id="desde_df"/>
+		<mx:Label text="Hasta:"/>
+		<mc:myDateField id="hasta_df"/>
+		<mx:Button label="Cargar" click="cargar()"/>
+	</mx:HBox>
+	<mx:DataGrid x="0" y="66" width="775" height="354" dataProvider="{fallasPeriodo_ac}">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Falla" dataField="falla"/>
+			<mx:DataGridColumn headerText="Fecha" dataField="fecha" width="80"/>
+			<mx:DataGridColumn headerText="[Hrs]" dataField="horas" width="45"/>
+			<mx:DataGridColumn headerText="J. Trabajo" dataField="turno" width="70"/>
+			<mx:DataGridColumn headerText="Eficacia" dataField="efectividad" width="60"/>
+			<mx:DataGridColumn headerText="# Maquinas" dataField="maquinas" width="80"/>
+			<mx:DataGridColumn headerText="Maquina" dataField="codigo" width="150"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Label x="10" y="40" text="Lista de Fallas"/>
+	<mx:Button x="689" y="428" label="Exportar"/>
+</mx:Canvas>
