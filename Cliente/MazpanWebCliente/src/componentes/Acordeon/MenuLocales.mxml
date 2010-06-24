@@ -6,12 +6,11 @@
 
 	<mx:Script>
 		<![CDATA[
-			import locales.PetroleoLuz;
-			import locales.Informe;
-			import locales.StockLocal;
-			import locales.Stock;
 			import locales.DesviacionOrdenes;
+			import locales.Stock;
+			import locales.GastosLocal;
 			import locales.ControlAsistencia;
+			import locales.Informe;
 			import eventos.ComplexEvent;
 			
 			[Bindable]
@@ -26,7 +25,7 @@
 			[Bindable]
 			private var visibles:Array = [false,false,false,false,false,false];
 			
-			public static const bits:int  = 7;
+			public static const bits:int = 7;
 			
 			public function privilegios(privilegios:Array, inicio:int):void
 			{
@@ -44,10 +43,9 @@
 		]]>
 	</mx:Script>
 	
-	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Asistencias" 	width="100" click="goState(ControlAsistencia.nombre)"/>
-	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Desv Ordenes" 	width="100" click="goState(DesviacionOrdenes.nombre)"/>
-	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Stock" 			width="100" click="goState(Stock.nombre)"/>
-	<mx:LinkButton visible="{visibles[3]}" x="10" y="100" label="Stock Local" 	width="100" click="goState(StockLocal.nombre)"/>
-	<mx:LinkButton visible="{visibles[4]}" x="10" y="130" label="Gastos" 		width="100" click="goState(PetroleoLuz.nombre)"/>
-	<mx:LinkButton visible="{visibles[5]}" x="10" y="160" label="Informe" 		width="100" click="goState(Informe.nombre)"/>
+	<mx:LinkButton visible="{visibles[0]}" x="10" y="10" label="Asistencia"  	width="100" click="goState(ControlAsistencia.nombre)"/>
+	<mx:LinkButton visible="{visibles[1]}" x="10" y="40" label="Gastos"  		width="100" click="goState(GastosLocal.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="70" label="Stock"  		width="100" click="goState(Stock.nombre)"/>
+	<mx:LinkButton visible="{visibles[2]}" x="10" y="100" label="Desviaciones"  	width="100" click="goState(DesviacionOrdenes.nombre)"/>
+	<mx:LinkButton visible="{visibles[3]}" x="10" y="130" label="Informe" 		width="100" click="goState(Informe.nombre)"/>
 </mx:Canvas>

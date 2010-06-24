@@ -47,9 +47,7 @@
 			{
 				if(local_cb.selectedIndex!=-1 && desde_df.text.length>0 && hasta_df.text.length>0)
 				{
-					LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,
-													desde_df.selectedDate.getFullYear()+"-"+(desde_df.selectedDate.getMonth()+1)+"-"+desde_df.selectedDate.date,
-													hasta_df.selectedDate.getFullYear()+"-"+(hasta_df.selectedDate.getMonth()+1)+"-"+hasta_df.selectedDate.date);
+					LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,desde_df.text, hasta_df.text);
 				}
 			}
 			private function getDesviacionesResult(event:ResultEvent):void

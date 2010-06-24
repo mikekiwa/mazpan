@@ -164,10 +164,10 @@
 				<ns13:ControlAsistencia id="controlAsistencia_cmp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="DesviacionOrdenes">
+		<mx:State name="GastosLocal">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns13:DesviacionOrdenes id="desviacionOrdenes_cmp"/>
+				<ns13:GastosLocal id="gastosLocal_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Stock">
@@ -176,10 +176,10 @@
 				<ns13:Stock id="stock_cmp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="StockLocal">
+		<mx:State name="DesviacionOrdenes">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns13:StockLocal id="stockLocal_cmp"/>
+				<ns13:DesviacionOrdenes id="desviacionOrdenes_cmp"/>
 			</mx:AddChild>
 		</mx:State>
 		<mx:State name="Informe">
@@ -188,12 +188,8 @@
 				<ns13:Informe id="informe_cmp"/>
 			</mx:AddChild>
 		</mx:State>
-		<mx:State name="PetroleoLuz">
-			<mx:RemoveChild target="{login}"/>
-			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
-				<ns13:PetroleoLuz id="petroleoLuz_cmp"/>
-			</mx:AddChild>
-		</mx:State>
+	
+	
 		<mx:State name="Items">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
@@ -273,10 +269,15 @@
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
-	
-	
+
 	<mx:Script>
 		<![CDATA[
+		/* 
+		Recordar: 	es necesario instalar PHP sobre ISS en la maquina que aloja la aplicacion
+					Esto para subir los documetos excel a nuestro servidor y que 
+					este despues lo encuentre y lo pueda leer y guardar en la BD.
+		 */
+			import locales.GastosLocal;
 			import misClases.HTTPUtil;
 			import componentes.Acordeon.MenuMantenciones;
 			import componentes.general.SolicitudesTrabajo;
@@ -292,14 +293,14 @@
 			
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
-			[Bindable]
-			public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			//public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
+			[Bindable] 
+			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
+			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
-
+			
 			public static var dias:ArrayCollection = new ArrayCollection(["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"]);
 			
 			[Bindable]
@@ -357,9 +358,9 @@
 					if(event.stateDestination == ControlAsistencia.nombre) controlAsistencia_cmp.init();
 					if(event.stateDestination == DesviacionOrdenes.nombre) desviacionOrdenes_cmp.init();
 					if(event.stateDestination == Stock.nombre) stock_cmp.init();
-					if(event.stateDestination == StockLocal.nombre) stockLocal_cmp.init();
+//					if(event.stateDestination == StockLocal.nombre) stockLocal_cmp.init();
+					if(event.stateDestination == GastosLocal.nombre) gastosLocal_cmp.init();
 					if(event.stateDestination == Informe.nombre) informe_cmp.init();
-					if(event.stateDestination == PetroleoLuz.nombre) petroleoLuz_cmp.init();
 					if(event.stateDestination == Items.nombre) items_cmp.init();
 					if(event.stateDestination == Secciones.nombre) secciones_cmp.init();
 					if(event.stateDestination == ItemSeccion.nombre) itemSeccion_cmp.init();
@@ -423,5 +424,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 22.20.05.10"/>
+	<mx:Label x="525" y="10" text="Versión 24.24.06.10"/>
 </mx:Application>

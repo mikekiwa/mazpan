@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Datos Informe"
-	creationComplete="init()">
+	xmlns:mc="misClases.*">
 	
-	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getFecha" 		result="getFechaResult(event)"		fault="ErrorFaultHandler(event, 'getFecha')"/>
-	</mx:WebService>
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
 		<mx:operation name="getAsistencia" 		result="getAsistenciaResult(event)"		fault="ErrorFaultHandler(event, 'getAsistencia')"/>
 		<mx:operation name="getDesviaciones" 	result="getDesviacionesResult(event)"	fault="ErrorFaultHandler(event, 'getDesviaciones')"/>
 		<mx:operation name="getStock" 			result="getStockResult(event)"	 		fault="ErrorFaultHandler(event, 'getStock')"/>
-		<mx:operation name="getProductosLocal" 	result="getProductosLocalResult(event)" fault="ErrorFaultHandler(event, 'getProductosLocal')"/>
-		<mx:operation name="getGastos"		result="getGastosResult(event)" 	fault="ErrorFaultHandler(event, 'getGastos')"/>
+		<mx:operation name="getGastos"			result="getGastosResult(event)" 		fault="ErrorFaultHandler(event, 'getGastos')"/>
 	</mx:WebService>
 	
 	<mx:Script>
@@ -23,8 +19,6 @@
 			public static const nombre:String = "Informe";
 			
 			[Bindable]
-			private var hoy:String;
-			[Bindable]
 			private var locales_ac:Array;
 			[Bindable]
 			private var asistencia_ac:Array;
@@ -33,11 +27,11 @@
 			[Bindable]
 			private var stock_ac:Array;
 			[Bindable]
-			private var stockFinal_ac:Array;
-			[Bindable]
 			private var petroleo:Object = new Object;
             [Bindable]
             private var luz:Object = new Object;
+			[Bindable]
+			private var gastosLocal:Array = new Array;
 			
 			private var formato:NumberFormatter = new NumberFormatter();
 			
@@ -58,30 +52,25 @@
 				locales_ac = new Array;
 				petroleo = new Object;
             	luz = new Object;
-				CombosService.getFecha();
-            }
-            private function getFechaResult(event:ResultEvent):void
-            {
-            	hoy = event.result as String;
-            	LocalesService.getLocales();
+				LocalesService.getLocales();
             }
             private function getLocalesResult(event:ResultEvent):void
             {
             	locales_ac = event.result.Tables.Locales.Rows.source as Array;
-            	if(locales_ac.length>0) LocalesService.getAsistencia(locales_ac[0].WhsCode);
+            	cargar();
             }
             private function cargar():void
 			{
 				exportar_btn.enabled = false;
-				if(local_cb.selectedIndex!=-1)
+				if(local_cb.selectedIndex!=-1 && fecha_df.text.length>0)
 				{
-					LocalesService.getAsistencia(local_cb.selectedItem.WhsCode);
+					LocalesService.getAsistencia(local_cb.selectedItem.WhsCode,fecha_df.text);
 				}
 			}
             private function getAsistenciaResult(event:ResultEvent):void
             {
             	asistencia_ac = event.result.Tables.Asistencia.Rows.source as Array;
-            	LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,"HOY","HOY");
+            	LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,fecha_df.text,fecha_df.text);
             }
             private function getDesviacionesResult(event:ResultEvent):void
             {
@@ -94,146 +83,66 @@
             	}
             	
             	desviaciones_ac = desviacionesAux;
-            	LocalesService.getStock(locales_ac[0].WhsCode);
-            }
-            
-            private function getStockResult(event:ResultEvent):void
-            {
-            	stock_ac = event.result.Tables.Stock.Rows.source as Array;
-            	for(var i:int=0; i<stock_ac.length; i++)
-            	{
-            		stock_ac[i].Local = 0;
-            		stock_ac[i].Diferencia = -1 * stock_ac[i].OnHand;
-            	}
-            	LocalesService.getProductosLocal(local_cb.selectedItem.WhsCode,"");
-            }
-            private function getProductosLocalResult(event:ResultEvent):void
-            {
-            	var auxProductos:Array = event.result.Tables.Productos.Rows.source as Array;
-            	var esta:Boolean;
+            	LocalesService.getGastos(local_cb.selectedItem.WhsCode, fecha_df.text);
             	
-            	for(var i:int=0; i<auxProductos.length; i++)
-            	{
-            		esta=false;
-            		for(var j:int=0; j<stock_ac.length; j++)
-            		{
-            			if(auxProductos[i].ItemCode==stock_ac[j].ItemCode)
-            			{
-            				esta = true;
-            				var aux:Number = Number(auxProductos[i].Local) - Number(stock_ac[j].OnHand);
-            				stock_ac[j].Diferencia = aux;
-            				stock_ac[j].Local = auxProductos[i].Local;
-            			}
-            		}
-            		if(!esta)
-            		{
-            			if(auxProductos[i].Local!=0)
-            			{
-            				auxProductos[i].OnHand = 0;
-            				auxProductos[i].Diferencia = Number(auxProductos[i].Local);
-            				stock_ac.push(auxProductos[i]);
-            			}
-            		}
-            	}
-            	
-            	var partes:Array;
-            	var numeroString:String;
-            	for(var k:int=0; k<stock_ac.length; k++)
-            	{
-            		if(stock_ac[k].Local!=0)
-            		{
-            			stock_ac[k].Local = formato.format(stock_ac[k].Local);
-            			numeroString = stock_ac[k].Local;
-            			partes = numeroString.split(',');
-            			if(partes[1]=="000") stock_ac[k].Local = partes[0];
-            		}
-            		if(stock_ac[k].OnHand!=0)
-            		{
-            			stock_ac[k].OnHand = formato.format(stock_ac[k].OnHand);
-            			numeroString = stock_ac[k].OnHand;
-            			partes = numeroString.split(',');
-            			if(partes[1]=="000") stock_ac[k].OnHand = partes[0];
-            		}
-            		if(stock_ac[k].Diferencia!=0)
-            		{
-            			stock_ac[k].Diferencia = formato.format(stock_ac[k].Diferencia);
-            			numeroString = stock_ac[k].Diferencia;
-            			partes = numeroString.split(',');
-            			if(partes[1]=="000") stock_ac[k].Diferencia = partes[0];
-            		}
-            	}
-            	stockFinal_ac = stock_ac;
-            	LocalesService.getGastos(local_cb.selectedItem.WhsCode);
             }
             private function getGastosResult(event:ResultEvent):void
             {
-            	var aux:Array = event.result.Tables.Gastos.Rows.source as Array;
-            	petroleo = new Object;
-            	luz = new Object;
+            	gastosLocal = event.result.Tables.Gastos.Rows.source as Array;
             	
-            	if(aux.length==2)
+            	LocalesService.getStock(local_cb.selectedItem.WhsCode,fecha_df.text);
+            }
+            private function getStockResult(event:ResultEvent):void
+            {
+            	var stockLocal:Array = event.result.StockLocal.Tables.StockLocal.Rows.source as Array;
+            	var stockSistema:Array = event.result.StockSistema.Tables.StockSistema.Rows.source as Array;
+            	stock_ac = new Array;
+            	
+            	for(var i:int=0; i<stockLocal.length; i++)
             	{
-            		if(aux[0].gasto=="Petroleo")
-            		{
-            			petroleo = aux[0];
-            			petroleo.total = formato.format(petroleo.total);
-            			luz = aux[1];
-            			luz.total = formato.format(luz.total);
-            		}
-            		else
-            		{
-            			luz = aux[0];
-            			luz.total = formato.format(luz.total);
-            			petroleo = aux[1];
-            			petroleo.total = formato.format(petroleo.total);
-            		}
-            	}
-            	if(aux.length==1)
-            	{
-            		if(aux[0].gasto=="Petroleo")
-            		{
-            			petroleo = aux[0];
-            			petroleo.total = formato.format(petroleo.total);
-            		}
-            		else
-            		{
-            			luz = aux[0];
-            			luz.total = formato.format(luz.total);
-            		}
+            		var producto:Object = new Object;
+            		producto.mostrar 	= true;
+            		producto.ItemName 	= stockLocal[i].ItemName;
+            		producto.Local 		= stockLocal[i].OnHand;
+            		producto.Sistema 	= stockSistema[i].OnHand;
+            		producto.InvntryUom = stockLocal[i].InvntryUom;
+            		producto.Diferencia = Number(stockLocal[i].OnHand as String) - Number(stockSistema[i].OnHand as String);
+            		stock_ac.push(producto);
             	}
             	exportar_btn.enabled  = true;
             }
+            
             private function exportar():void
             {
             	var layoutLocales:LayoutLocales = new LayoutLocales;
-            	layoutLocales.generar(asistencia_ac,desviaciones_ac,stockFinal_ac,hoy,local_cb.selectedItem,petroleo,luz);
+            	layoutLocales.generar(asistencia_ac,desviaciones_ac,stock_ac, gastosLocal, fecha_df.text,local_cb.selectedItem);
             }
             private function todos():void
             {
-            	for(var i:int=0; i<stockFinal_ac.length; i++)
+            	for(var i:int=0; i<stock_ac.length; i++)
             	{
-            		stockFinal_ac[i].mostrar = true;
+            		stock_ac[i].mostrar = true;
             	}
             }
             private function ninguno():void
             {
-            	for(var i:int=0; i<stockFinal_ac.length; i++)
+            	for(var i:int=0; i<stock_ac.length; i++)
             	{
-            		stockFinal_ac[i].mostrar = false;
+            		stock_ac[i].mostrar = false;
             	}
             }
             private function invertir():void
             {
-            	for(var i:int=0; i<stockFinal_ac.length; i++)
+            	for(var i:int=0; i<stock_ac.length; i++)
             	{
-            		stockFinal_ac[i].mostrar = !(stockFinal_ac[i].mostrar);
+            		stock_ac[i].mostrar = !(stock_ac[i].mostrar);
             	}
             }
 		]]>
 	</mx:Script>
 	<mx:HBox x="479" y="10" width="273">
 		<mx:Label text="Fecha:" fontWeight="bold"/>
-		<mx:Label text="{hoy}" fontWeight="bold"/>
+		<mc:myDateField id="fecha_df" change="cargar()"/>
 	</mx:HBox>
 	<mx:Label x="10" y="8" text="Local"/>
 	<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" x="51" y="6" change="cargar()"/>
@@ -259,8 +168,17 @@
 				</mx:columns>
 			</mx:DataGrid>
 		</mx:Canvas>
+		<mx:Canvas label="Gastos" width="100%" height="100%">
+			<mx:DataGrid x="0" y="0" width="773" height="351" dataProvider="{gastosLocal}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Gasto" dataField="gasto" width="120"/>
+					<mx:DataGridColumn headerText="Total" dataField="total" width="120"/>
+					<mx:DataGridColumn headerText="Observaciones" dataField="observaciones"/>
+				</mx:columns>
+			</mx:DataGrid>
+		</mx:Canvas>
 		<mx:Canvas label="Stock" width="100%" height="100%">
-			<mx:DataGrid x="0" y="30" width="100%" height="320" dataProvider="{stockFinal_ac}" id="tabla3">
+			<mx:DataGrid x="0" y="30" width="100%" height="320" dataProvider="{stock_ac}" id="tabla3">
 				<mx:columns>
 					<mx:DataGridColumn id="colsel" headerText=""  width="25" paddingRight="2" textAlign="center" sortable="false">
 						<mx:itemRenderer>
@@ -271,7 +189,7 @@
 					</mx:DataGridColumn>
 					<mx:DataGridColumn headerText="Item" dataField="ItemName" width="300"/>
 					<mx:DataGridColumn headerText="En Stock Local" dataField="Local" width="165" textAlign="right"/>
-					<mx:DataGridColumn headerText="En Stock Sistema" dataField="OnHand" width="165" textAlign="right"/>
+					<mx:DataGridColumn headerText="En Stock Sistema" dataField="Sistema" width="165" textAlign="right"/>
 					<mx:DataGridColumn headerText="Un. Medida" dataField="InvntryUom" width="111" textAlign="right" sortable="false"/>
 					<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="165" textAlign="right"/>
 				</mx:columns>
@@ -279,18 +197,6 @@
 			<mx:LinkButton x="0" y="0" label="Todos" color="#0531F0" click="todos()"/>
 			<mx:LinkButton x="61" y="0" label="Ninguno" color="#0531F0" click="ninguno()"/>
 			<mx:LinkButton x="135" y="0" label="Invertir" color="#0531F0" click="invertir()"/>
-		</mx:Canvas>
-		<mx:Canvas label="Gastos" width="100%" height="100%">
-			<mx:Label x="56" y="29" text="Gastos de Petroleo"/>
-			<mx:Label x="87" y="55" text="Total Gastos Petroleo"/>
-			<mx:Label x="87" y="81" text="Observaciones"/>
-			<mx:Label x="56" y="157" text="Gastos de Luz"/>
-			<mx:Label x="87" y="192" text="Total Gastos Luz"/>
-			<mx:Label x="87" y="218" text="Observaciones"/>
-			<mx:TextInput x="220" y="53" editable="false" text="{petroleo.total}"/>
-			<mx:TextArea x="220" y="80" width="440" height="71" editable="false" text="{petroleo.observaciones}"/>
-			<mx:TextInput x="220" y="190" editable="false" text="{luz.total}"/>
-			<mx:TextArea x="220" y="217" width="440" height="71" editable="false" text="{luz.observaciones}"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
 	<mx:Button x="689" y="428" label="Exportar" click="exportar()" id="exportar_btn" enabled="false"/>

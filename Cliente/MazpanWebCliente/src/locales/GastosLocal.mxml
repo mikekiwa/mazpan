@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="400" title="Gastos Local"
+	xmlns:mc="misClases.*">
+	
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getLocales" 	result="getLocalesResult(event)" 	fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getGastos"		result="getGastosResult(event)" 	fault="ErrorFaultHandler(event, 'getGastos')"/>
+		<mx:operation name="editarGastos"	result="guardarGastosResult(event)" fault="ErrorFaultHandler(event, 'editarGastos')"/>
+		<mx:operation name="guardarGastos"	result="guardarGastosResult(event)" fault="ErrorFaultHandler(event, 'guardarGastos')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String = "GastosLocal";
+			
+			[Bindable]
+			private var hoy:String;
+			[Bindable]
+			private var locales_ac:Array;
+			[Bindable]
+			private var gasto:Object = new Object;
+            private var gastos:Array = new Array; 	
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+            public function init():void
+            {
+            	locales_ac = new Array;
+            	gasto = new Object;
+            	LocalesService.getLocales();
+            }
+            private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	cargarGastos();
+            }
+            private function cargarGastos():void
+            {
+            	gasto = new Object;
+            	if(fecha_df.text.length>0 && locales_ac.length>0)
+            	{
+            		LocalesService.getGastos(local_cb.selectedItem.WhsCode, fecha_df.text);//fecha
+            	}
+            }
+            private function getGastosResult(event:ResultEvent):void
+            {
+            	gastos = event.result.Tables.Gastos.Rows.source as Array;
+            	cambiar();
+            }
+            private function cambiar():void
+            {
+            	gasto = new Object;
+            	
+            	for(var i:int; i<gastos.length; i++)
+            	{
+            		if(gastos[i].gasto==tiposGastos.selectedItem.toString()) gasto = gastos[i];
+            	}
+            }
+            private function guardar(gasto:Object,tipo:String):void
+            {
+            	if(gasto.id!=null) LocalesService.editarGasto(gasto.id,gasto.total,gasto.observaciones);
+            	else LocalesService.guardarGasto(tipo,local_cb.selectedItem.WhsCode,gasto.total,gasto.observaciones,fecha_df.text);
+            }
+            private function guardarGastosResult(event:ResultEvent):void
+            {
+            	if(event.result == 1)
+            	{
+            		if(local_cb.selectedIndex!=-1) cargarGastos();
+            	}
+            	else
+            	{
+            		trace("Error intentando cargar datos.");
+            	}
+            }
+		]]>
+	</mx:Script>
+	
+	<mx:Label x="10" y="12" text="Local"/>
+	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="cargarGastos()"/>
+	
+	<mx:HBox x="479" y="10" width="273">
+		<mx:Label text="Fecha:" fontWeight="bold"/>
+		<mc:myDateField id="fecha_df" change="cargarGastos()"/>
+	</mx:HBox>
+	
+	<mx:Label x="10" y="58" text="Selecione un tipo de Gastos"/>
+	<mx:ComboBox x="179" y="56" dataProvider="{VARIABLES.TIPOSGASTOS}" id="tiposGastos" change="cambiar()"/>
+	
+	<mx:Label x="10" y="100" text="Gasto" fontWeight="bold"/>
+	<mx:Canvas x="10" y="126" width="755" height="221" borderStyle="solid">
+		<mx:Label x="10" y="10" text="Total Gastado" />
+		<mx:Label x="10" y="39" text="Observaciones"/>
+		<mx:TextInput x="190" y="8" text="{gasto.total}" focusOut="{gasto.total=event.target.text}" restrict="0-9" id="totalPetroleo_ti"/>
+		<mx:TextArea x="190" y="38" width="553" height="141" text="{gasto.observaciones}" focusOut="{gasto.observaciones=event.target.text}" id="obsPetroleo_ta" maxChars="50"/>
+		<mx:Button x="671" y="187" label="Guardar" click="guardar(gasto,tiposGastos.selectedItem.toString())"/>
+		<mx:Label x="406" y="180" text="Máximo 50 caracteres" fontStyle="italic"/>
+	</mx:Canvas>
+</mx:Panel>
