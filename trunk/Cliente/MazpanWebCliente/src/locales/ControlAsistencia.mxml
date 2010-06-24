@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Control de Asistencia de Personal"
-	creationComplete="init()">
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Control Asistencia" xmlns:mc="misClases.*">
 	
-	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getFecha" 		result="getFechaResult(event)"		fault="ErrorFaultHandler(event, 'getFecha')"/>
-	</mx:WebService>
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
 		<mx:operation name="getSociosDe" 		result="getSociosDeResult(event)"		fault="ErrorFaultHandler(event, 'getSociosDe')"/>
@@ -17,11 +13,7 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 		
-		
 			public static const nombre:String = "ControlAsistencia";
-			
-			[Bindable]
-			private var hoy:String;
 			
 			[Bindable]
 			private var locales_ac:Array;
@@ -35,17 +27,12 @@
             public function init():void
             {
             	locales_ac = new Array;
-            	CombosService.getFecha();
-            }
-            private function getFechaResult(event:ResultEvent):void
-            {
-            	hoy = event.result as String;
             	LocalesService.getLocales();
             }
             private function getLocalesResult(event:ResultEvent):void
             {
             	locales_ac = event.result.Tables.Locales.Rows.source as Array;
-            	if(locales_ac.length>0) LocalesService.getSociosDe(locales_ac[0].WhsCode);
+            	recargarTrabajadores();
             }
             private function getSociosDeResult(event:ResultEvent):void
             {
@@ -75,7 +62,9 @@
             		item.asistencia = comboAsistencia.selectedItem;
             		if(horasAtraso.visible) item.atraso = horasAtraso.value;
             		else item.atraso = "";
-            		LocalesService.guardarAsistencia(item.CardCode,item.asistencia,item.atraso);
+            		
+            		if(fecha_df.text.length>0) LocalesService.guardarAsistencia(item.CardCode,item.asistencia,item.atraso,fecha_df.text);
+            		else Alert.show("Seleccione la fecha antes de proceder","Aviso");
             	}
             	else
             	{
@@ -86,23 +75,30 @@
             {
             	if(event.result==1)
             	{
-            		if(locales_ac.length>0) LocalesService.getSociosDe(local_cb.selectedItem.WhsCode);
+            		if(locales_ac.length>0) recargarTrabajadores();
             	}
             	else
             	{
             		trace ("ERROR: intento de guardar asistencia fallido");
             	}
             }
+            private function recargarTrabajadores():void
+            {
+            	if(fecha_df.text.length>0 && locales_ac.length>0)
+            	{
+            		LocalesService.getSociosDe(local_cb.selectedItem.WhsCode, fecha_df.text);
+            	}
+            }
 		]]>
 	</mx:Script>
 	
+	<mx:Label x="10" y="12" text="Local"/>
+	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="recargarTrabajadores()"/>
 	<mx:HBox x="479" y="10" width="273">
 		<mx:Label text="Fecha:" fontWeight="bold"/>
-		<mx:Label text="{hoy}" fontWeight="bold"/>
+		<mc:myDateField id="fecha_df" change="recargarTrabajadores()"/>
 	</mx:HBox>
 	<mx:Label x="10" y="38" text="Trabajadores"/>
-	<mx:Label x="10" y="12" text="Local"/>
-	<mx:ComboBox x="84" y="10" id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" change="{LocalesService.getSociosDe(local_cb.selectedItem.WhsCode)}"/>
 	<mx:DataGrid x="10" y="64" width="755" height="314" dataProvider="{socios_ac}" id="tabla">
 		<mx:columns>
 			<mx:DataGridColumn headerText="Nombres" dataField="CardName" width="495"/>

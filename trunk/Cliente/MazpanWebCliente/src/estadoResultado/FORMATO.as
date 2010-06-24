@@ -50,7 +50,9 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			pdf.addText(item+" año "+ano,90,20);
 			pdf.addText(sucursal, 110,30);
 			pdf.addImage(grafico,null,10,30,250,160);
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"Grafico.pdf");
+          	
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "Grafico.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"Grafico.pdf");
 		}
 		
 		public function generarTabla(arreglo:Array,tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
@@ -144,7 +146,8 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			}
 			
 			
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER1.pdf");
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER1.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER1.pdf");
 		}
 		
 		private function removeFormatting(e:String):String
@@ -155,9 +158,193 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 		}
 		private function parentesis(valor:String):String
 		{
+			
 			var arreglo:Array = valor.split('-');
 			if(arreglo.length==1) return valor;
 			return "("+arreglo[1]+")";
+		}
+		public function generarTabla4(arreglo:Array, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
+		{
+			pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
+			
+			var elMES:String = index.meses[meses];
+			var m1:String='-';
+			var m2:String='-';
+			var m3:String='-';
+			if(meses==1){ m3='ENE';}
+			if(meses==2){ m2='ENE';m3='FEB';}
+			if(meses==3){ m1='ENE';m2='FEB';m3='MAR';}
+			if(meses==4){ m1='FEB';m2='MAR';m3='ABR';}
+			if(meses==5){ m1='MAR';m2='ABR';m3='MAY';}
+			if(meses==6){ m1='ABR';m2='MAY';m3='JUN';}
+			if(meses==7){ m1='MAY';m2='JUN';m3='JUL';}
+			if(meses==8){ m1='JUN';m2='JUL';m3='AGO';}
+			if(meses==9){ m1='JUL';m2='AGO';m3='SEP';}
+			if(meses==10){ m1='AGO';m2='SEP';m3='OCT';}
+			if(meses==11){ m1='SEP';m2='OCT';m3='NOV';}
+			
+			pdf.setFontSize(15);
+			pdf.addImage(img,null,0,0);
+			pdf.addCell(53,1);//espacio para la imagen
+			pdf.addCell(147, 10,titulo,0,0,Align.CENTER);
+			pdf.writeText(6,"\n");
+			pdf.addCell(53,1);//espacio para la imagen
+			pdf.addCell(147,10,elMES+" "+ano,0,0,Align.CENTER);
+			pdf.writeText(10,"\n");
+			
+			pdf.setFontSize(8);
+			pdf.writeText(2,"\n");
+			pdf.addCell(47, 4,ano,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(53, 14,"INGRESOS Y GASTOS",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(47, 4,elMES+" "+ano,1,0,Align.CENTER);
+			pdf.addCell(3,1);//espacio
+			pdf.addCell(47, 4,"ACUMULADO a "+elMES+" "+ano,1,0,Align.CENTER);
+
+			pdf.writeText(5,"\n");
+			pdf.addCell(15, 4,m1,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,m2,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,m3,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(53, 4);//NADA
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"REAL",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"DESV",1,0,Align.CENTER);
+			pdf.addCell(3,1);//espacio
+			pdf.addCell(15, 4,"REAL",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"DESV",1,0,Align.CENTER);
+			
+			pdf.writeText(5,"\n");
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(53, 4);//NADA
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"%",1,0,Align.CENTER);
+			pdf.addCell(3,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"%",1,0,Align.CENTER);
+			pdf.writeText(8,"\n");
+			pdf.setFontSize(6);
+			
+			addDatosLineas(arreglo,ITEMS.VENTASZONAS,ITEMS.VENTASNETAS,meses,2);
+			addLineaTotal(1,2);
+			addTotal(arreglo,ITEMS.VENTASNETAS,meses,2);
+			addLineaTotal(1,2);
+			
+			addDatosLineas(arreglo,ITEMS.COSTOSINSUMOSZONAS,ITEMS.COSTOSTOTALES,meses,2);
+			addLineaTotal(1,2);
+			addTotal(arreglo,ITEMS.COSTOSTOTALES,meses,2);
+			addLineaTotal(2,2);
+			addTotal(arreglo,ITEMS.MARGENCOMERCIAL,meses,2);
+			addLineaTotal(1,2);
+			
+			addTexto("GASTOS DE ADM. Y VENTAS",2);
+			addDatosLineas(arreglo,ITEMS.REMUNERACIONES,ITEMS.DEPRECIACIONES,meses,2);
+			addLineaTotal(1,2);
+			
+			addTotalGastosAdministrativosYVentas("TOTAL GASTOS ADM. Y VENTAS",arreglo,meses,2);
+			addLineaTotal(2,2);
+			addTotalMargenOperacionalBruto("MARGEN OPERACIONAL BRUTO",arreglo,meses,2);
+			addLineaTotal(1,2);
+/////////////////////	
+			
+			pdf.setFontSize(8);
+			pdf.writeText(2,"\n");
+			pdf.addCell(47, 4,ano,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(53, 14,"INGRESOS Y GASTOS",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(47, 4,elMES+" "+ano,1,0,Align.CENTER);
+			pdf.addCell(3,1);//espacio
+			pdf.addCell(47, 4,"ACUMULADO a "+elMES+" "+ano,1,0,Align.CENTER);
+
+			pdf.writeText(5,"\n");
+			pdf.addCell(15, 4,m1,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,m2,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,m3,1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(53, 4);//NADA
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"REAL",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"DESV",1,0,Align.CENTER);
+			pdf.addCell(3,1);//espacio
+			pdf.addCell(15, 4,"REAL",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"DESV",1,0,Align.CENTER);
+			
+			pdf.writeText(5,"\n");
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(53, 4);//NADA
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"%",1,0,Align.CENTER);
+			pdf.addCell(3,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(1,1);//espacio
+			pdf.addCell(15, 4,"%",1,0,Align.CENTER);
+			pdf.writeText(8,"\n");
+			pdf.setFontSize(6);
+			
+			addDatosLineas(arreglo,ITEMS.VENTASZONAS,ITEMS.VENTASNETAS,meses,2);
+			addLineaTotal(1,2);
+			addTotal(arreglo,ITEMS.VENTASNETAS,meses,2);
+			addLineaTotal(1,2);
+			
+			addDatosLineas(arreglo,ITEMS.COSTOSINSUMOSZONAS,ITEMS.COSTOSTOTALES,meses,2);
+			addLineaTotal(1,2);
+			addTotal(arreglo,ITEMS.COSTOSTOTALES,meses,2);
+			addLineaTotal(2,2);
+			addTotal(arreglo,ITEMS.MARGENCOMERCIAL,meses,2);
+			addLineaTotal(1,2);
+			
+			addTexto("GASTOS DE ADM. Y VENTAS",2);
+			addDatosLineas(arreglo,ITEMS.REMUNERACIONES,ITEMS.DEPRECIACIONES,meses,2);
+			addLineaTotal(1,2);
+			
+			addTotalGastosAdministrativosYVentas("TOTAL GASTOS ADM. Y VENTAS",arreglo,meses,2);
+			addLineaTotal(2,2);
+			addTotalMargenOperacionalBruto("MARGEN OPERACIONAL BRUTO",arreglo,meses,2);
+			addLineaTotal(1,2);
+			
+			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER3-2.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "ER3-2.pdf");
 		}
 		public function generarTabla3(arreglo:Array, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
 		{
@@ -258,7 +445,7 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			addDatosLineas(arreglo,ITEMS.REMUNERACIONES,ITEMS.DEPRECIACIONES,meses);
 			addLineaTotal();
 			
-			addTexto("TOTAL GASTOS ADM. Y VENTAS");
+			addTotalGastosAdministrativosYVentas("TOTAL GASTOS ADM. Y VENTAS",arreglo,meses);
 			addLineaTotal(2);
 			addTotalMargenOperacionalBruto("MARGEN OPERACIONAL BRUTO",arreglo,meses);
 			addLineaTotal();
@@ -278,9 +465,10 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			addTotal(arreglo,ITEMS.RESULTADO,meses);
 			addLineaTotal();
 			
-			pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "actividades.pdf");
+			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER3-1.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "ER3-1.pdf");
 		}
-		private function addTotalMargenOperacionalBruto(nombre:String,arreglo:Array,meses:int):void
+		private function addTotalGastosAdministrativosYVentas(nombre:String,arreglo:Array,meses:int,escala:int=1):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -295,76 +483,193 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			var da:String='0';
 			
 			var realAux:String='0';
-			/**
-			 *Deberia restar 26 -25 para este total
-			 *
-			 *
-			 *
-			 * 
-			 */
-			if(meses==0){ realAux=(int(arreglo[26].ENE)-int(arreglo[25].ENE))+"";}
-			if(meses==1){ realAux=(int(arreglo[26].FEB)-int(arreglo[25].FEB))+"";m3 = parentesis((int(arreglo[26].ENE)-int(arreglo[25].ENE))+"");}
-			if(meses==2){ realAux=(int(arreglo[26].MAR)-int(arreglo[25].MAR))+"";m3 = parentesis((int(arreglo[26].FEB)-int(arreglo[25].FEB))+"");m2 = parentesis((int(arreglo[26].ENE)-int(arreglo[25].ENE))+"");}
-			if(meses==3){ realAux=(int(arreglo[26].ABR)-int(arreglo[25].ABR))+"";m3 = parentesis((int(arreglo[26].MAR)-int(arreglo[25].MAR))+"");m2 = parentesis((int(arreglo[26].FEB)-int(arreglo[25].FEB))+"");m1 = parentesis((int(arreglo[26].ENE)-int(arreglo[25].ENE))+"");}
-			if(meses==4){ realAux=(int(arreglo[26].MAY)-int(arreglo[25].MAY))+"";m3 = parentesis((int(arreglo[26].ABR)-int(arreglo[25].ABR))+"");m2 = parentesis((int(arreglo[26].MAR)-int(arreglo[25].MAR))+"");m1 = parentesis((int(arreglo[26].FEB)-int(arreglo[25].FEB))+"");}
-			if(meses==5){ realAux=(int(arreglo[26].JUN)-int(arreglo[25].JUN))+"";m3 = parentesis((int(arreglo[26].MAY)-int(arreglo[25].MAY))+"");m2 = parentesis((int(arreglo[26].ABR)-int(arreglo[25].ABR))+"");m1 = parentesis((int(arreglo[26].MAR)-int(arreglo[25].MAR))+"");}
-			if(meses==6){ realAux=(int(arreglo[26].JUL)-int(arreglo[25].JUL))+"";m3 = parentesis((int(arreglo[26].JUN)-int(arreglo[25].JUN))+"");m2 = parentesis((int(arreglo[26].MAY)-int(arreglo[25].MAY))+"");m1 = parentesis((int(arreglo[26].ABR)-int(arreglo[25].ABR))+"");}
-			if(meses==7){ realAux=(int(arreglo[26].AGO)-int(arreglo[25].AGO))+"";m3 = parentesis((int(arreglo[26].JUL)-int(arreglo[25].JUL))+"");m2 = parentesis((int(arreglo[26].JUN)-int(arreglo[25].JUN))+"");m1 = parentesis((int(arreglo[26].MAY)-int(arreglo[25].MAY))+"");}
-			if(meses==8){ realAux=(int(arreglo[26].SEP)-int(arreglo[25].SEP))+"";m3 = parentesis((int(arreglo[26].AGO)-int(arreglo[25].AGO))+"");m2 = parentesis((int(arreglo[26].JUL)-int(arreglo[25].JUL))+"");m1 = parentesis((int(arreglo[26].JUN)-int(arreglo[25].JUN))+"");}
-			if(meses==9){ realAux=(int(arreglo[26].OCT)-int(arreglo[25].OCT))+"";m3 = parentesis((int(arreglo[26].SEP)-int(arreglo[25].SEP))+"");m2 = parentesis((int(arreglo[26].AGO)-int(arreglo[25].AGO))+"");m1 = parentesis((int(arreglo[26].JUL)-int(arreglo[25].JUL))+"");}
-			if(meses==10){realAux=(int(arreglo[26].NOV)-int(arreglo[25].NOV))+"";m3 = parentesis((int(arreglo[26].OCT)-int(arreglo[25].OCT))+"");m2 = parentesis((int(arreglo[26].SEP)-int(arreglo[25].SEP))+"");m1 = parentesis((int(arreglo[26].AGO)-int(arreglo[25].AGO))+"");}
-			if(meses==11){realAux=(int(arreglo[26].DIC)-int(arreglo[25].DIC))+"";m3 = parentesis((int(arreglo[26].NOV)-int(arreglo[25].NOV))+"");m2 = parentesis((int(arreglo[26].OCT)-int(arreglo[25].OCT))+"");m1 = parentesis((int(arreglo[26].SEP)-int(arreglo[25].SEP))+"");}
 			
-			/*
-			ra = parentesis(arreglo[26].REAL);
-			pa = parentesis(arreglo[26].PPTO);
-			da = parentesis(carcularDesviacion(arreglo[26].REAL,arreglo[26].PPTO,2));
+			if(meses==0){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE)))+"");}
+			if(meses==1){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE))))+"");}
+			if(meses==2){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE))))+"");}
+			if(meses==3){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE))))+"");}
+			if(meses==4){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB))))+"");}
+			if(meses==5){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR))))+"");}
+			if(meses==6){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR))))+"");}
+			if(meses==7){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY))))+"");}
+			if(meses==8){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN))))+"");}
+			if(meses==9){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].OCT))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].OCT)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL))))+"");}
+			if(meses==10){realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].NOV))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].NOV)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].OCT))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].OCT))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO))))+"");}
+			if(meses==11){realAux=formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].DIC))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].DIC)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].NOV))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].NOV))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].OCT))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].OCT))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP))))+"");}
+			
+			
+			ra = parentesis(formato.format(int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].REAL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].REAL))));
+			pa = parentesis(formato.format(int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].PPTO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].PPTO))));
+			da = parentesis(carcularDesviacion(formato.format(int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].REAL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].REAL))),formato.format(int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].PPTO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].PPTO))),2));
 			r = parentesis(realAux);
-			p = parentesis(arreglo[26].MES);
-			d = parentesis(carcularDesviacion(realAux,arreglo[26].MES,2));
-			*/
-						
-			pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+			p = parentesis(formato.format(int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MES))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MES))));
+			d = parentesis(carcularDesviacion(realAux,formato.format(int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MES))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MES))),2));
 			
-			pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(70,0.3,"   "+nombre,0,0,Align.LEFT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
-			pdf.addCell(3,1);//espacio
-			pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
-			pdf.writeText(3,"\n");
+			if(escala==1)
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+			
+				pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(70,0.3,"   "+nombre,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
+				pdf.writeText(3,"\n");
+			}
+			else
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+			
+				pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+				pdf.writeText(2,"\n");
+				pdf.setFontSize(8);
+			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
 		}
-		private function addTexto(texto:String):void
+		private function addTotalMargenOperacionalBruto(nombre:String,arreglo:Array,meses:int,escala:int=1):void
 		{
-			pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
-					
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(70,0.3,"   "+texto,0,0,Align.LEFT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(3,1);//espacio
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
-			pdf.writeText(3,"\n");
+			var m1:String='-';
+			var m2:String='-';
+			var m3:String='-';
+			
+			var r:String='0';
+			var p:String='0';
+			var d:String='0';
+			
+			var ra:String='0';
+			var pa:String='0';
+			var da:String='0';
+			
+			var realAux:String='0';
+			
+			if(meses==0){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ENE))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE)))+"");}
+			if(meses==1){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].FEB))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ENE))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE))))+"");}
+			if(meses==2){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].FEB))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ENE))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE))))+"");}
+			if(meses==3){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ABR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].FEB))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ENE))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ENE))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ENE))))+"");}
+			if(meses==4){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAY))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ABR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].FEB))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].FEB))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].FEB))))+"");}
+			if(meses==5){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUN))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAY))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ABR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAR))))+"");}
+			if(meses==6){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUL))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUN))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAY))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].ABR))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].ABR))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].ABR))))+"");}
+			if(meses==7){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].AGO))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUL))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUN))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MAY))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MAY))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MAY))))+"");}
+			if(meses==8){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].SEP))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].AGO))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUL))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUN))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUN))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUN))))+"");}
+			if(meses==9){ realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].OCT))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].OCT))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].OCT)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].SEP))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].AGO))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].JUL))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].JUL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].JUL))))+"");}
+			if(meses==10){realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].NOV))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].NOV))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].NOV)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].OCT))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].OCT))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].OCT))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].SEP))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].AGO))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].AGO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].AGO))))+"");}
+			if(meses==11){realAux=formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].DIC))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].DIC))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].DIC)))+"");m3 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].NOV))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].NOV))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].NOV))))+"");m2 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].OCT))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].OCT))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].OCT))))+"");m1 = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].SEP))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].SEP))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].SEP))))+"");}
+		
+			
+			ra = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].REAL))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].REAL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].REAL)))+"")); 
+			pa = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].PPTO))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].PPTO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].PPTO)))+""));
+			da = parentesis(carcularDesviacion(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].REAL))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].REAL))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].REAL)))+""),formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].PPTO))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].PPTO))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].PPTO)))+""),2));
+			r = parentesis(realAux);
+			p = parentesis(formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MES))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MES))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MES)))+""));
+			d = parentesis(carcularDesviacion(realAux,formato.format((int(removeFormatting(arreglo[ITEMS.MARGENCOMERCIAL].MES))+int(removeFormatting(arreglo[ITEMS.TOTALGASTOSADMINISTRATIVOS].MES))-int(removeFormatting(arreglo[ITEMS.DEPRECIACIONES].MES)))+""),2));
+			
+						
+			if(escala==1)
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+				
+				pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(70,0.3,"   "+nombre,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
+				pdf.writeText(3,"\n");
+			}
+			else
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+				
+				pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+				pdf.writeText(2,"\n");
+			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
 		}
-		private function addTotal(arreglo:Array,i:int,meses:int):void
+		private function addTexto(texto:String,escala:int=1):void
+		{
+			if(escala==1)
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+				
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(70,0.3,"   "+texto,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,"",0,0,Align.RIGHT);
+				pdf.writeText(3,"\n");
+			}
+			else
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+				
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(53,0.3,"   "+texto,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.writeText(2,"\n");
+			}
+			
+			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+		}
+		private function addTotal(arreglo:Array,i:int,meses:int,escala:int=1):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -401,22 +706,44 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			d = parentesis(carcularDesviacion(realAux,arreglo[i].MES,2));
 				
 			
-			pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
-			
-			pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(70,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
-			pdf.addCell(3,1);//espacio
-			pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
-			pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
-			pdf.writeText(3,"\n");
+			if(escala==1)
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
+				
+				pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(70,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
+				pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
+				pdf.writeText(3,"\n");
+			}
+			else
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+				
+				pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+				pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+				pdf.writeText(2,"\n");
+			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
 		}
@@ -452,7 +779,7 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				return parentesis(formato.format(Math.round(aux)/10));
 			}			
 		}
-		private function addDatosLineas(arreglo:Array,desde:int, hasta:int,meses:int):void
+		private function addDatosLineas(arreglo:Array,desde:int, hasta:int,meses:int, escala:int=0):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -490,25 +817,76 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				p = parentesis(arreglo[i].MES);
 				d = parentesis(carcularDesviacion(realAux,arreglo[i].MES,2));
 				
-				pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
-				pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
-				pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(70,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
-				pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
-				pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
-				pdf.addCell(3,1);//espacio
-				pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
-				pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
-				pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
-				pdf.writeText(3,"\n");
+				if(escala==1)
+				{
+					pdf.addCell(20,0.3,m1,0,0,Align.RIGHT);
+					pdf.addCell(20,0.3,m2,0,0,Align.RIGHT);
+					pdf.addCell(20,0.3,m3,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(70,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(20,0.3,r,0,0,Align.RIGHT);
+					pdf.addCell(20,0.3,p,0,0,Align.RIGHT);
+					pdf.addCell(20,0.3,d,0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(20,0.3,ra,0,0,Align.RIGHT);
+					pdf.addCell(20,0.3,pa,0,0,Align.RIGHT);
+					pdf.addCell(20,0.3,da,0,0,Align.RIGHT);
+					pdf.writeText(3,"\n");
+				}
+				else
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
+			
+					pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+					pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+					pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+					pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+					pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+					pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+					pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+				}
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+			
 			}
 		}
-		private function addLineaTotal(lineas:int=1):void
+		private function addLineaTotal(lineas:int=1,escala:int=1):void
 		{
 			if(lineas==2)
+			{
+				if(escala==1)
+				{
+					pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(70,0.3,"",0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+				}
+				else
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
+			
+					pdf.addCell(47,0.3,"",1,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"",0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(47,0.3,"",1,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(47,0.3,"",1,0,Align.RIGHT);
+					pdf.writeText(1,"\n");
+				}
+			}
+			if(escala==1)
 			{
 				pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
 				pdf.addCell(1,1);//espacio
@@ -517,17 +895,28 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
 				pdf.addCell(3,1);//espacio
 				pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
+				pdf.writeText(3,"\n");
+			}
+			else
+			{
+				pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
+			
+				pdf.addCell(47,0.3,"",1,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(53,0.3,"",0,0,Align.LEFT);
+				pdf.addCell(1,1);//espacio
+				pdf.addCell(47,0.3,"",1,0,Align.RIGHT);
+				pdf.addCell(3,1);//espacio
+				pdf.addCell(47,0.3,"",1,0,Align.RIGHT);
 				pdf.writeText(2,"\n");
 			}
-			pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(70,0.3,"",0,0,Align.LEFT);
-			pdf.addCell(1,1);//espacio
-			pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
-			pdf.addCell(3,1);//espacio
-			pdf.addCell(62,0.3,"",1,0,Align.RIGHT);
-			pdf.writeText(3,"\n");
+			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
+			
 		}
+
+
+
+
 		private function rellenar(texto:String):String
 		{
 			var salida:String = "";
@@ -932,7 +1321,8 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				}
 			}
 			
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER2.pdf");
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER2.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER2.pdf");
 		}
 
 		public function actividades(array:ArrayCollection, fecha:String):void
@@ -967,7 +1357,8 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 0, true);
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "actividades.pdf");
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "actividades.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "actividades.pdf");
 		}
 		private function to20(codigo:String):String
 		{
@@ -1002,7 +1393,9 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
           	pdf.addText("Solicitudes de Trabajo "+fecha, 20, 20);
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 18, false);
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"solicitudes.pdf");
+          	
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "solicitudes.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"solicitudes.pdf");
 		}
 		public function vistaComponente(componente:Object):void
 		{
@@ -1075,7 +1468,8 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
           		pdf.addGrid(manten);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosComponente.pdf");
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosComponente.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosComponente.pdf");
 		}
 		public function vistaMaquina(maquina:Object):void
 		{
@@ -1166,7 +1560,8 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
           		pdf.addGrid(union);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosMaquina.pdf");
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosMaquina.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosMaquina.pdf");
 		}
 		public function vistaLinea(linea:Object):void
 		{
@@ -1225,7 +1620,8 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
           		pdf.addGrid(union);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosLinea.pdf");
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosLinea.pdf");
+			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosLinea.pdf");
 		}
 	}
 }

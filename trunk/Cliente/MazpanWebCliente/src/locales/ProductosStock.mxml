@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="428">
+	
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getProductosStock" result="getProductosStockResult(event)" fault="ErrorFaultHandler(event, 'getProductosStock')"/>
+		<mx:operation name="utilizarProductos" result="utilizarProductosResult(event)" fault="ErrorFaultHandler(event, 'utilizarProductos')"/>
+		<mx:operation name="bloquearProductos" result="bloquearProductosResult(event)" fault="ErrorFaultHandler(event, 'bloquearProductos')"/>
+	</mx:WebService>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			public static const nombre:String = "ProductosStock";
+			
+			[Bindable]
+			private var productos:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				LocalesService.getProductosStock();
+			}
+			private function getProductosStockResult(event:ResultEvent):void
+			{
+				productos = event.result.Tables.Productos.Rows.source as Array;
+			}
+			
+			private var datosParaGuardar:Array;
+            private function utilizar():void
+			{
+				datosParaGuardar = new Array();
+	          	for(var i:int=0;i< productos.length;i++)
+	          		if(productos[i].marcado) datosParaGuardar.push(productos[i].ItemCode);
+          		
+          		if(datosParaGuardar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(datosParaGuardar.length==1) Alert.show(MENSAJES.MS0001A,MENSAJES.AVISO, 3, this, utilizarClick);
+                	else Alert.show(MENSAJES.MS0001B, MENSAJES.AVISO, 3, this, utilizarClick);	
+            	}
+                else Alert.show("Debe seleccionar al menos una cuenta para poder proceder");
+          	}
+          	private function utilizarClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		LocalesService.utilizarProductos(datosParaGuardar);
+				}
+			}
+			private function utilizarProductosResult(event:ResultEvent):void
+			{
+				if(event.result) init();
+				else trace("Error marcardo productos para utilizar");
+			}
+			private function bloquear():void
+			{
+				datosParaGuardar = new Array();
+	          	for(var i:int=0;i< productos.length;i++)
+	          		if(productos[i].marcado) datosParaGuardar.push(productos[i].ItemCode);
+          		
+          		if(datosParaGuardar.length>0)
+            	{
+            		Alert.yesLabel = "Si";
+                	Alert.noLabel = "No";
+                	if(datosParaGuardar.length==1) Alert.show(MENSAJES.MS0002A,MENSAJES.AVISO, 3, this, bloquearClick);
+                	else Alert.show(MENSAJES.MS0002B, MENSAJES.AVISO, 3, this, bloquearClick);	
+            	}
+                else Alert.show("Debe seleccionar al menos una cuenta para poder proceder");
+          	}
+          	private function bloquearClick(event:CloseEvent):void 
+          	{
+          		if (event.detail==Alert.YES)
+            	{
+            		LocalesService.bloquearProductos(datosParaGuardar);
+				}
+			}
+			private function bloquearProductosResult(event:ResultEvent):void
+			{
+				if(event.result) init();
+				else trace("Error bloqueando productos");
+			}
+		]]>
+	</mx:Script>
+	<mx:Label x="10" y="10" text="Lista de productos"/>
+	<mx:DataGrid x="10" y="36" width="755" height="352" dataProvider="{productos}">
+		<mx:columns>
+			<mx:DataGridColumn id="colSel" headerText="" width="20" sortable="false" paddingLeft="3">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox selected="{data.marcado}" click="{data.marcado=!data.marcado}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Producto"  dataField="ItemName"/>
+			<mx:DataGridColumn headerText="Unidades"  width="65" dataField="InvntryUom"/>
+			<mx:DataGridColumn headerText="En Uso"	 width="50" sortable="false" paddingLeft="3">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox selected="{data.EnUso}" enabled="false"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Bloqueado"	 width="70" sortable="false" paddingLeft="3">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox selected="{data.Bloqueado}" enabled="false"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="603" y="396" label="Utilizar" width="77" click="utilizar()"/>
+	<mx:Button x="688" y="396" label="Bloquear" click="bloquear()"/>
+</mx:Canvas>

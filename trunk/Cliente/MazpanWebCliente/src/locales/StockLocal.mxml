@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Declaración de Stock de Local"
-	creationComplete="init()" xmlns:misClases="misClases.*">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="428" xmlns:misClases="misClases.*">
 	
-	<mx:WebService id="CombosService" 	wsdl="{index.URL + 'CombosService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getFecha" 	result="getFechaResult(event)"	 fault="ErrorFaultHandler(event, 'getFecha')"/>
-	</mx:WebService>
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getLocales" 	result="getLocalesResult(event)" 	fault="ErrorFaultHandler(event, 'getLocales')"/>
-		<mx:operation name="getProductos" 	result="getProductosResult(event)" 	fault="ErrorFaultHandler(event, 'getProductos')"/>
-		<mx:operation name="guardarStock" 	result="guardarStockResult(event)" 	fault="ErrorFaultHandler(event, 'guardarStock')"/>
+		<mx:operation name="getLocales" 		result="getLocalesResult(event)" 		fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getProductosLocal" 	result="getProductosLocalResult(event)" fault="ErrorFaultHandler(event, 'getProductosLocal')"/>
+		<mx:operation name="guardarStock" 		result="guardarStockResult(event)" 		fault="ErrorFaultHandler(event, 'guardarStock')"/>
 	</mx:WebService>
 	
 	<mx:Script>
 		<![CDATA[
+		/*Revisar por que no usa getprodutoslocal del server dado que en este se ve el stock del local*/
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
 			
 			
 			public static const nombre:String = "StockLocal";
 			
-			[Bindable]
-			private var hoy:String;
 			[Bindable]
 			private var locales_ac:Array;
 			[Bindable]
@@ -34,12 +29,7 @@
             }
 			public function init():void
 			{
-				CombosService.getFecha();
-			} 
-			private function getFechaResult(event:ResultEvent):void
-            {
-            	hoy = event.result as String;
-            	LocalesService.getLocales();
+				LocalesService.getLocales();
             }
             private function getLocalesResult(event:ResultEvent):void
             {
@@ -47,9 +37,9 @@
             }
             private function cargar():void
             {
-            	if(fecha_df.text.length>0) LocalesService.getProductos(local_cb.selectedItem.WhsCode,String(fecha_df.selectedDate.getFullYear()+"-"+(fecha_df.selectedDate.getMonth()+1)+"-"+fecha_df.selectedDate.date));
+            	if(fecha_df.text.length>0 && locales_ac.length>0) LocalesService.getProductosLocal(local_cb.selectedItem.WhsCode,fecha_df.text);
             }
-            private function getProductosResult(event:ResultEvent):void
+            private function getProductosLocalResult(event:ResultEvent):void
             {
             	productos_ac = event.result.Tables.Productos.Rows.source as Array;
             }
@@ -106,16 +96,16 @@
 	<mx:Label x="10" y="40" text="Buscar"/>
 	<mx:TextInput x="59" y="38" width="209" id="input"/>
 	<mx:Button x="276" y="38" label="Filtrar" width="72" click="filtar()"/>
-	<mx:DataGrid x="0" y="66" width="775" height="354" dataProvider="{productos_ac}" id="tabla">
+	<mx:DataGrid x="10" y="66" width="755" height="322" dataProvider="{productos_ac}" id="tabla">
 		<mx:columns>
-			<mx:DataGridColumn id="colSel" headerText="" width="10" sortable="false" paddingLeft="3">
+			<mx:DataGridColumn id="colSel" headerText="" width="20" sortable="false" paddingLeft="3">
 				<mx:itemRenderer>
 					<mx:Component>
 						<mx:CheckBox selected="{data.actualizado}" enabled="false"/>
 					</mx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="400"/>
+			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="435"/>
 			<mx:DataGridColumn headerText="En Stock Local" width="200" sortable="false">
 				<mx:itemRenderer>
 					<mx:Component>
@@ -126,5 +116,5 @@
 			<mx:DataGridColumn headerText="Un. Medida" dataField="InvntryUom" width="100" textAlign="right" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button x="693" y="428" label="Guardar" click="guardar()"/>
-</mx:Panel>
+	<mx:Button x="693" y="396" label="Guardar" click="guardar()"/>
+</mx:Canvas>
