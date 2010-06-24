@@ -163,69 +163,118 @@ public class Service : System.Web.Services.WebService
 
         return dt;
     }
-    
+
+    private List<Monto> getMontos(DataTable FLUJO, DataTable ITEMS)
+    {
+        List<Monto> montos = new List<Monto>();
+
+        foreach (DataRow row1 in ITEMS.Rows)
+        {
+            foreach (DataRow row2 in FLUJO.Rows)
+            {
+                if (row1[1].ToString() == row2[1].ToString())
+                {
+                    Monto m = new Monto();
+                    m.itemName = row1[0].ToString();
+                    m.Column1 = row2[0].ToString();
+                    montos.Add(m);
+                }
+            }
+        }
+
+        int monto = 0;
+        string item="";
+        if(montos.Count>0) item = montos[0].itemName;
+
+        List<Monto> montos2 = new List<Monto>();
+        foreach (Monto m in montos)
+        {
+            if (item != m.itemName)
+            {
+                Monto mo = new Monto();
+                mo.itemName = item;
+                int redondeo = monto / 1000;
+                mo.Column1 = redondeo.ToString();
+                montos2.Add(mo);
+
+                monto = 0;
+                item = m.itemName;
+            }
+            monto += Int32.Parse(m.Column1);
+        }
+        Monto aux = new Monto();
+        aux.itemName = item;
+        int redondeo2 = monto / 1000;
+        aux.Column1 = redondeo2.ToString();
+        montos2.Add(aux);
+        return montos2;
+    }
+
     [WebMethod]
     public Flujo getFlujo(string sucursal, int ano, int mes)
     {
         Flujo f = new Flujo();
+
+        DataTable items = obtenerTabla("ItemsCuentas", "SELECT T6.[itemName],T5.cuenta FROM [PracticaDb].[dbo].[ItemCuenta] T5 JOIN [PracticaDb].[dbo].[Items] T6 ON T6.id = T5.item ORDER BY T6.[itemName]");
+
         if (mes == 1)
         {
-            f.FLUJOENE = flujo(sucursal, 1, ano);
+            f.FLUJOENE = getMontos(flujo(sucursal, 1, ano),items);
             f.PPTOENE = PresupuestoMensual(sucursal, 0, ano);
         }
         else if (mes == 2)
         {
-            f.FLUJOFEB = flujo(sucursal, 2, ano);
+            f.FLUJOFEB = getMontos(flujo(sucursal, 2, ano),items);
             f.PPTOFEB = PresupuestoMensual(sucursal, 1, ano);
         }
         else if (mes == 3)
         {
-            f.FLUJOMAR = flujo(sucursal, 3, ano);
+            f.FLUJOMAR = getMontos(flujo(sucursal, 3, ano),items);
             f.PPTOMAR = PresupuestoMensual(sucursal, 2, ano);
         }
         else if (mes == 4)
         {
-            f.FLUJOABR = flujo(sucursal, 4, ano);
+            f.FLUJOABR = getMontos(flujo(sucursal, 4, ano),items);
             f.PPTOABR = PresupuestoMensual(sucursal, 3, ano);
         }
         else if (mes == 5)
         {
-            f.FLUJOMAY = flujo(sucursal, 5, ano);
+            f.FLUJOMAY = getMontos(flujo(sucursal, 5, ano),items);
             f.PPTOMAY = PresupuestoMensual(sucursal, 4, ano);
         }
         else if (mes == 6)
         {
-            f.FLUJOJUN = flujo(sucursal, 6, ano);
+            f.FLUJOJUN = getMontos(flujo(sucursal, 6, ano),items);
             f.PPTOJUN = PresupuestoMensual(sucursal, 5, ano);
         }
         else if (mes == 7)
         {
-            f.FLUJOJUL = flujo(sucursal, 7, ano);
+            f.FLUJOJUL = getMontos(flujo(sucursal, 7, ano),items);
             f.PPTOJUL = PresupuestoMensual(sucursal, 6, ano);
         }
         else if (mes == 8)
         {
-            f.FLUJOAGO = flujo(sucursal, 8, ano);
+            f.FLUJOAGO = getMontos(flujo(sucursal, 8, ano),items);
             f.PPTOAGO = PresupuestoMensual(sucursal, 7, ano);
         }
         else if (mes == 9)
         {
-            f.FLUJOSEP = flujo(sucursal, 9, ano);
+            f.FLUJOSEP = getMontos(flujo(sucursal, 9, ano),items);
             f.PPTOSEP = PresupuestoMensual(sucursal, 8, ano);
         }
         else if (mes == 10)
         {
-            f.FLUJOOCT = flujo(sucursal, 10, ano);
+            f.FLUJOOCT = getMontos(flujo(sucursal, 10, ano),items);
             f.PPTOOCT = PresupuestoMensual(sucursal, 9, ano);
         }
         else if (mes == 11)
         {
-            f.FLUJONOV = flujo(sucursal, 11, ano);
+            f.FLUJONOV = getMontos(flujo(sucursal, 11, ano),items);
             f.PPTONOV = PresupuestoMensual(sucursal, 10, ano);
         }
         else if (mes == 12)
         {
-            f.FLUJODIC = flujo(sucursal, 12, ano);
+            f.FLUJODIC = getMontos(flujo(sucursal, 12, ano), items);
             f.PPTODIC = PresupuestoMensual(sucursal, 11, ano);
         }
         f.MESNUMERO = mes;
@@ -246,38 +295,30 @@ public class Service : System.Web.Services.WebService
         string query;
         if (sucursal.CompareTo("00") == 0)
         {
-            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000 as Column1" +
-                       " FROM [Maspan].[dbo].[JDT1] T4" +
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T4.[Account] = T2.cuenta" +
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
-                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY itemName";
+            query = " SELECT convert(int,sum(T4.[Credit]-T4.[Debit])) as Column1, T4.[Account] " +
+                    " FROM [Maspan].[dbo].[JDT1] T4 " +
+                    " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' GROUP BY T4.[Account]";
         }
         else if(sucursal.CompareTo("01") == 0)
         {
-            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000 as Column1" +
-                       " FROM [Maspan].[dbo].[OACT] T1" +
-                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
-                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND (T1.[Segment_1]='01' OR T1.[Segment_1]='05' OR (T1.[Segment_1]='00' AND T1.AcctCode!='_SYS00000001166')) GROUP BY itemName";
+            query = " SELECT convert(int,sum(T4.[Credit]-T4.[Debit])) as Column1, T4.[Account]" +
+                    " FROM [Maspan].[dbo].[OACT] T1" +
+                    " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                    " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND (T1.[Segment_1]='01' OR T1.[Segment_1]='05' OR (T1.[Segment_1]='00' AND T1.AcctCode!='_SYS00000001166')) GROUP BY T4.[Account]";
         }
         else if (sucursal.CompareTo("23") == 0)
         {
-            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000 as Column1" +
-                       " FROM [Maspan].[dbo].[OACT] T1" +
-                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
-                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND (T1.[Segment_1]='23' OR T1.AcctCode='_SYS00000001166') GROUP BY itemName";
+            query = " SELECT convert(int,sum(T4.[Credit]-T4.[Debit])) as Column1, T4.[Account]" +
+                    " FROM [Maspan].[dbo].[OACT] T1" +
+                    " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                    " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND (T1.[Segment_1]='23' OR T1.AcctCode='_SYS00000001166') GROUP BY T4.[Account]";
         }
         else 
         {
-            query =    " SELECT T3.[itemName],SUM(T4.[Credit]-T4.[Debit])/1000 as Column1" +
-                       " FROM [Maspan].[dbo].[OACT] T1" +
-                       " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
-                       " INNER JOIN [PracticaDb].[dbo].[ItemCuenta] T2 ON T1.AcctCode = T2.cuenta" +
-                       " INNER JOIN [PracticaDb].[dbo].[Items] T3 ON T3.id = T2.item" +
-                       " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND T1.[Segment_1]='"+sucursal+"' GROUP BY itemName";
+            query = " SELECT convert(int,sum(T4.[Credit]-T4.[Debit])) as Column1, T4.[Account]" +
+                    " FROM [Maspan].[dbo].[OACT] T1" +
+                    " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
+                    " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND T1.[Segment_1]='" + sucursal + "' GROUP BY T4.[Account]";
         }
         DataTable dt = new DataTable();
         dt.TableName = "MES";

@@ -7,46 +7,47 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.UI.WebControls.WebParts;
 using System.Web.UI.HtmlControls;
+using System.Collections.Generic;
 
 /// <summary>
 /// Descripción breve de Flujo
 /// </summary>
 public class Flujo
 {
-    private DataTable flujoEne;
+    private List<Monto> flujoEne;
     private DataTable pptoEne;
 
-    private DataTable flujoFeb;
+    private List<Monto> flujoFeb;
     private DataTable pptoFeb;
 
-    private DataTable flujoMar;
+    private List<Monto> flujoMar;
     private DataTable pptoMar;
 
-    private DataTable flujoAbr;
+    private List<Monto> flujoAbr;
     private DataTable pptoAbr;
 
-    private DataTable flujoMay;
+    private List<Monto> flujoMay;
     private DataTable pptoMay;
 
-    private DataTable flujoJun;
+    private List<Monto> flujoJun;
     private DataTable pptoJun;
 
-    private DataTable flujoJul;
+    private List<Monto> flujoJul;
     private DataTable pptoJul;
 
-    private DataTable flujoAgo;
+    private List<Monto> flujoAgo;
     private DataTable pptoAgo;
 
-    private DataTable flujoSep;
+    private List<Monto> flujoSep;
     private DataTable pptoSep;
 
-    private DataTable flujoOct;
+    private List<Monto> flujoOct;
     private DataTable pptoOct;
 
-    private DataTable flujoNov;
+    private List<Monto> flujoNov;
     private DataTable pptoNov;
 
-    private DataTable flujoDic;
+    private List<Monto> flujoDic;
     private DataTable pptoDic;
 
     private int m;//mes numero
@@ -61,62 +62,62 @@ public class Flujo
         get { return m; }
     }
 
-    public DataTable FLUJOENE
+    public List<Monto> FLUJOENE
     {
         set { flujoEne = value; }
         get { return flujoEne; }
     }
-    public DataTable FLUJOFEB
+    public List<Monto> FLUJOFEB
     {
         set { flujoFeb = value; }
         get { return flujoFeb; }
     }
-    public DataTable FLUJOMAR
+    public List<Monto> FLUJOMAR
     {
         set { flujoMar = value; }
         get { return flujoMar; }
     }
-    public DataTable FLUJOABR
+    public List<Monto> FLUJOABR
     {
         set { flujoAbr = value; }
         get { return flujoAbr; }
     }
-    public DataTable FLUJOMAY
+    public List<Monto> FLUJOMAY
     {
         set { flujoMay = value; }
         get { return flujoMay; }
     }
-    public DataTable FLUJOJUN
+    public List<Monto> FLUJOJUN
     {
         set { flujoJun = value; }
         get { return flujoJun; }
     }
-    public DataTable FLUJOJUL
+    public List<Monto> FLUJOJUL
     {
         set { flujoJul = value; }
         get { return flujoJul; }
     }
-    public DataTable FLUJOAGO
+    public List<Monto> FLUJOAGO
     {
         set { flujoAgo = value; }
         get { return flujoAgo; }
     }
-    public DataTable FLUJOSEP
+    public List<Monto> FLUJOSEP
     {
         set { flujoSep = value; }
         get { return flujoSep; }
     }
-    public DataTable FLUJOOCT
+    public List<Monto> FLUJOOCT
     {
         set { flujoOct = value; }
         get { return flujoOct; }
     }
-    public DataTable FLUJONOV
+    public List<Monto> FLUJONOV
     {
         set { flujoNov = value; }
         get { return flujoNov; }
     }
-    public DataTable FLUJODIC
+    public List<Monto> FLUJODIC
     {
         set { flujoDic = value; }
         get { return flujoDic; }
