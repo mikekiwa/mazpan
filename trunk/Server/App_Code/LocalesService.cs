@@ -15,10 +15,81 @@ public class LocalesService : System.Web.Services.WebService
     private string coneccionString = Coneccion.coneccionStringSVRMASPAN;
     //private string SAP = "[Pruebas Maspan].[dbo]";
     private string SAP = "[Maspan].[dbo]";
+    private string MAER = "[PracticaDb].[dbo]";
+
+
 
     public LocalesService ()
     {
     }
+
+/*********************************************************************************************************************/
+
+    /// <summary>
+    /// return 1 sí la insercion fue exitosa, 0 EOC
+    /// </summary>
+    /// <param name="query">
+    /// La consulta que se desea ejecutar
+    /// </param>
+    private int Ejecutar(string query)
+    {
+        SqlConnection conn = new SqlConnection(coneccionString);
+        conn.Open();
+        SqlCommand insert = new SqlCommand(query, conn);
+
+        try
+        {
+            insert.ExecuteNonQuery();
+            conn.Close();
+        }
+        catch
+        {
+            conn.Close();
+            return 0;
+        }
+        return 1;
+    }
+
+
+    /// <summary>
+    /// Recive una cadana de texto con formato dd/mm/aaaa y la lleva a un DateTime
+    /// </summary>
+    /// <param name="fecha">Cadana de texto con formato dd/mm/aaaa</param>
+    /// <returns>Fecha como un tipo DateTime</returns>
+    private DateTime toDateTime(string fecha)
+    {
+        string[] date = fecha.Split('/');
+        int dia = Convert.ToInt32(date[0]);
+        int mes = Convert.ToInt32(date[1]);
+        int año = Convert.ToInt32(date[2]);
+
+        return new DateTime(año, mes, dia);
+    }
+
+    private DataTable obtenerTabla(string nombre, string query)
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = nombre;
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+   
+    
+/*********************************************************************************************************************/
 
     [WebMethod]
     public DataTable getLocales()
@@ -55,16 +126,21 @@ public class LocalesService : System.Web.Services.WebService
 
         return dt;
     }
-    
+
+/*********************************************************************************************************************/
+   
     [WebMethod]
-    public DataTable getSociosDe(string local)
+    public DataTable getSociosDe(string local, string ddmmaa)
     {
+        DateTime date = toDateTime(ddmmaa);
+        string fecha = date.Year + "-" + date.Month + "-" + date.Day;
+        
         DataTable dt = new DataTable();
         dt.TableName = "Socios";
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' WHERE U_LTrabj='" + local + "' ";
+        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj LEFT JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + fecha + "' WHERE U_LTrabj='" + local + "' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -80,34 +156,97 @@ public class LocalesService : System.Web.Services.WebService
         return dt;
     }
 
-    /// <summary>
-    /// return 1 sí la insercion fue exitosa, 0 EOC
-    /// </summary>
-    /// <param name="query">
-    /// La consulta que se desea ejecutar
-    /// </param>
-    private int Ejecutar(string query)
-    {
-        SqlConnection conn = new SqlConnection(coneccionString);
-        conn.Open();
-        SqlCommand insert = new SqlCommand(query, conn);
+/*********************************************************************************************************************/
 
-        try
+    private bool existeAsistencia(string CardCode, string fecha)
+    {
+        String query = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[Asistencia] WHERE CardCode = '" + CardCode + "' AND fecha='"+fecha+"' ";
+        SqlConnection selectConn = new SqlConnection(coneccionString);
+        selectConn.Open();
+        SqlCommand select = new SqlCommand(query, selectConn);
+        SqlDataReader reader = select.ExecuteReader();
+
+        if (reader.Read())
         {
-            insert.ExecuteNonQuery();
-            conn.Close();
+            if (reader.GetInt32(0) == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
-        catch
+        else
         {
-            conn.Close();
-            return 0;
+            return false;
         }
-        return 1;
     }
 
-    private bool existeAsistencia(string CardCode)
+    [WebMethod]
+    public DataTable getAsistencia(string local, string ddmmaa)
     {
-        String query = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[Asistencia] WHERE CardCode = '" + CardCode + "' AND fecha='"+DateTime.Now.Year+"-"+DateTime.Now.Month+"-"+DateTime.Now.Day+"' ";
+        string fecha;
+        if (ddmmaa == "" || ddmmaa == "HOY") fecha = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
+        else
+        {
+            DateTime dt = toDateTime(ddmmaa);
+            fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
+        }
+        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + fecha + "' WHERE U_LTrabj='" + local + "' ";
+
+        return obtenerTabla("Asistencia",query);
+    }
+
+    [WebMethod]
+    public int guardarAsistencia(string CardCode, string asistencia, string atraso, string ddmmaa)
+    {
+        DateTime dt = toDateTime(ddmmaa);
+        string fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
+        
+        if (existeAsistencia(CardCode, fecha))
+        {
+            return Ejecutar("UPDATE [PracticaDB].[dbo].[Asistencia] SET asistencia='" + asistencia + "', atraso='" + atraso + "' WHERE CardCode = '" + CardCode + "' AND fecha='"+fecha+"' ");
+        }
+        else
+        {
+            return Ejecutar("INSERT INTO [PracticaDB].[dbo].[Asistencia] (CardCode,asistencia,atraso,fecha) VALUES('" + CardCode + "','" + asistencia + "','" + atraso + "','"+fecha+"') ");
+        }
+    }
+
+/*********************************************************************************************************************/
+
+    [WebMethod]
+    public DataTable getDesviaciones(string local, string ddmmaa1, string ddmmaa2)
+    {
+        string desde;
+        if (ddmmaa1 == "" || ddmmaa1 == "HOY") desde = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
+        else
+        {
+            DateTime dt = toDateTime(ddmmaa1);
+            desde = dt.Year + "-" + dt.Month + "-" + dt.Day;
+        }
+
+        string hasta;
+        if (ddmmaa2 == "" || ddmmaa2 == "HOY") hasta = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
+        else
+        {
+            DateTime dt = toDateTime(ddmmaa2);
+            hasta = dt.Year + "-" + dt.Month + "-" + dt.Day;
+        }
+
+        String query = " SELECT T1.[ItemName],T0.[U_CantElab] CantidadElaborada, T0.[CmpltQty] CantidadCompletada, (T0.[CmpltQty] - T0.[U_CantElab]) Diferencia, ((T0.CmpltQty * 100)/T0.U_CantElab) Logrado, (((T0.CmpltQty - T0.U_CantElab ) * 100) / T0.U_CantElab) NoLogrado"+
+                       " FROM "+SAP+".OWOR T0 JOIN "+SAP+".OITM T1 ON T0.ItemCode = T1.ItemCode JOIN "+SAP+".OWHS T2 ON T0.Warehouse = T2.WhsCode "+
+                       " WHERE T0.CmpltQty >= '1' and T0.U_CantElab >= '1' AND T0.[DueDate] >='"+desde+"' AND T0.[DueDate] <='"+hasta+"' AND t2.WhsCode='"+local+"' ";
+
+        return obtenerTabla("Desviaciones",query);
+    }
+
+/*********************************************************************************************************************/
+   
+    private bool existeProducto(string producto)
+    {
+        String query = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[Productos] WHERE producto='" + producto + "'";
         SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand select = new SqlCommand(query, selectConn);
@@ -131,121 +270,82 @@ public class LocalesService : System.Web.Services.WebService
     }
     
     [WebMethod]
-    public int guardarAsistencia(string CardCode, string asistencia, string atraso)
+    public DataTable getProductosStock()
     {
-        if (existeAsistencia(CardCode))
+        return obtenerTabla("Productos", " SELECT T1.[ItemCode],T1.[ItemName],T1.[InvntryUom], T2.visible as EnUso, T2.bloqueado as Bloqueado" +
+                                         " FROM "+SAP+".OITM T1 LEFT JOIN "+MAER+".Productos T2 ON T2.producto=T1.ItemCode AND T2.visible='True'"+
+                                         " WHERE T1.[Canceled]!='Y' AND T1.[InvntryUom]!='NULL'");
+    }
+
+    [WebMethod]
+    public int utilizarProductos(List<string> productos)
+    {
+        int results = 0;
+        foreach (string p in productos)
         {
-            return Ejecutar("UPDATE [PracticaDB].[dbo].[Asistencia] SET asistencia='" + asistencia + "', atraso='" + atraso + "' WHERE CardCode = '" + CardCode + "' AND fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' ");
+            if (!existeProducto(p)) results += Ejecutar("INSERT INTO " + MAER + ".[Productos] (producto) VALUES ('" + p + "') ");
+            else results += Ejecutar("UPDATE " + MAER + ".[Productos] SET visible='True' AND bloqueado='False' WHERE producto='"+p+"'");
         }
+        if (results < productos.Count) return -1;
+        if (results == productos.Count) return 1;
+        return 0;
+    }
+
+    [WebMethod]
+    public int bloquearProductos(List<string> productos)
+    {
+        int results = 0;
+        foreach (string p in productos)
+        {
+            results += Ejecutar("UPDATE " + MAER + ".[Productos] SET bloqueado='True' WHERE producto='" + p + "'");
+        }
+        if (results < productos.Count) return -1;
+        if (results == productos.Count) return 1;
+        return 0;
+    }
+
+    [WebMethod]
+    public DataTable getProductosLocal(string local, string ddmmaa)
+    {
+        string fecha;
+        string query;
+        if (ddmmaa == "" || ddmmaa == "HOY") fecha = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
         else
         {
-            return Ejecutar("INSERT INTO [PracticaDB].[dbo].[Asistencia] (CardCode,asistencia,atraso,fecha) VALUES('" + CardCode + "','" + asistencia + "','" + atraso + "','" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "') ");
+            DateTime dt = toDateTime(ddmmaa);
+            fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
         }
+
+        query = " SELECT T1.[ItemCode],T1.[ItemName],T1.[InvntryUom], T3.[Total] as Local " +
+                " FROM "+SAP+".OITM T1 JOIN "+MAER+".Productos T2 ON T2.producto=T1.ItemCode AND T2.bloqueado='False' " +
+                " LEFT JOIN "+MAER+".StockLocal T3 ON T1.[ItemCode]=T3.[ItemCode] AND T3.[fecha]='" + fecha + "' AND T3.[local]='" + local + "'";
+
+        return obtenerTabla("Productos", query);
     }
 
-    [WebMethod]
-    public DataTable getDesviaciones(string local, string desde, string hasta)
-    {
-        if (desde == "HOY") desde = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
-        if (hasta == "HOY") hasta = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
-
-        DataTable dt = new DataTable();
-        dt.TableName = "Desviaciones";
-
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T1.[ItemName],T0.[U_CantElab] CantidadElaborada, T0.[CmpltQty] CantidadCompletada, (T0.[CmpltQty] - T0.[U_CantElab]) Diferencia, ((T0.CmpltQty * 100)/T0.U_CantElab) Logrado, (((T0.CmpltQty - T0.U_CantElab ) * 100) / T0.U_CantElab) NoLogrado"+
-                       " FROM "+SAP+".OWOR T0 JOIN "+SAP+".OITM T1 ON T0.ItemCode = T1.ItemCode JOIN "+SAP+".OWHS T2 ON T0.Warehouse = T2.WhsCode "+
-                       " WHERE T0.CmpltQty >= '1' and T0.U_CantElab >= '1' AND T0.[DueDate] >='"+desde+"' AND T0.[DueDate] <='"+hasta+"' AND t2.WhsCode='"+local+"' ";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
-        {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
-        }
-
-        return dt;
-    }
+/*********************************************************************************************************************/
 
     [WebMethod]
-    public DataTable getStock(string local)
+    public Stock getStock(string local, string ddmmaa)
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Stock";
+        DateTime dt = toDateTime(ddmmaa);
+        string fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
 
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T0.ItemCode, T0.ItemName, T1.OnHand, T0.InvntryUom " +
-                        " FROM [Maspan].[dbo].[OITM] T0 JOIN [Maspan].[dbo].[OITW] T1 ON T0.ItemCode = T1.ItemCode JOIN [Maspan].[dbo].[OWHS] T2 ON T1.WhsCode = T2.WhsCode " +
-                        " WHERE T1.[Locked]='N' AND InvntryUom!='NULL' AND T2.WhsCode='" + local + "' " +
-                        " ORDER BY T0.ItemName";
+        String query1 = " SELECT T3.ItemCode, T3.ItemName, OnHand = CASE WHEN T1.Total IS NULL THEN '0' ELSE REPLACE(T1.Total,',','.') END, T3.InvntryUom " +
+                        " FROM " + MAER + ".[StockLocal] T1 RIGHT JOIN " + MAER + ".[Productos] T2 ON T1.ItemCode=T2.Producto " +
+                        " AND [local]='" + local + "' AND [fecha]='" + fecha + "' " +
+                        " JOIN " + SAP + ".[OITM] T3 ON T2.producto=T3.ItemCode";
 
-        da.SelectCommand = new SqlCommand(query, cn);
+        String query2 = " SELECT T3.ItemCode, T3.ItemName, OnHand = CASE WHEN T1.Total IS NULL THEN '0' ELSE REPLACE(T1.Total,',','.') END, T3.InvntryUom " +
+                        " FROM " + MAER + ".[StockSistema] T1 RIGHT JOIN " + MAER + ".[Productos] T2 ON T1.ItemCode=T2.Producto " +
+                        " AND [local]='" + local + "' AND [fecha]='" + fecha + "' " +
+                        " JOIN "+SAP+".[OITM] T3 ON T2.producto=T3.ItemCode";
 
-        try
-        {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
-        }
+        Stock st = new Stock();
+        st.StockLocal = obtenerTabla("StockLocal",query1);
+        st.StockSistema = obtenerTabla("StockSistema",query2);
 
-        return dt;
-    }
-
-    [WebMethod]
-    public DataTable getProductosLocal(string local, string fecha)
-    {
-        if (fecha == "") fecha = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
-        DataTable dt = new DataTable();
-        dt.TableName = "Productos";
-
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T0.[ItemCode],T0.[ItemName],T0.[InvntryUom], T1.[Total] as Local FROM " + SAP + ".OITM T0 JOIN [PracticaDb].[dbo].StockLocal T1 ON T0.[ItemCode]=T1.[ItemCode] AND T1.[fecha]='"+fecha+"' AND T1.[local]='"+local+"' WHERE T0.[Canceled]!='Y' AND T0.[InvntryUom]!='NULL' ";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
-        {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
-        }
-
-        return dt;
-    }
-    [WebMethod]
-    public DataTable getProductos(string local, string fecha)
-    {
-        if (fecha == "") fecha = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
-        DataTable dt = new DataTable();
-        dt.TableName = "Productos";
-
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT T0.[ItemCode],T0.[ItemName],T0.[InvntryUom], T1.[Total] as Local FROM " + SAP + ".OITM T0 LEFT JOIN [PracticaDb].[dbo].StockLocal T1 ON T0.[ItemCode]=T1.[ItemCode] AND T1.[fecha]='"+fecha+"' AND T1.[local]='"+local+"' WHERE T0.[Canceled]!='Y' AND T0.[InvntryUom]!='NULL' ";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
-        {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
-        }
-
-        return dt;
+        return st;
     }
 
     [WebMethod]
@@ -287,51 +387,57 @@ public class LocalesService : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public DataTable getAsistencia(string local)
+    public int addStockSistema(List<Stock> stockSistema, string local, string ddmmaa)
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Asistencia";
+        DateTime t = toDateTime(ddmmaa);
+        string fecha = t.Year + "-" + t.Month + "-" + t.Day + " 00:00.000";
 
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' WHERE U_LTrabj='" + local + "' ";
+        Ejecutar("DELETE [PracticaDb].[dbo].[StockSistema] WHERE fecha='" + fecha + "' and local='" + local + "'");
 
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
+        foreach (Stock s in stockSistema)
         {
-            da.Fill(dt);
-        }
-        finally
-        {
-            cn.Close();
+            string sql = " INSERT INTO [PracticaDb].[dbo].[StockSistema] ([fecha],[local],[ItemCode],[total],[valorAcumulado]) " +
+                         " VALUES ('" + fecha + "','" + local + "','" + s.codigo + "','" + s.cantidad + "','" + s.valor + "')";
+            if (existeArticulo(s.codigo)) Ejecutar(sql);
         }
 
-        return dt;
+        return 1;
     }
-
-    [WebMethod]
-    public DataTable getGastos(string local)
+    private bool existeArticulo(string producto)
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Gastos";
+        String query = "SELECT COUNT(*) FROM [PracticaDb].[dbo].[Productos] WHERE producto = '" + producto + "'";
+        SqlConnection selectConn = new SqlConnection(coneccionString);
+        selectConn.Open();
+        SqlCommand select = new SqlCommand(query, selectConn);
+        SqlDataReader reader = select.ExecuteReader();
 
-        SqlConnection cn = new SqlConnection(coneccionString);
-        SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT * FROM [PracticaDb].[dbo].[GastosLocal] T1 WHERE T1.fecha='" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "' AND T1.local='" + local + "' ";
-
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try
+        if (reader.Read())
         {
-            da.Fill(dt);
+            if (reader.GetInt32(0) == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
-        finally
+        else
         {
-            cn.Close();
+            return false;
         }
+    }
+/*********************************************************************************************************************/
+    
+    [WebMethod]
+    public DataTable getGastos(string local, string ddmmaa)
+    {
+        DateTime dt = toDateTime(ddmmaa);
+        string fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
 
-        return dt;
+        return obtenerTabla("Gastos", " SELECT * "+
+                                      " FROM [PracticaDb].[dbo].[GastosLocal] T1 "+
+                                      " WHERE T1.fecha='" + fecha + "' AND T1.local='" + local + "'");
     }
 
     [WebMethod]
@@ -341,9 +447,12 @@ public class LocalesService : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public int guardarGasto(string gasto, string local, string total, string obsevaciones)//fecha.now
+    public int guardarGasto(string gasto, string local, string total, string obsevaciones, string ddmmaa)
     {
-        return Ejecutar(" INSERT INTO [PracticaDb].[dbo].[GastosLocal] (fecha,gasto,total,observaciones,local) VALUES('" + DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + "','" + gasto + "','" + total + "','" + obsevaciones + "','" + local + "') ");
+        DateTime dt = toDateTime(ddmmaa);
+        string fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
+
+        return Ejecutar(" INSERT INTO [PracticaDb].[dbo].[GastosLocal] (fecha,gasto,total,observaciones,local) VALUES('" + fecha + "','" + gasto + "','" + total + "','" + obsevaciones + "','" + local + "') ");
     }
 
 }

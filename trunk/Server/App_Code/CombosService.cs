@@ -20,6 +20,15 @@ public class CombosService : System.Web.Services.WebService
     {
     }
 
+
+    [WebMethod]
+    public DataSet getExcel(string nombre)
+    {
+        File f = new File();
+        DataSet dataset = f.getExcel2(nombre);
+        return dataset;
+    }
+
     [WebMethod]
     public int agregarPais(String pais)
     {
