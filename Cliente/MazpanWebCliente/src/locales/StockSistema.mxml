@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="428" xmlns:mc="misClases.*">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="428" xmlns:mc="misClases.*" xmlns:ns1="locales.*">
+	<mx:states>
+		<mx:State name="CargarArchivo">
+			<mx:RemoveChild target="{tabla}"/>
+			<mx:RemoveChild target="{linkbutton1}"/>
+			<mx:RemoveChild target="{local_cb}"/>
+			<mx:RemoveChild target="{label1}"/>
+			<mx:RemoveChild target="{hbox1}"/>
+			<mx:AddChild position="lastChild">
+				<ns1:CargarArchivo x="0" y="0" id="cargarArchivo_cmp" complexClick="addStockSistemaResult(event)" />
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
 	
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getLocales" 		result="getLocalesResult(event)" 		fault="ErrorFaultHandler(event, 'getLocales')"/>
 		<mx:operation name="getStock" 			result="getStockResult(event)"	 		fault="ErrorFaultHandler(event, 'getStock')"/>
-		<mx:operation name="addStockSistema" 	result="addStockSistemaResult(event)"  	fault="ErrorFaultHandler(event, 'addStockSistema')"/>
 	</mx:WebService>
 	
 	
 	<mx:Script>
 		<![CDATA[
-			import flash.system.fscommand;
-			import com.as3xls.xls.ExcelFile;
+			import eventos.ComplexEvent;
 			import mx.controls.Alert;		
 			import mx.formatters.NumberFormatter;
 			import mx.rpc.events.ResultEvent;
@@ -24,8 +34,6 @@
 			[Bindable]
 			private var stock_ac:Array;
 			
-			private var fileRef:FileReference = new FileReference();
-									
 			private var formato:NumberFormatter = new NumberFormatter();
 				
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
@@ -34,87 +42,20 @@
             }
 			public function init():void
 			{
-				fileRef.addEventListener(Event.SELECT, selectHandler);
-				
 				formato.precision=3;
 				formato.useThousandsSeparator=true;
 				formato.thousandsSeparatorFrom=".";
 				formato.thousandsSeparatorTo=".";
 				formato.decimalSeparatorFrom=",";
 				formato.decimalSeparatorTo=",";
-            	locales_ac = new Array;
             	
-				stock_ac = new Array;
+            	locales_ac = new Array;
+            	stock_ac = new Array;
 				LocalesService.getLocales();
             }
-            
-			private function buscarArchivo():void
-            {
-            	if(locales_ac.length>0 && fecha_df.text.length>0)
-            	{
-            		try
-					{
-						Alert.show(MENSAJES.MS0004,MENSAJES.AVISO);
-						//[new FileFilter("PPack", "*.jpg;*.jpeg;*.gif;*.png;*.tiff;*.tif;*.pdf")] <--- filtro 
-					    var success:Boolean = fileRef.browse([new FileFilter("Archivo de texto plano indexado", "*.txt;")]);
-					}
-					catch (error:Error)
-					{
-					    trace("Unable to browse for files.");
-					}
-            	}
-            	else
-            	{
-            		Alert.show(MENSAJES.MS0003,MENSAJES.AVISO);
-            	}
-            }
-            private function selectHandler(event:Event):void
+			private function addStockSistemaResult(event:ComplexEvent):void
 			{
-			    try
-			    {
-			        var url:URLRequest = new URLRequest("C:/"+fileRef.name);
-					var loadit:URLLoader = new URLLoader();
-					loadit.addEventListener(Event.COMPLETE, completeHandler);
-					loadit.load(url);
-			    }
-			    catch (error:Error)
-			    {
-			        trace("Unable to upload file.");
-			    }
-			}
-			private function completeHandler(ev:Event):void
-			{
-				var texto:String = ev.target.data;
-				var lineas:Array = texto.split('\r\n');
-				var stockAux:Array = new Array;
-				var linea:Array;
-				
-				for(var i:int=1; i<lineas.length; i++)
-				{
-					var s:Object = new Object;
-					linea = String(lineas[i]).split('\t');
-					if(linea.length==4)
-					{
-						s.codigo = rellenar(linea[0],9);
-						s.nombre = linea[1];
-						s.cantidad = linea[2];
-						s.valor = linea[3];
-						stockAux.push(s);
-					}
-				}
-						
-				LocalesService.addStockSistema(stockAux,local_cb.selectedItem.WhsCode, fecha_df.text);
-			}
-			private function rellenar(texto:String, largo:int):String
-			{
-				for(var i:int=texto.length; i<largo; i++)
-				{
-					texto = "0"+texto;
-				}
-				return texto;
-			}
-			private function addStockSistemaResult(event:ResultEvent):void
-			{
+				currentState = '';
 				cargar();
 			}
 			private function getLocalesResult(event:ResultEvent):void
@@ -136,20 +77,27 @@
             	{
             		var producto:Object = new Object;
             		producto.ItemName 	= stockLocal[i].ItemName;
-            		producto.Local 		= stockLocal[i].OnHand;
-            		producto.Sistema 	= stockSistema[i].OnHand;
+            		producto.Local 		= formato.format(Number(stockLocal[i].OnHand));
+            		producto.Sistema 	= formato.format(Number(stockSistema[i].OnHand));
             		producto.InvntryUom = stockLocal[i].InvntryUom;
-            		producto.Diferencia = Number(stockLocal[i].OnHand as String) - Number(stockSistema[i].OnHand as String);
+            		producto.Diferencia = formato.format(Number(stockLocal[i].OnHand as String) - Number(stockSistema[i].OnHand as String));
             		stock_ac.push(producto);
             	}
             }
+			private function cargarArchivo():void
+			{
+				if(locales_ac.length>0 && fecha_df.text.length>0)
+				{
+					currentState = CargarArchivo.nombre;
+					cargarArchivo_cmp.parametros(local_cb.selectedItem, fecha_df.text);
+				}
+			}
 			
-           
 		]]>
 	</mx:Script>
-	<mx:Label text="Local" y="12" x="10"/>
+	<mx:Label text="Local" y="12" x="10" id="label1"/>
 	<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" x="51" y="10" change="cargar()"/>
-	<mx:HBox x="479" y="10" width="273">
+	<mx:HBox x="479" y="10" width="273" id="hbox1">
 		<mx:Label text="Fecha:" fontWeight="bold"/>
 		<mc:myDateField id="fecha_df" change="cargar()"/>
 	</mx:HBox>
@@ -163,6 +111,6 @@
 			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="100" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:LinkButton x="10" y="38" label="Cargar Archivo" color="#0000FF" click="buscarArchivo()"/>
+	<mx:LinkButton x="10" y="38" label="Cargar Archivo" color="#0000FF" click="cargarArchivo()" id="linkbutton1"/>
 	
 </mx:Canvas>

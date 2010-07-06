@@ -30,6 +30,7 @@
             }
 			public function init():void
 			{
+				sucursales_ac = new Array;
 				cargar_btn.enabled = false;
 				pdf_btn.enabled = false;
 				Service.getSucursales2(index.usuario);

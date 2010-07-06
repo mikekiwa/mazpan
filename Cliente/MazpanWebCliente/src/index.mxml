@@ -182,6 +182,12 @@
 				<ns13:DesviacionOrdenes id="desviacionOrdenes_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="Mermas">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns13:Mermas id="mermas_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 		<mx:State name="Informe">
 			<mx:RemoveChild target="{login}"/>
 			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
@@ -293,7 +299,7 @@
 			
 			private var httpManager:HTTPUtil = new HTTPUtil();
 			
-			[Bindable] 
+			[Bindable]
 			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
 			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
@@ -358,7 +364,7 @@
 					if(event.stateDestination == ControlAsistencia.nombre) controlAsistencia_cmp.init();
 					if(event.stateDestination == DesviacionOrdenes.nombre) desviacionOrdenes_cmp.init();
 					if(event.stateDestination == Stock.nombre) stock_cmp.init();
-//					if(event.stateDestination == StockLocal.nombre) stockLocal_cmp.init();
+					if(event.stateDestination == Mermas.nombre) mermas_cmp.init();
 					if(event.stateDestination == GastosLocal.nombre) gastosLocal_cmp.init();
 					if(event.stateDestination == Informe.nombre) informe_cmp.init();
 					if(event.stateDestination == Items.nombre) items_cmp.init();
@@ -424,5 +430,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 24.24.06.10"/>
+	<mx:Label x="525" y="10" text="Versión 28.05.07.10"/>
 </mx:Application>

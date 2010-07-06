@@ -5,6 +5,7 @@ package estadoResultado
 	import flash.display.DisplayObject;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	import mx.formatters.NumberFormatter;
 	
 	import org.alivepdf.colors.RGBColor;
@@ -152,13 +153,23 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 		
 		private function removeFormatting(e:String):String
 		{
+			e = removeParentesis(e);
 			var array:Array;
 			array = e.split(".");
 			return array.join("");
 		}
+		private function removeParentesis(e:String):String
+		{
+			var aux:String;
+			var array:Array;
+			array = e.split("(");
+			aux = array.join("");
+			if(array.length==2) aux = "-"+aux;
+			array = aux.split(")");
+			return array.join("");
+		}
 		private function parentesis(valor:String):String
 		{
-			
 			var arreglo:Array = valor.split('-');
 			if(arreglo.length==1) return valor;
 			return "("+arreglo[1]+")";
@@ -289,15 +300,15 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			pdf.addCell(1,1);//espacio
 			pdf.addCell(15, 4,"REAL",1,0,Align.CENTER);
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"DESV",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
 			pdf.addCell(3,1);//espacio
 			pdf.addCell(15, 4,"REAL",1,0,Align.CENTER);
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"DESV",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"PPTO",1,0,Align.CENTER);
 			
 			pdf.writeText(5,"\n");
 			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
@@ -310,37 +321,37 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			pdf.addCell(1,1);//espacio
 			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"%",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
 			pdf.addCell(3,1);//espacio
 			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
 			pdf.addCell(1,1);//espacio
-			pdf.addCell(15, 4,"%",1,0,Align.CENTER);
+			pdf.addCell(15, 4,"M$",1,0,Align.CENTER);
 			pdf.writeText(8,"\n");
 			pdf.setFontSize(6);
 			
-			addDatosLineas(arreglo,ITEMS.VENTASZONAS,ITEMS.VENTASNETAS,meses,2);
+			addDatosLineas(arreglo,ITEMS.VENTASZONAS,ITEMS.VENTASNETAS,meses,2,true);
 			addLineaTotal(1,2);
-			addTotal(arreglo,ITEMS.VENTASNETAS,meses,2);
+			addTotal(arreglo,ITEMS.VENTASNETAS,meses,2,true);
 			addLineaTotal(1,2);
 			
-			addDatosLineas(arreglo,ITEMS.COSTOSINSUMOSZONAS,ITEMS.COSTOSTOTALES,meses,2);
+			addDatosLineas(arreglo,ITEMS.COSTOSINSUMOSZONAS,ITEMS.COSTOSTOTALES,meses,2,true);
 			addLineaTotal(1,2);
-			addTotal(arreglo,ITEMS.COSTOSTOTALES,meses,2);
+			addTotal(arreglo,ITEMS.COSTOSTOTALES,meses,2,true);
 			addLineaTotal(2,2);
-			addTotal(arreglo,ITEMS.MARGENCOMERCIAL,meses,2);
+			addTotal(arreglo,ITEMS.MARGENCOMERCIAL,meses,2,true);
 			addLineaTotal(1,2);
 			
 			addTexto("GASTOS DE ADM. Y VENTAS",2);
-			addDatosLineas(arreglo,ITEMS.REMUNERACIONES,ITEMS.DEPRECIACIONES,meses,2);
+			addDatosLineas(arreglo,ITEMS.REMUNERACIONES,ITEMS.DEPRECIACIONES,meses,2,true);
 			addLineaTotal(1,2);
 			
-			addTotalGastosAdministrativosYVentas("TOTAL GASTOS ADM. Y VENTAS",arreglo,meses,2);
+			addTotalGastosAdministrativosYVentas("TOTAL GASTOS ADM. Y VENTAS",arreglo,meses,2,true);
 			addLineaTotal(2,2);
-			addTotalMargenOperacionalBruto("MARGEN OPERACIONAL BRUTO",arreglo,meses,2);
+			addTotalMargenOperacionalBruto("MARGEN OPERACIONAL BRUTO",arreglo,meses,2,true);
 			addLineaTotal(1,2);
 			
 			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER3-2.pdf");
@@ -468,7 +479,32 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER3-1.pdf");
 			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "ER3-1.pdf");
 		}
-		private function addTotalGastosAdministrativosYVentas(nombre:String,arreglo:Array,meses:int,escala:int=1):void
+		
+		private function getVentas(arreglo:Array,meses:int):Array
+		{
+			var i:int=ITEMS.VENTASNETAS;
+			var s:Array = [0,0,0,0,0,0,0];
+			
+			if(meses==0){ s[3] = arreglo[i].ENE;}
+			if(meses==1){ s[3] = arreglo[i].FEB;s[2] = arreglo[i].ENE;}
+			if(meses==2){ s[3] = arreglo[i].MAR;s[2] = arreglo[i].FEB;s[1] = arreglo[i].ENE;}
+			if(meses==3){ s[3] = arreglo[i].ABR;s[2] = arreglo[i].MAR;s[1] = arreglo[i].FEB;s[0] = arreglo[i].ENE;}
+			if(meses==4){ s[3] = arreglo[i].MAY;s[2] = arreglo[i].ABR;s[1] = arreglo[i].MAR;s[0] = arreglo[i].FEB;}
+			if(meses==5){ s[3] = arreglo[i].JUN;s[2] = arreglo[i].MAY;s[1] = arreglo[i].ABR;s[0] = arreglo[i].MAR;}
+			if(meses==6){ s[3] = arreglo[i].JUL;s[2] = arreglo[i].JUN;s[1] = arreglo[i].MAY;s[0] = arreglo[i].ABR;}
+			if(meses==7){ s[3] = arreglo[i].AGO;s[2] = arreglo[i].JUL;s[1] = arreglo[i].JUN;s[0] = arreglo[i].MAY;}
+			if(meses==8){ s[3] = arreglo[i].SEP;s[2] = arreglo[i].AGO;s[1] = arreglo[i].JUL;s[0] = arreglo[i].JUN;}
+			if(meses==9){ s[3] = arreglo[i].OCT;s[2] = arreglo[i].SEP;s[1] = arreglo[i].AGO;s[0] = arreglo[i].JUL;}
+			if(meses==10){s[3] = arreglo[i].NOV;s[2] = arreglo[i].OCT;s[1] = arreglo[i].SEP;s[0] = arreglo[i].AGO;}
+			if(meses==11){s[3] = arreglo[i].DIC;s[2] = arreglo[i].NOV;s[1] = arreglo[i].OCT;s[0] = arreglo[i].SEP;}
+			
+			s[4] = arreglo[i].MES;
+			s[5] = arreglo[i].REAL;
+			s[6] = arreglo[i].PPTO;
+			
+			return s;
+		}
+		private function addTotalGastosAdministrativosYVentas(nombre:String,arreglo:Array,meses:int,escala:int=1,porcentaje:Boolean=false):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -526,28 +562,64 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			}
 			else
 			{
-				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
-			
-				pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
-				pdf.addCell(3,1);//espacio
-				pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
-				pdf.writeText(2,"\n");
-				pdf.setFontSize(8);
+				if(!porcentaje)
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+				
+					pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+					pdf.setFontSize(8);
+				}
+				else
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+					var ventasNetas:Array = getVentas(arreglo,meses);
+						
+					pdf.addCell(15,0.3,aPorcentaje(m1,ventasNetas[0]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(m2,ventasNetas[1]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(m3,ventasNetas[2]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(r ,ventasNetas[3]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(p ,ventasNetas[4]),0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(ra,ventasNetas[5]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(pa,ventasNetas[6]),0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+					pdf.setFontSize(8);
+				}
 			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
 		}
-		private function addTotalMargenOperacionalBruto(nombre:String,arreglo:Array,meses:int,escala:int=1):void
+		private function addTotalMargenOperacionalBruto(nombre:String,arreglo:Array,meses:int,escala:int=1,porcentaje:Boolean=false):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -606,22 +678,57 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			}
 			else
 			{
-				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
-				
-				pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
-				pdf.addCell(3,1);//espacio
-				pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
-				pdf.writeText(2,"\n");
+				if(!porcentaje)
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+					
+					pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+				}
+				else
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+					var ventasNetas:Array = getVentas(arreglo,meses);
+						
+					pdf.addCell(15,0.3,aPorcentaje(m1,ventasNetas[0]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(m2,ventasNetas[1]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(m3,ventasNetas[2]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(r ,ventasNetas[3]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(p ,ventasNetas[4]),0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(ra,ventasNetas[5]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(pa,ventasNetas[6]),0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+				}
 			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
@@ -652,24 +759,30 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
 				
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
 				pdf.addCell(1,1);//espacio
 				pdf.addCell(53,0.3,"   "+texto,0,0,Align.LEFT);
 				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
 				pdf.addCell(3,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
+				pdf.addCell(1,1);//espacio
 				pdf.addCell(15,0.3,"",0,0,Align.RIGHT);
 				pdf.writeText(2,"\n");
 			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
 		}
-		private function addTotal(arreglo:Array,i:int,meses:int,escala:int=1):void
+		private function addTotal(arreglo:Array,i:int,meses:int,escala:int=1,porcentaje:Boolean=false):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -727,22 +840,57 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 			}
 			else
 			{
-				pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+				if(!porcentaje)
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
 				
-				pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
-				pdf.addCell(1,1);//espacio
-				pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
-				pdf.addCell(3,1);//espacio
-				pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
-				pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
-				pdf.writeText(2,"\n");
+					pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+				}
+				else
+				{
+					pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),6);
+					var ventasNetas:Array = getVentas(arreglo,meses);
+					
+					pdf.addCell(15,0.3,aPorcentaje(m1,ventasNetas[0]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(m2,ventasNetas[1]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(m3,ventasNetas[2]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(r, ventasNetas[3]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(p, ventasNetas[4]),0,0,Align.RIGHT);
+					pdf.addCell(3,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(ra,ventasNetas[5]),0,0,Align.RIGHT);
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,"");//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+					pdf.addCell(1,1);//espacio
+					pdf.addCell(15,0.3,aPorcentaje(pa,ventasNetas[6]),0,0,Align.RIGHT);
+					pdf.writeText(2,"\n");
+				}
 			}
 			
 			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
@@ -779,7 +927,7 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				return parentesis(formato.format(Math.round(aux)/10));
 			}			
 		}
-		private function addDatosLineas(arreglo:Array,desde:int, hasta:int,meses:int, escala:int=0):void
+		private function addDatosLineas(arreglo:Array,desde:int, hasta:int,meses:int, escala:int=1,porcentaje:Boolean=false):void
 		{
 			var m1:String='-';
 			var m2:String='-';
@@ -836,28 +984,84 @@ pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1
 				}
 				else
 				{
-					pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
-			
-					pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
-					pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
-					pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
-					pdf.addCell(1,1);//espacio
-					pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
-					pdf.addCell(1,1);//espacio
-					pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
-					pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
-					pdf.addCell(15,0.3,d,0,0,Align.RIGHT);
-					pdf.addCell(3,1);//espacio
-					pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
-					pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
-					pdf.addCell(15,0.3,da,0,0,Align.RIGHT);
-					pdf.writeText(2,"\n");
+					if(!porcentaje)
+					{
+						pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
+						pdf.addCell(15,0.3,m1,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,m2,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,m3,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,r,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,p,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,d,0,0,Align.RIGHT);//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+						pdf.addCell(3,1);//espacio
+						pdf.addCell(15,0.3,ra,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,pa,0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,da,0,0,Align.RIGHT);//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+						pdf.writeText(2,"\n");
+					}
+					else
+					{
+						pdf.setFont(new CoreFont(FontFamily.HELVETICA),6);
+						var ventasNetas:Array = getVentas(arreglo,meses);
+						
+						pdf.addCell(15,0.3,aPorcentaje(m1,ventasNetas[0]),0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,aPorcentaje(m2,ventasNetas[1]),0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,aPorcentaje(m3,ventasNetas[2]),0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(53,0.3,"   "+arreglo[i].nombre,0,0,Align.LEFT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,aPorcentaje(r,ventasNetas[3]),0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,"",0);//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,aPorcentaje(p,ventasNetas[4]),0,0,Align.RIGHT);
+						pdf.addCell(3,1);//espacio
+						pdf.addCell(15,0.3,aPorcentaje(ra,ventasNetas[5]),0,0,Align.RIGHT);
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,"",0);//En cualquier caso diferente del general, la desvicion no es una factor, por tanto no se coloca
+						pdf.addCell(1,1);//espacio
+						pdf.addCell(15,0.3,aPorcentaje(pa,ventasNetas[6]),0,0,Align.RIGHT);
+						pdf.writeText(2,"\n");
+					}
 				}
 				pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
-			
 			}
 		}
-		private function addLineaTotal(lineas:int=1,escala:int=1):void
+		private function aPorcentaje(m:String,venta:String):String
+		{
+			formato.precision = 1;
+			var valor:Number = Number(removeFormatting(m));
+			var total:Number = Number(removeFormatting(venta));
+			var salida:String="";
+			
+			if(total!=0)
+			{
+				var aux:Number = (valor*100)/total;
+				var aux2:String  = "0";
+				
+				var arreglo:Array = aux.toString().split('.');
+				if(arreglo.length==2) aux2 = arreglo.join(',');
+				else aux2 = aux.toString();
+				
+				salida =  parentesis( formato.format(aux2) );
+			}
+			else salida = '100';
+			
+			formato.precision = 0;
+			return salida;
+		}
+		private function addLineaTotal(lineas:int=1,escala:int=1,porcentaje:Boolean=false):void
 		{
 			if(lineas==2)
 			{
