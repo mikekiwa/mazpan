@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="770" height="425">
+	
+	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="addStockSistema" 	result="addStockSistemaResult(event)"  	fault="ErrorFaultHandler(event, 'addStockSistema')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+			[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import eventos.ComplexEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.controls.Alert;
+			
+			public static const nombre:String = "CargarArchivo";
+			
+			[Bindable]
+			private var stockSistema_ac:Array;
+			[Bindable]
+			private var local:Object;
+			[Bindable]
+			private var fecha:String;
+			
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function parametros(_local:Object,_fecha:String):void
+			{
+				local=_local;
+				fecha=_fecha;
+			}
+			private function pegar():void
+			{
+				texto_ta.setFocus();
+			}
+			private function completeHandler(ev:Event):void
+			{
+				texto_ta.text = ev.target.data;
+				cargar(texto_ta.text);
+			}
+			private function cargar(_texto:String):void
+			{
+				if(_texto.length>0)
+				{
+					var texto:String = _texto;
+					var lineas:Array = texto.split('\r');
+					var stockAux:Array = new Array;
+					var columnas:Array = String(lineas[i]).split('\t');
+					var linea:Array;
+					
+					var CODIGO:int = 0;
+					var NOMBRE:int = 1;
+					var CANTIDAD:int = 2;
+					var VALOR:int = 3;
+					
+					for(var columna:int; columna<columnas.length; columna++)
+					{
+						if(columnas[columna]=="Número de artículo") 	CODIGO 		= columna;
+						if(columnas[columna]=="Descripción") 			NOMBRE 		= columna;
+						if(columnas[columna]=="Cantidad acumulada") 	CANTIDAD 	= columna;
+						if(columnas[columna]=="Valor acumulado") 		VALOR 		= columna; 
+					}
+					if(CODIGO!=NOMBRE && CODIGO!=CANTIDAD && CODIGO!=VALOR && NOMBRE!=CANTIDAD && NOMBRE!=VALOR && CANTIDAD!=VALOR)
+					{
+						for(var i:int=1; i<lineas.length; i++)
+						{
+							var s:Object = new Object;
+							linea = String(lineas[i]).split('\t');
+							
+							if(linea!=null && linea.length>=4)
+							{
+								s.codigo = rellenar(linea[CODIGO],9);
+								s.nombre = linea[NOMBRE];
+								s.cantidad = linea[CANTIDAD];
+								s.valor = linea[VALOR];
+								stockAux.push(s);
+							}
+						}
+						stockSistema_ac = stockAux;
+					}
+					else
+					{
+						Alert.show("Error de formato, columnas esperadas :\n\tNúmero de artículo\n\tDescripción\n\tCantidad acumulada\n\tValor acumulado\n\nUtilice Tabulador para separar columnas", "ERROR");
+					}
+				}
+				texto_ta.text = "";
+			}
+			private function rellenar(texto:String, largo:int):String
+			{
+				for(var i:int=texto.length; i<largo; i++)
+				{
+					texto = "0"+texto;
+				}
+				return texto;
+			}
+			private function guardar():void
+			{
+				if(stockSistema_ac.length>0) LocalesService.addStockSistema(stockSistema_ac, local.WhsCode, fecha);
+				else Alert.show("Aún no ingresa datos del stock","AVISO");
+			}
+			private function addStockSistemaResult(event:ResultEvent):void
+			{
+				atras();
+			}
+			private function atras():void
+			{
+				stockSistema_ac = new Array;
+				dispatchEvent(new ComplexEvent(ComplexEvent.COMPLEX_CLICK,'',nombre,null));
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:HBox x="10" y="10" width="750">
+		<mx:Label text="Local:" fontWeight="bold"/>
+		<mx:Label text="{local.WhsName}"/>
+		<mx:Label text="Fecha:" fontWeight="bold"/>
+		<mx:Label text="{fecha}"/>
+	</mx:HBox>
+	<mx:TextArea x="10" y="36" width="750" height="349" change="cargar(texto_ta.text)" id="texto_ta" visible="false"/>
+	<mx:DataGrid x="10" y="36" width="750" height="349" dataProvider="{stockSistema_ac}" click="pegar()">
+		<mx:columns>
+			<mx:DataGridColumn headerText="Número de artículo" dataField="codigo" width="125"/>
+			<mx:DataGridColumn headerText="Descripción" dataField="nombre"/>
+			<mx:DataGridColumn headerText="Cantidad acumulada" dataField="cantidad" width="130"/>
+			<mx:DataGridColumn headerText="Valor Acumulado" dataField="valor" width="115"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="688" y="393" label="Guardar" click="guardar()"/>
+	<mx:Button x="605" y="393" label="Cancelar" click="atras()"/>
+</mx:Canvas>

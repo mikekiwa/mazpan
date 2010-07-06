@@ -8,6 +8,7 @@
 		<mx:operation name="getDesviaciones" 	result="getDesviacionesResult(event)"	fault="ErrorFaultHandler(event, 'getDesviaciones')"/>
 		<mx:operation name="getStock" 			result="getStockResult(event)"	 		fault="ErrorFaultHandler(event, 'getStock')"/>
 		<mx:operation name="getGastos"			result="getGastosResult(event)" 		fault="ErrorFaultHandler(event, 'getGastos')"/>
+		<mx:operation name="getMermas" 			result="getMermasResult(event)" 		fault="ErrorFaultHandler(event, 'getMermas')"/>
 	</mx:WebService>
 	
 	<mx:Script>
@@ -27,11 +28,14 @@
 			[Bindable]
 			private var stock_ac:Array;
 			[Bindable]
-			private var petroleo:Object = new Object;
-            [Bindable]
-            private var luz:Object = new Object;
-			[Bindable]
 			private var gastosLocal:Array = new Array;
+			[Bindable]
+			private var mermas_ac:Array;
+			[Bindable]
+			private var cantidadTotal:String = "0";
+            [Bindable]
+			private var montoTotal:String = "0";
+        
 			
 			private var formato:NumberFormatter = new NumberFormatter();
 			
@@ -42,7 +46,7 @@
             public function init():void
 			{
 				exportar_btn.enabled = false;
-				formato.precision=3;
+				formato.precision=2;
 				formato.useThousandsSeparator=true;
 				formato.thousandsSeparatorFrom=".";
 				formato.thousandsSeparatorTo=".";
@@ -50,8 +54,6 @@
 				formato.decimalSeparatorTo=",";
 				
 				locales_ac = new Array;
-				petroleo = new Object;
-            	luz = new Object;
 				LocalesService.getLocales();
             }
             private function getLocalesResult(event:ResultEvent):void
@@ -62,15 +64,15 @@
             private function cargar():void
 			{
 				exportar_btn.enabled = false;
-				if(local_cb.selectedIndex!=-1 && fecha_df.text.length>0)
+				if(local_cb.selectedIndex!=-1 && desde_df.text.length>0 && hasta_df.text.length>0)
 				{
-					LocalesService.getAsistencia(local_cb.selectedItem.WhsCode,fecha_df.text);
+					LocalesService.getAsistencia(local_cb.selectedItem.WhsCode,desde_df.text,hasta_df.text);
 				}
 			}
             private function getAsistenciaResult(event:ResultEvent):void
             {
             	asistencia_ac = event.result.Tables.Asistencia.Rows.source as Array;
-            	LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,fecha_df.text,fecha_df.text);
+            	LocalesService.getDesviaciones(local_cb.selectedItem.WhsCode,desde_df.text,hasta_df.text);
             }
             private function getDesviacionesResult(event:ResultEvent):void
             {
@@ -83,14 +85,14 @@
             	}
             	
             	desviaciones_ac = desviacionesAux;
-            	LocalesService.getGastos(local_cb.selectedItem.WhsCode, fecha_df.text);
+            	LocalesService.getGastos(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);//more params
             	
             }
             private function getGastosResult(event:ResultEvent):void
             {
             	gastosLocal = event.result.Tables.Gastos.Rows.source as Array;
             	
-            	LocalesService.getStock(local_cb.selectedItem.WhsCode,fecha_df.text);
+            	LocalesService.getStock(local_cb.selectedItem.WhsCode,hasta_df.text);//more params
             }
             private function getStockResult(event:ResultEvent):void
             {
@@ -103,19 +105,37 @@
             		var producto:Object = new Object;
             		producto.mostrar 	= true;
             		producto.ItemName 	= stockLocal[i].ItemName;
-            		producto.Local 		= stockLocal[i].OnHand;
-            		producto.Sistema 	= stockSistema[i].OnHand;
+            		producto.Local 		= formato.format(Number(stockLocal[i].OnHand));
+            		producto.Sistema 	= formato.format(Number(stockSistema[i].OnHand));
             		producto.InvntryUom = stockLocal[i].InvntryUom;
-            		producto.Diferencia = Number(stockLocal[i].OnHand as String) - Number(stockSistema[i].OnHand as String);
+            		producto.Diferencia = formato.format(Number(stockLocal[i].OnHand as String) - Number(stockSistema[i].OnHand as String));
             		stock_ac.push(producto);
             	}
+            	LocalesService.getMermas(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);
+            }
+            private function getMermasResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Mermas.Rows.source as Array;
+            	
+            	var ct:Number = 0;
+            	var mt:Number = 0;
+            	
+            	for(var i:int; i<aux.length; i++)
+            	{
+            		ct += Number(aux[i].Quantity);
+            		mt += Number(aux[i].Monto);
+            		aux[i].Quantity = formato.format(Number(aux[i].Quantity));
+            		aux[i].Monto 	= formato.format(Number(aux[i].Monto));
+            	}
+            	cantidadTotal  = formato.format(Number(ct));
+            	montoTotal = formato.format(Number(mt));
+            	mermas_ac = aux;
             	exportar_btn.enabled  = true;
             }
-            
             private function exportar():void
             {
             	var layoutLocales:LayoutLocales = new LayoutLocales;
-            	layoutLocales.generar(asistencia_ac,desviaciones_ac,stock_ac, gastosLocal, fecha_df.text,local_cb.selectedItem);
+            	layoutLocales.generar(asistencia_ac,desviaciones_ac,stock_ac, gastosLocal, desde_df.text + " al " + hasta_df.text,local_cb.selectedItem,mermas_ac,cantidadTotal, montoTotal);
             }
             private function todos():void
             {
@@ -140,9 +160,11 @@
             }
 		]]>
 	</mx:Script>
-	<mx:HBox x="479" y="10" width="273">
-		<mx:Label text="Fecha:" fontWeight="bold"/>
-		<mc:myDateField id="fecha_df" change="cargar()"/>
+	<mx:HBox x="448" y="10" width="327" id="hbox1">
+		<mx:Label text="Desde:" fontWeight="bold"/>
+		<mc:myDateField id="desde_df" change="cargar()"/>
+		<mx:Label text="Hastas:" fontWeight="bold"/>
+		<mc:myDateField id="hasta_df" change="cargar()"/>
 	</mx:HBox>
 	<mx:Label x="10" y="8" text="Local"/>
 	<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" x="51" y="6" change="cargar()"/>
@@ -153,6 +175,7 @@
 					<mx:DataGridColumn headerText="Nombres" dataField="CardName" width="495"/>
 					<mx:DataGridColumn headerText="Asistencia" dataField="asistencia" width="150" sortable="false"/>
 					<mx:DataGridColumn headerText="Horas Atraso" dataField="atraso" width="100" sortable="false"/>
+					<mx:DataGridColumn headerText="Fecha" dataField="fecha" width="100" sortable="false"/>
 				</mx:columns>
 			</mx:DataGrid>
 		</mx:Canvas>
@@ -197,6 +220,18 @@
 			<mx:LinkButton x="0" y="0" label="Todos" color="#0531F0" click="todos()"/>
 			<mx:LinkButton x="61" y="0" label="Ninguno" color="#0531F0" click="ninguno()"/>
 			<mx:LinkButton x="135" y="0" label="Invertir" color="#0531F0" click="invertir()"/>
+		</mx:Canvas>
+		<mx:Canvas label="Mermas" width="100%" height="100%">
+			<mx:DataGrid x="0" y="0" width="773" height="325" dataProvider="{mermas_ac}">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Descripción" dataField="Dscription" width="465" sortable="false"/>
+					<mx:DataGridColumn headerText="Cantidad" dataField="Quantity" width="100" sortable="false"/>
+					<mx:DataGridColumn headerText="Fecha Salida" dataField="U_FechSal" width="110" sortable="false"/>
+					<mx:DataGridColumn headerText="Monto" dataField="Monto" width="100" sortable="false"/>
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:Label x="672" y="333" text="{montoTotal}" width="79" textAlign="right" fontWeight="bold"/>
+			<mx:Label x="462" y="333" text="{cantidadTotal}" width="84" textAlign="right" fontWeight="bold"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
 	<mx:Button x="689" y="428" label="Exportar" click="exportar()" id="exportar_btn" enabled="false"/>

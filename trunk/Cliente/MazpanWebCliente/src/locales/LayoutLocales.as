@@ -20,7 +20,7 @@ package locales
 			pdf.textStyle(new RGBColor(0),1);
 		}
 		
-		public function generar(asistencia:Array, desviaciones:Array, stock:Array, gastos_ac:Array , fecha:String, local:Object):void
+		public function generar(asistencia:Array, desviaciones:Array, stock:Array, gastos_ac:Array , fecha:String, local:Object, mermas:Array, cantidadTotal:String, montoTotal:String):void
 		{
 			pdf.setFontSize(22);
           	pdf.writeText(22,"Control "+local.WhsName+" "+fecha+"\n");
@@ -84,20 +84,20 @@ package locales
           		pdf.writeText(12,"Desviaciones:\n");
           		pdf.setFontSize(8);
           		
-          		pdf.addCell(85, 5,"Item", 1);
-          		pdf.addCell(25, 5,"Elaborado", 1);
-          		pdf.addCell(25, 5,"Completado", 1);
-          		pdf.addCell(25, 5,"Diferencia", 1);
+          		pdf.addCell(91, 5,"Item", 1);
+          		pdf.addCell(23, 5,"Elaborado", 1);
+          		pdf.addCell(23, 5,"Completado", 1);
+          		pdf.addCell(23, 5,"Diferencia", 1);
           		pdf.addCell(17, 5,"% Logrado", 1);
           		pdf.addCell(20, 5,"% No Logrado", 1);
           		pdf.writeText(5,"\n");
           		
 		        for(i=0; i<desviaciones.length; i++)
 	          	{
-	          		pdf.addCell(85, 5,desviaciones[i].ItemName, 1);
-	          		pdf.addCell(25, 5,desviaciones[i].CantidadElaborada, 1,0,Align.RIGHT);
-	          		pdf.addCell(25, 5,desviaciones[i].CantidadCompletada, 1,0,Align.RIGHT);
-	          		pdf.addCell(25, 5,desviaciones[i].Diferencia, 1,0,Align.RIGHT);
+	          		pdf.addCell(91, 5,desviaciones[i].ItemName, 1);
+	          		pdf.addCell(23, 5,desviaciones[i].CantidadElaborada, 1,0,Align.RIGHT);
+	          		pdf.addCell(23, 5,desviaciones[i].CantidadCompletada, 1,0,Align.RIGHT);
+	          		pdf.addCell(23, 5,desviaciones[i].Diferencia, 1,0,Align.RIGHT);
 	          		pdf.addCell(17, 5,desviaciones[i].Logrado, 1,0,Align.RIGHT);
 	          		pdf.addCell(20, 5,desviaciones[i].NoLogrado, 1,0,Align.RIGHT);
 	          		pdf.writeText(5,"\n");
@@ -124,22 +124,22 @@ package locales
           		pdf.writeText(12,"Stock:\n");
           		pdf.setFontSize(8);
           		
-          		pdf.addCell(85, 5,"Item", 1);
-          		pdf.addCell(25, 5,"En Stock Local", 1);
-          		pdf.addCell(25, 5,"En Stock Sistema", 1);
+          		pdf.addCell(91, 5,"Item", 1);
+          		pdf.addCell(23, 5,"En Stock Local", 1);
+          		pdf.addCell(23, 5,"En Stock Sistema", 1);
           		pdf.addCell(20, 5,"Un. Medida", 1);
-          		pdf.addCell(25, 5,"Diferencia", 1);
+          		pdf.addCell(23, 5,"Diferencia", 1);
           		pdf.writeText(5,"\n");
           		
 		        for(i=0; i<stock.length; i++)
 	          	{
 	          		if(stock[i].mostrar)
 	          		{
-		          		pdf.addCell(85, 5,stock[i].ItemName, 1);
-		          		pdf.addCell(25, 5,stock[i].Local, 1,0,Align.RIGHT);
-		          		pdf.addCell(25, 5,stock[i].Sistema, 1,0,Align.RIGHT);
+		          		pdf.addCell(91, 5,stock[i].ItemName, 1);
+		          		pdf.addCell(23, 5,stock[i].Local, 1,0,Align.RIGHT);
+		          		pdf.addCell(23, 5,stock[i].Sistema, 1,0,Align.RIGHT);
 		          		pdf.addCell(20, 5,stock[i].InvntryUom, 1,0,Align.RIGHT);
-		          		pdf.addCell(25, 5,stock[i].Diferencia, 1,0,Align.RIGHT);
+		          		pdf.addCell(23, 5,stock[i].Diferencia, 1,0,Align.RIGHT);
 		          		pdf.writeText(5,"\n");
 		          	}
 	          	}
@@ -151,8 +151,46 @@ package locales
           		pdf.setFontSize(8);
           	}
           	
-          	//pdf.save(Method.REMOTE, "http://192.168.3.117/create.php",'inline', "Informe"+fecha+".pdf");
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Informe"+fecha+".pdf");
+          	pdf.writeText(5,"\n");
+          	
+          	if(mermas.length>0)
+          	{
+          		pdf.setFontSize(12);
+          		pdf.writeText(12,"Mermas:\n");
+          		pdf.setFontSize(8);
+          		
+          		pdf.addCell(85, 5,"Item", 1);
+          		pdf.addCell(25, 5,"Fecha Salida", 1);
+          		pdf.addCell(25, 5,"Cantidad", 1);
+          		pdf.addCell(25, 5,"Monto", 1);
+          		pdf.writeText(5,"\n");
+          		
+		        for(i=0; i<mermas.length; i++)
+	          	{
+	          		pdf.addCell(85, 5,mermas[i].Dscription, 1);
+	          		if(mermas[i].U_FechSal) pdf.addCell(25, 5,mermas[i].U_FechSal, 1,0,Align.CENTER);
+	          		else pdf.addCell(25, 5,"");
+	          		pdf.addCell(25, 5,mermas[i].Quantity, 1,0,Align.RIGHT);
+	          		pdf.addCell(25, 5,mermas[i].Monto, 1,0,Align.RIGHT);
+	          		pdf.writeText(5,"\n");
+	          	}
+	          	pdf.writeText(1,"\n");
+	          	
+	          	pdf.addCell(85, 5,"");
+          		pdf.addCell(25, 5,"Total",1);
+          		pdf.addCell(25, 5,cantidadTotal, 1,0,Align.RIGHT);
+          		pdf.addCell(25, 5,montoTotal, 1,0,Align.RIGHT);
+          		pdf.writeText(5,"\n");
+          	}
+          	else
+          	{
+          		pdf.setFontSize(12);
+          		pdf.writeText(12,"Local no registra mermas\n");
+          		pdf.setFontSize(8);
+          	}
+          	
+          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php",'inline', "Informe"+fecha+".pdf");
+          	//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Informe"+fecha+".pdf");
 		}
 	}
 }
