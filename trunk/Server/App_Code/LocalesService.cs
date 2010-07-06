@@ -184,16 +184,23 @@ public class LocalesService : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public DataTable getAsistencia(string local, string ddmmaa)
+    public DataTable getAsistencia(string local, string ddmmaa1, string ddmmaa2)
     {
-        string fecha;
-        if (ddmmaa == "" || ddmmaa == "HOY") fecha = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
+        string desde;
+        string hasta;
+        if (ddmmaa1 == "" || ddmmaa1 == "HOY") desde = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
         else
         {
-            DateTime dt = toDateTime(ddmmaa);
-            fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
+            DateTime dt1 = toDateTime(ddmmaa1);
+            desde = dt1.Year + "-" + dt1.Month + "-" + dt1.Day;
         }
-        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha='" + fecha + "' WHERE U_LTrabj='" + local + "' ";
+        if (ddmmaa2 == "" || ddmmaa2 == "HOY") hasta = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day;
+        else
+        {
+            DateTime dt2 = toDateTime(ddmmaa2);
+            hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
+        }
+        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,convert(varchar(50),fecha,105) as fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha>='" + desde + "' AND fecha<='" + hasta + "' WHERE U_LTrabj='" + local + "' ORDER BY fecha";
 
         return obtenerTabla("Asistencia",query);
     }
@@ -235,9 +242,11 @@ public class LocalesService : System.Web.Services.WebService
             hasta = dt.Year + "-" + dt.Month + "-" + dt.Day;
         }
 
-        String query = " SELECT T1.[ItemName],T0.[U_CantElab] CantidadElaborada, T0.[CmpltQty] CantidadCompletada, (T0.[CmpltQty] - T0.[U_CantElab]) Diferencia, ((T0.CmpltQty * 100)/T0.U_CantElab) Logrado, (((T0.CmpltQty - T0.U_CantElab ) * 100) / T0.U_CantElab) NoLogrado"+
+        String query = " SELECT *, ((CantidadCompletada*100)/CantidadElaborada) AS Logrado, (((CantidadCompletada-CantidadElaborada) * 100) / CantidadElaborada) AS NoLogrado " +
+                       " FROM (SELECT T1.[ItemName],SUM(T0.[U_CantElab]) AS CantidadElaborada, SUM(T0.[CmpltQty]) AS CantidadCompletada, SUM((T0.[CmpltQty] - T0.[U_CantElab])) AS Diferencia " +
                        " FROM "+SAP+".OWOR T0 JOIN "+SAP+".OITM T1 ON T0.ItemCode = T1.ItemCode JOIN "+SAP+".OWHS T2 ON T0.Warehouse = T2.WhsCode "+
-                       " WHERE T0.CmpltQty >= '1' and T0.U_CantElab >= '1' AND T0.[DueDate] >='"+desde+"' AND T0.[DueDate] <='"+hasta+"' AND t2.WhsCode='"+local+"' ";
+                       " WHERE T0.CmpltQty >= '1' and T0.U_CantElab >= '1' AND T0.[DueDate] >='"+desde+"' AND T0.[DueDate] <='"+hasta+"' AND t2.WhsCode='"+local+"' "+
+                       " GROUP BY T1.[ItemName]) Tx";
 
         return obtenerTabla("Desviaciones",query);
     }
@@ -430,14 +439,23 @@ public class LocalesService : System.Web.Services.WebService
 /*********************************************************************************************************************/
     
     [WebMethod]
-    public DataTable getGastos(string local, string ddmmaa)
+    public DataTable getGastos(string local, string ddmmaa1, string ddmmaa2)
     {
-        DateTime dt = toDateTime(ddmmaa);
-        string fecha = dt.Year + "-" + dt.Month + "-" + dt.Day;
+        if (ddmmaa2 == null || ddmmaa2 == "") ddmmaa2 = ddmmaa1;
+        DateTime dt = toDateTime(ddmmaa1);
+        string desde = dt.Year + "-" + dt.Month + "-" + dt.Day;
+        DateTime dt2 = toDateTime(ddmmaa2);
+        string hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
 
-        return obtenerTabla("Gastos", " SELECT * "+
-                                      " FROM [PracticaDb].[dbo].[GastosLocal] T1 "+
-                                      " WHERE T1.fecha='" + fecha + "' AND T1.local='" + local + "'");
+        string sql = "";
+        if (desde.CompareTo(hasta)==0) sql = " SELECT * " +
+                                             " FROM [PracticaDb].[dbo].[GastosLocal] T1 " +
+                                             " WHERE T1.fecha>='" + desde + "' AND T1.fecha<='" + hasta + "' AND T1.local='" + local + "'";
+        else sql = " SELECT gasto,SUM(convert(int,total)) as total,'Item Agrupado' as observaciones, '"+hasta+"' as fecha, '"+local+"' as [local] "+
+                   " FROM [PracticaDb].[dbo].[GastosLocal] T1 "+
+                   " WHERE T1.fecha>='"+desde+"' AND T1.fecha<='"+hasta+"' AND T1.local='"+local+"' "+
+                   " GROUP BY Gasto";
+        return obtenerTabla("Gastos", sql);
     }
 
     [WebMethod]
@@ -455,5 +473,45 @@ public class LocalesService : System.Web.Services.WebService
         return Ejecutar(" INSERT INTO [PracticaDb].[dbo].[GastosLocal] (fecha,gasto,total,observaciones,local) VALUES('" + fecha + "','" + gasto + "','" + total + "','" + obsevaciones + "','" + local + "') ");
     }
 
+/*********************************************************************************************************************/
+
+    [WebMethod]
+    public DataTable getMermas(string local, string ddmmaa1, string ddmmaa2)
+    {
+        DateTime dt1 = toDateTime(ddmmaa1);
+        DateTime dt2 = toDateTime(ddmmaa2);
+        string desde = dt1.Year + "-" + dt1.Month + "-" + dt1.Day;
+        string hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
+        string sql = "";
+
+        if (desde.CompareTo(hasta) == 0)
+        {
+            sql = " SELECT T1.[Dscription],T1.[Quantity], U_FechSal,(T1.[Quantity] * T1.[StockPrice])*-1 as 'Monto' " +
+                   " FROM " + SAP + ".OIGE T0 INNER JOIN " + SAP + ".IGE1 T1 ON T0.DocEntry = T1.DocEntry " +
+                   " INNER JOIN " + SAP + ".OWHS T2 ON T1.WhsCode = T2.WhsCode " +
+                   " INNER JOIN " + SAP + ".OACT T3 ON T1.AcctCode = T3.AcctCode " +
+                   " WHERE T2.[WhsName] Like '%Mayorista%' AND " +
+                   " T0.[DocDate] >='" + desde + "' AND " +
+                   " T0.[DocDate] <='" + hasta + "' AND " +
+                   " T3.[AcctName] NOT Like '%Productos%' AND " +
+                   " T3.[AcctName] Like '%Merma%' AND " +
+                   " T2.WhsCode='" + local + "'";
+        }
+        else
+        {
+            sql = " SELECT T1.[Dscription],SUM(T1.[Quantity]) as Quantity, '" + ddmmaa2 + "' as U_FechSal,SUM((T1.[Quantity] * T1.[StockPrice])*-1) as 'Monto' " +
+                  " FROM " + SAP + ".OIGE T0 INNER JOIN " + SAP + ".IGE1 T1 ON T0.DocEntry = T1.DocEntry " +
+                  " INNER JOIN " + SAP + ".OWHS T2 ON T1.WhsCode = T2.WhsCode " +
+                  " INNER JOIN " + SAP + ".OACT T3 ON T1.AcctCode = T3.AcctCode " +
+                  " WHERE T2.[WhsName] Like '%Mayorista%' AND " +
+                  " T0.[DocDate] >='" + desde + "' AND " +
+                  " T0.[DocDate] <='" + hasta + "' AND " +
+                  " T3.[AcctName] NOT Like '%Productos%' AND " +
+                  " T3.[AcctName] Like '%Merma%' AND " +
+                  " T2.WhsCode='" + local + "' " +
+                  " GROUP BY T1.[Dscription]";
+        }
+        return obtenerTabla("Mermas", sql);
+    }
 }
 
