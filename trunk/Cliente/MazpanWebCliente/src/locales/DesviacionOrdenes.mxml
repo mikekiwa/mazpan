@@ -59,6 +59,7 @@
             	{
             		aux[i].Logrado = formato.format(aux[i].Logrado);
             		aux[i].NoLogrado = formato.format(aux[i].NoLogrado);
+            		aux[i].Referencia = '-'+formato.format(Number(aux[i].CantidadElaborada)*0.15);
             		desviaciones_ac.push(aux[i]);
             	}
             }
@@ -76,12 +77,13 @@
 	</mx:HBox>
 	<mx:DataGrid x="0" y="38" width="775" height="422" dataProvider="{desviaciones_ac}">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="250"/>
-			<mx:DataGridColumn headerText="Elaborado" dataField="CantidadElaborada" width="111" textAlign="right"/>
-			<mx:DataGridColumn headerText="Completado" dataField="CantidadCompletada" width="111" textAlign="right"/>
-			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="113" textAlign="right"/>
-			<mx:DataGridColumn headerText="% Logrado" dataField="Logrado" width="95" textAlign="right"/>
-			<mx:DataGridColumn headerText="% No Logrado" dataField="NoLogrado" width="95" textAlign="right"/>
+			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="155" sortable="false"/>
+			<mx:DataGridColumn headerText="Elaborado" dataField="CantidadElaborada" width="111" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Completado" dataField="CantidadCompletada" width="111" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="113" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Dif. Ref." dataField="Referencia" width="95" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="% Logrado" dataField="Logrado" width="95" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="% No Logrado" dataField="NoLogrado" width="95" textAlign="right" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
 </mx:Panel>

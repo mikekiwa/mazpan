@@ -2,9 +2,9 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" title="Control Asistencia" xmlns:mc="misClases.*">
 	
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getLocales" 		result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
-		<mx:operation name="getSociosDe" 		result="getSociosDeResult(event)"		fault="ErrorFaultHandler(event, 'getSociosDe')"/>
-		<mx:operation name="guardarAsistencia" 	result="guardarAsistenciaResult(event)"	fault="ErrorFaultHandler(event, 'guardarAsistencia')"/>
+		<mx:operation name="getLocales" 		result="getLocalesResult(event)"			fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getSociosMayorista" result="getSociosMayoristaResult(event)"	fault="ErrorFaultHandler(event, 'getSociosMayorista')"/>
+		<mx:operation name="guardarAsistencia" 	result="guardarAsistenciaResult(event)"		fault="ErrorFaultHandler(event, 'guardarAsistencia')"/>
 	</mx:WebService>
 	
 	<mx:Script>
@@ -34,7 +34,7 @@
             	locales_ac = event.result.Tables.Locales.Rows.source as Array;
             	recargarTrabajadores();
             }
-            private function getSociosDeResult(event:ResultEvent):void
+            private function getSociosMayoristaResult(event:ResultEvent):void
             {
             	socios_ac = event.result.Tables.Socios.Rows.source as Array;
             }
@@ -86,7 +86,7 @@
             {
             	if(fecha_df.text.length>0 && locales_ac.length>0)
             	{
-            		LocalesService.getSociosDe(local_cb.selectedItem.WhsCode, fecha_df.text);
+            		LocalesService.getSociosMayorista(local_cb.selectedItem.WhsCode, fecha_df.text);
             	}
             }
 		]]>
