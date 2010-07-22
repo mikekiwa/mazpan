@@ -156,6 +156,33 @@ public class LocalesService : System.Web.Services.WebService
         return dt;
     }
 
+    [WebMethod]
+    public DataTable getSociosMayorista(string local, string ddmmaa)
+    {
+        DateTime date = toDateTime(ddmmaa);
+        string fecha = date.Year + "-" + date.Month + "-" + date.Day;
+
+        DataTable dt = new DataTable();
+        dt.TableName = "Socios";
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+        String query = " SELECT WhsCode,WhsName,(nombres+' '+apellidoPaterno+' '+apellidoMaterno) as CardName,rut as CardCode,asistencia,atraso,fecha  FROM " + SAP + ".[OWHS] T1 RIGHT JOIN [PracticaDb].[dbo].[Personal] T2 ON T1.WhsCode=T2.mayorista LEFT JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.rut AND fecha='" + fecha + "' WHERE T2.mayorista='" + local + "' ";
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
 /*********************************************************************************************************************/
 
     private bool existeAsistencia(string CardCode, string fecha)
@@ -200,7 +227,7 @@ public class LocalesService : System.Web.Services.WebService
             DateTime dt2 = toDateTime(ddmmaa2);
             hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
         }
-        String query = " SELECT WhsCode,WhsName,CardName,T2.CardCode,asistencia,atraso,convert(varchar(50),fecha,105) as fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN " + SAP + ".[OCRD] T2 ON T1.WhsCode=T2.U_LTrabj JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.CardCode AND fecha>='" + desde + "' AND fecha<='" + hasta + "' WHERE U_LTrabj='" + local + "' ORDER BY fecha";
+        String query = " SELECT WhsCode,WhsName,(nombres+' '+apellidoPaterno+' '+apellidoMaterno) as CardName,rut as CardCode,asistencia,atraso,convert(varchar(50),fecha,105) as fecha FROM " + SAP + ".[OWHS] T1 RIGHT JOIN [PracticaDb].[dbo].[Personal] T2 ON T1.WhsCode=T2.mayorista JOIN [PracticaDb].[dbo].[Asistencia] T3 ON T3.CardCode=T2.rut AND fecha>='" + desde + "' AND fecha<='" + hasta + "' WHERE T2.mayorista='" + local + "' ORDER BY fecha";
 
         return obtenerTabla("Asistencia",query);
     }
@@ -486,7 +513,7 @@ public class LocalesService : System.Web.Services.WebService
 
         if (desde.CompareTo(hasta) == 0)
         {
-            sql = " SELECT T1.[Dscription],T1.[Quantity], U_FechSal,(T1.[Quantity] * T1.[StockPrice])*-1 as 'Monto' " +
+            sql =  " SELECT T1.[Dscription],T1.[Quantity], U_FechSal,(T1.[Quantity] * T1.[StockPrice])*-1 as 'Monto' " +
                    " FROM " + SAP + ".OIGE T0 INNER JOIN " + SAP + ".IGE1 T1 ON T0.DocEntry = T1.DocEntry " +
                    " INNER JOIN " + SAP + ".OWHS T2 ON T1.WhsCode = T2.WhsCode " +
                    " INNER JOIN " + SAP + ".OACT T3 ON T1.AcctCode = T3.AcctCode " +
@@ -511,6 +538,25 @@ public class LocalesService : System.Web.Services.WebService
                   " T2.WhsCode='" + local + "' " +
                   " GROUP BY T1.[Dscription]";
         }
+        return obtenerTabla("Mermas", sql);
+    }
+
+    [WebMethod]
+    public DataTable getProducidoVsMermas(string local, string ddmmaa1, string ddmmaa2)
+    {
+        DateTime dt1 = toDateTime(ddmmaa1);
+        DateTime dt2 = toDateTime(ddmmaa2);
+        string desde = dt1.Year + "-" + dt1.Month + "-" + dt1.Day;
+        string hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
+        string sql = " SELECT T1.[ItemCode], T1.[Dscription], SUM(T1.[Quantity]) AS 'PRODUCIDO', SUM(T2.[Quantity]) AS 'MERMADO' " +
+                     " FROM " + SAP + ".ODLN T0 " +
+                     " JOIN " + SAP + ".DLN1 T1 ON T0.DocEntry = T1.DocEntry " +
+                     " JOIN " + SAP + ".IGE1 T2 ON T1.ItemCode=T2.ItemCode " +
+                     " JOIN " + SAP + ".OIGE T3 ON T2.DocEntry = T3.DocEntry " +
+                     " WHERE T1.[WhsCode]='" + local + "' AND T2.[WhsCode] ='" + local + "' AND " +
+                     " T0.[DocDate] >='" + desde + "' AND T0.[DocDate] <='" + hasta + "' AND " +
+                     " T3.[DocDate] >='" + desde + "' AND T3.[DocDate] <='" + hasta + "' " +
+                     " GROUP BY T1.[ItemCode], T1.[Dscription]";
         return obtenerTabla("Mermas", sql);
     }
 }

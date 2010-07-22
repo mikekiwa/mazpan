@@ -167,23 +167,34 @@ public class VentasService : System.Web.Services.WebService
         }
         return 1;
     }
-    
+
+    private DataTable obtenerTabla(string nombre, string query)
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = nombre;
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+
+        SqlCommand cmd = new SqlCommand(query, cn);
+        cmd.CommandTimeout = 180;
+        da.SelectCommand = cmd;
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
     [WebMethod]
     public Tablas getVentas(int mes, int ano, string codigoCliente,string cliente)
     {
-        Tablas sal = new Tablas();
-        DataTable dt1 = new DataTable();
-        dt1.TableName = "Ventas1";
-        DataTable dt2 = new DataTable();
-        dt2.TableName = "Ventas2";
-        DataTable dt3 = new DataTable();
-        dt3.TableName = "Ventas3";
-        DataTable dt4 = new DataTable();
-        dt4.TableName = "Ventas4";
-        DataTable dt5 = new DataTable();
-        dt5.TableName = "Presupuesto";
-
-
         DateTime fecha = new DateTime(ano, mes, 1);
         string inicio = fecha.Year + "-" + fecha.Month + "-" + fecha.Day;
         DateTime fecha2 = fecha.AddMonths(1);
@@ -194,56 +205,24 @@ public class VentasService : System.Web.Services.WebService
         DateTime fecha20 = fecha0.AddMonths(1);
         string termino0 = fecha20.Year + "-" + fecha20.Month + "-" + fecha20.Day;
         
-
-        SqlConnection cn1 = new SqlConnection(coneccionString);
-        SqlDataAdapter da1 = new SqlDataAdapter();
         String query1 = " SELECT itemname,sum(T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
-
-        SqlConnection cn2 = new SqlConnection(coneccionString);
-        SqlDataAdapter da2 = new SqlDataAdapter();
         String query2 = " SELECT itemname,sum(T1.quantity*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio + "' AND T1.docdate<'" + termino + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
-
-        SqlConnection cn3 = new SqlConnection(coneccionString);
-        SqlDataAdapter da3 = new SqlDataAdapter();
         String query3 = " SELECT itemname,sum(T1.quantity) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[INV1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
-
-        SqlConnection cn4 = new SqlConnection(coneccionString);
-        SqlDataAdapter da4 = new SqlDataAdapter();
         String query4 = " SELECT itemname,sum(T1.quantity*-1) quantity,T2.QryGroup1,T2.QryGroup2 FROM [Maspan].[dbo].[RIN1] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.itemcode=T2.itemcode WHERE T1.docdate>='" + inicio0 + "' AND T1.docdate<'" + termino0 + "' AND (T2.QryGroup1='Y' OR T2.QryGroup2='Y') AND T1.baseCard='" + codigoCliente + "' GROUP BY itemname, T2.QryGroup1, T2.QryGroup2";
-
-        SqlConnection cn5 = new SqlConnection(coneccionString);
-        SqlDataAdapter da5 = new SqlDataAdapter();
         String query5 = " SELECT T1.*,T2.itemcode, T2.itemname,T2.QryGroup1, T2.QryGroup2 FROM [PracticaDb].[dbo].[Presupuesto] T1 JOIN [Maspan].[dbo].[OITM] T2 ON T1.articulo=T2.itemCode WHERE T1.cliente='" + codigoCliente + "' AND T1.ano='" + ano + "' AND tipo='1' ";
 
-        da1.SelectCommand = new SqlCommand(query1, cn1);
-        da2.SelectCommand = new SqlCommand(query2, cn2);
-        da3.SelectCommand = new SqlCommand(query3, cn3);
-        da4.SelectCommand = new SqlCommand(query4, cn4);
-        da5.SelectCommand = new SqlCommand(query5, cn5);
+        Tablas t = new Tablas();
+        t.t1 = obtenerTabla("Ventas1", query1);
+        t.t2 = obtenerTabla("Ventas2", query2);
+        t.t3 = obtenerTabla("Ventas3", query3);
+        t.t4 = obtenerTabla("Ventas4", query4);
+        t.t5 = obtenerTabla("Presupuesto", query5);
+        t.CardCode = codigoCliente;
+        t.CardName = cliente;
+        t.mes = mes;
+        t.ano = ano;
 
-        try
-        {
-            da1.Fill(dt1);
-            da2.Fill(dt2);
-            da3.Fill(dt3);
-            da4.Fill(dt4);
-            da5.Fill(dt5);
-            sal.t1 = dt1;
-            sal.t2 = dt2;
-            sal.t3 = dt3;
-            sal.t4 = dt4;
-            sal.t5 = dt5;
-            sal.CardCode = codigoCliente;
-            sal.CardName = cliente;
-            sal.mes = mes;
-            sal.ano = ano;
-        }
-        finally
-        {
-            cn1.Close();
-            cn2.Close();
-        }
-        return sal;
+        return t;
     }
 
     [WebMethod]

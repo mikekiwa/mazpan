@@ -12,6 +12,7 @@ public class Personal
     private string ap;//apellidoPaterno
     private string am;//apellidoMaterno
     private string p;//planta
+    private string m;//mayorista
 
 	public Personal()
 	{
@@ -41,5 +42,10 @@ public class Personal
     {
         set { p = value; }
         get { return p; }
+    }
+    public string mayorista
+    {
+        set { m = value; }
+        get { return m; }
     }
 }
