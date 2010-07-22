@@ -1,5 +1,7 @@
 package locales
 {
+	import mx.formatters.NumberFormatter;
+	
 	import org.alivepdf.colors.RGBColor;
 	import org.alivepdf.layout.Align;
 	import org.alivepdf.layout.Orientation;
@@ -11,15 +13,41 @@ package locales
 	public class LayoutLocales
 	{
 		private var pdf:PDF;
-		
+		private var formato:NumberFormatter = new NumberFormatter();
+			
 		public function LayoutLocales()
 		{
 			pdf = new PDF(Orientation.PORTRAIT,Unit.MM,Size.LETTER);
 			pdf.setMargins(10,10,10,10);
 			pdf.addPage();
 			pdf.textStyle(new RGBColor(0),1);
+			
+			formato.precision=2;
+			formato.useThousandsSeparator=true;
+			formato.thousandsSeparatorFrom=".";
+			formato.thousandsSeparatorTo=".";
+			formato.decimalSeparatorFrom=",";
+			formato.decimalSeparatorTo=",";
 		}
-		
+		private function removeFormatting(e:String):String
+		{
+			e = removeParentesis(e);
+			var array:Array;
+			array = e.split(".");
+			var salida:String = array.join("");
+			array = salida.split(",");
+			return array.join(".");
+		}
+		private function removeParentesis(e:String):String
+		{
+			var aux:String;
+			var array:Array;
+			array = e.split("(");
+			aux = array.join("");
+			if(array.length==2) aux = "-"+aux;
+			array = aux.split(")");
+			return array.join("");
+		}
 		public function generar(asistencia:Array, desviaciones:Array, stock:Array, gastos_ac:Array , fecha:String, local:Object, mermas:Array, cantidadTotal:String, montoTotal:String):void
 		{
 			pdf.setFontSize(22);
@@ -36,14 +64,16 @@ package locales
           		pdf.setFontSize(8);
           		
           		pdf.addCell(70, 5,"Tipo Gasto", 1);
-	          	pdf.addCell(50, 5,"Total", 1);
+	          	pdf.addCell(50, 5,"Total", 1,0,Align.CENTER);
+	          	pdf.addCell(20, 5,"Unidad", 1);
 	          	pdf.addCell(30, 5,"Observaciones", 1);
 	          	pdf.writeText(5,"\n");
 	          	
           		for(i=0; i<gastos_ac.length; i++)
 	          	{
 	          		pdf.addCell(70, 5,gastos_ac[i].gasto, 1);
-	          		pdf.addCell(50, 5,gastos_ac[i].total, 1);
+	          		pdf.addCell(50, 5,gastos_ac[i].total, 1,0,Align.RIGHT);
+	          		pdf.addCell(20, 5,gastos_ac[i].unidad, 1);
 	          		pdf.addCell(30, 5,gastos_ac[i].observaciones, 1);
 	          		pdf.writeText(5,"\n");
 	          	}
@@ -85,23 +115,36 @@ package locales
           		pdf.setFontSize(8);
           		
           		pdf.addCell(91, 5,"Item", 1);
-          		pdf.addCell(23, 5,"Elaborado", 1);
-          		pdf.addCell(23, 5,"Completado", 1);
-          		pdf.addCell(23, 5,"Diferencia", 1);
-          		pdf.addCell(17, 5,"% Logrado", 1);
-          		pdf.addCell(20, 5,"% No Logrado", 1);
+          		pdf.addCell(18, 5,"Elaborado", 1,0,Align.CENTER);
+          		pdf.addCell(18, 5,"Completado", 1,0,Align.CENTER);
+          		pdf.addCell(18, 5,"Diferencia", 1,0,Align.CENTER);
+////////////////////////////////////////////
+          		pdf.addCell(18, 5,"Dif. Ref. 15%", 1,0,Align.CENTER);
+          		pdf.addCell(17, 5,"% Logrado", 1,0,Align.CENTER);
+          		pdf.addCell(20, 5,"% No Logrado", 1,0,Align.CENTER);
           		pdf.writeText(5,"\n");
           		
+          		var a1:Number;
+          		var a2:Number;
 		        for(i=0; i<desviaciones.length; i++)
-	          	{
+	          	{//aqui ver si referencia es menor para colocar todo el texto en color diferente
+	          		
 	          		pdf.addCell(91, 5,desviaciones[i].ItemName, 1);
-	          		pdf.addCell(23, 5,desviaciones[i].CantidadElaborada, 1,0,Align.RIGHT);
-	          		pdf.addCell(23, 5,desviaciones[i].CantidadCompletada, 1,0,Align.RIGHT);
-	          		pdf.addCell(23, 5,desviaciones[i].Diferencia, 1,0,Align.RIGHT);
+	          		pdf.addCell(18, 5,desviaciones[i].CantidadElaborada, 1,0,Align.RIGHT);
+	          		pdf.addCell(18, 5,desviaciones[i].CantidadCompletada, 1,0,Align.RIGHT);
+	          		
+	          		a1=Number(removeFormatting(desviaciones[i].Referencia));
+	          		a2=Number(removeFormatting(desviaciones[i].Diferencia));
+	          		if(a1>a2) pdf.textStyle(new RGBColor(16711680),1);
+	          		pdf.addCell(18, 5,desviaciones[i].Diferencia, 1,0,Align.RIGHT);
+	          		pdf.textStyle(new RGBColor(0),1);
+	          		
+	          		pdf.addCell(18, 5,desviaciones[i].Referencia, 1,0,Align.RIGHT);
 	          		pdf.addCell(17, 5,desviaciones[i].Logrado, 1,0,Align.RIGHT);
 	          		pdf.addCell(20, 5,desviaciones[i].NoLogrado, 1,0,Align.RIGHT);
 	          		pdf.writeText(5,"\n");
 	          	}
+	          	
           	}
           	else
           	{
@@ -127,8 +170,8 @@ package locales
           		pdf.addCell(91, 5,"Item", 1);
           		pdf.addCell(23, 5,"En Stock Local", 1);
           		pdf.addCell(23, 5,"En Stock Sistema", 1);
-          		pdf.addCell(20, 5,"Un. Medida", 1);
-          		pdf.addCell(23, 5,"Diferencia", 1);
+          		pdf.addCell(18, 5,"Un. Medida", 1,0,Align.CENTER);
+          		pdf.addCell(23, 5,"Diferencia", 1,0,Align.CENTER);
           		pdf.writeText(5,"\n");
           		
 		        for(i=0; i<stock.length; i++)
@@ -138,7 +181,7 @@ package locales
 		          		pdf.addCell(91, 5,stock[i].ItemName, 1);
 		          		pdf.addCell(23, 5,stock[i].Local, 1,0,Align.RIGHT);
 		          		pdf.addCell(23, 5,stock[i].Sistema, 1,0,Align.RIGHT);
-		          		pdf.addCell(20, 5,stock[i].InvntryUom, 1,0,Align.RIGHT);
+		          		pdf.addCell(18, 5,stock[i].InvntryUom, 1,0,Align.RIGHT);
 		          		pdf.addCell(23, 5,stock[i].Diferencia, 1,0,Align.RIGHT);
 		          		pdf.writeText(5,"\n");
 		          	}
@@ -160,26 +203,35 @@ package locales
           		pdf.setFontSize(8);
           		
           		pdf.addCell(85, 5,"Item", 1);
-          		pdf.addCell(25, 5,"Fecha Salida", 1);
-          		pdf.addCell(25, 5,"Cantidad", 1);
-          		pdf.addCell(25, 5,"Monto", 1);
+          		pdf.addCell(30, 5,"Cant. Producida", 1,0,Align.CENTER);
+          		pdf.addCell(30, 5,"Cant. Mermada", 1,0,Align.CENTER);
+          		pdf.addCell(30, 5,"Desviación", 1,0,Align.CENTER);
           		pdf.writeText(5,"\n");
           		
 		        for(i=0; i<mermas.length; i++)
 	          	{
 	          		pdf.addCell(85, 5,mermas[i].Dscription, 1);
-	          		if(mermas[i].U_FechSal) pdf.addCell(25, 5,mermas[i].U_FechSal, 1,0,Align.CENTER);
-	          		else pdf.addCell(25, 5,"");
-	          		pdf.addCell(25, 5,mermas[i].Quantity, 1,0,Align.RIGHT);
-	          		pdf.addCell(25, 5,mermas[i].Monto, 1,0,Align.RIGHT);
+	          		pdf.addCell(30, 5,mermas[i].PRODUCIDO, 1,0,Align.RIGHT);
+	          		pdf.addCell(30, 5,mermas[i].MERMADO, 1,0,Align.RIGHT);
+	          		pdf.addCell(30, 5,mermas[i].Desviacion, 1,0,Align.RIGHT);
 	          		pdf.writeText(5,"\n");
 	          	}
 	          	pdf.writeText(1,"\n");
 	          	
-	          	pdf.addCell(85, 5,"");
-          		pdf.addCell(25, 5,"Total",1);
-          		pdf.addCell(25, 5,cantidadTotal, 1,0,Align.RIGHT);
-          		pdf.addCell(25, 5,montoTotal, 1,0,Align.RIGHT);
+	          	pdf.addCell(55, 5,"");
+          		pdf.addCell(30, 5,"Total",1);
+          		pdf.addCell(30, 5,cantidadTotal, 1,0,Align.RIGHT);
+          		pdf.addCell(30, 5,montoTotal, 1,0,Align.RIGHT);
+          		if(cantidadTotal!='0')
+        		{
+        			cantidadTotal = removeFormatting(cantidadTotal);
+        			var ef:Number = Number(removeFormatting(montoTotal));
+        			ef = ef*100;
+        			var desv:String = formato.format(ef/Number(cantidadTotal));
+        			pdf.addCell(30, 5,desv,1,0,Align.RIGHT);
+        		}
+        		else pdf.addCell(30, 5,'100',1,0,Align.RIGHT);
+          		
           		pdf.writeText(5,"\n");
           	}
           	else

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%" 
-	creationComplete="init()" backgroundColor="#999999" scriptTimeLimit="120"
+	creationComplete="init()" backgroundColor="#999999" scriptTimeLimit="60"
 	xmlns:ns1="componentes.*" 
 	xmlns:ns2="componentes.mantencionMaquinas.*" 
 	xmlns:ns3="componentes.Acordeon.*" 
@@ -430,5 +430,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 28.05.07.10"/>
+	<mx:Label x="525" y="10" text="Versión 31.22.07.10"/>
 </mx:Application>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="775" height="460" title="Ventas"
-	xmlns:mc="misClases.*" backgroundColor="#cccccc" creationComplete="init()">
+	xmlns:mc="misClases.*" backgroundColor="#cccccc" creationComplete="init()" scriptTimeLimit="120">
 	
-	<mx:WebService id="VentasService" wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true">
+	<mx:WebService id="VentasService" wsdl="{index.URL + 'VentasService.asmx?WSDL'}" showBusyCursor="true" >
 		<mx:operation name="getVentas"		result="getVentasResult(event)" fault="ErrorFaultHandler(event, 'getVentas')"/>
 		<mx:operation name="getVentasPesos"	result="getVentasResult(event)" fault="ErrorFaultHandler(event, 'getVentasPesos')"/>
 	</mx:WebService>

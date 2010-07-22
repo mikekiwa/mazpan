@@ -3,8 +3,8 @@
 	
 	<mx:WebService id="PersonalService" 	wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="editPersonal" 	result="editPersonalResult(event)" fault="ErrorFaultHandler(event, 'editPersonal')"/>
+		<mx:operation name="getLocales" 	result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
 	</mx:WebService>
-	
 	
 	<mx:Metadata>
 		[Event(name="complexClick",type="eventos.ComplexEvent")]
@@ -21,6 +21,11 @@
    			
    			private var personal:Object;
    			
+   			private var locales_ac:Array;
+   			
+   			[Bindable]
+   			private var mayorista:String = "";
+   			
    			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
@@ -36,6 +41,26 @@
 				apellidoPaterno_ti.text = personal.apellidoPaterno;
 				apellidoMaterno_ti.text = personal.apellidoMaterno;
 				editar_btn.enabled = true;
+				
+				if(personal.mayorista!='NINGUNO')
+				{
+					PersonalService.getLocales();
+					label1Mayorista.visible = true;
+					label2Mayorista.visible = true;
+				}
+				else
+				{
+					label1Mayorista.visible = false;
+					label2Mayorista.visible = false;
+				}
+			}
+			private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	
+            	for(var i:int=0; i<locales_ac.length; i++)
+            		if(personal.mayorista==locales_ac[i].WhsCode) 
+            			mayorista=locales_ac[i].WhsName;
             }
 			private function verificar():void
 			{
@@ -96,4 +121,6 @@
 	<mx:TextInput id="apellidoMaterno_ti" x="299" y="218" width="248" maxChars="50" change="verificar()"/>
 	<mx:Button id="editar_btn" x="387" y="316" label="Editar" enabled="false" click="editar()" width="75"/>
 	<mx:Button x="472" y="316" label="Cancelar" click="atras()"/>
+	<mx:Label x="163" y="274" text="Mayorista" id="label1Mayorista"/>
+	<mx:Label x="299" y="274" text="{mayorista}" width="248" id="label2Mayorista"/>
 </mx:Canvas>

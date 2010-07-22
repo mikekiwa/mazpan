@@ -7,7 +7,7 @@ package misClases
 		public function MesesCB()
 		{
 			super();
-			dataProvider = ["Enero","Febrero","Marzo","Abril","Mayo","Jonio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+			dataProvider = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 		}
 	}
 }

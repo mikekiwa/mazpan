@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
 	
 	<mx:WebService id="PersonalService" 	wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
+		<mx:operation name="getLocales" 	result="getLocalesResult(event)"		fault="ErrorFaultHandler(event, 'getLocales')"/>
 		<mx:operation name="addPersonal" 	result="addPersonalResult(event)" fault="ErrorFaultHandler(event, 'addPersonal')"/>
 	</mx:WebService>
 	
@@ -18,14 +19,26 @@
    		
    			public static const nombre:String = "AgregarPersonal";
    			
+   			[Bindable]
+			private var locales_ac:Array;
+   			
    			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
 			public function init():void
 			{
-				
+				PersonalService.getLocales();
 			}
+			private function getLocalesResult(event:ResultEvent):void
+            {
+            	locales_ac = event.result.Tables.Locales.Rows.source as Array;
+            	var ob:Object = new Object;
+            	ob.WhsName = "NINGUNO";
+            	ob.WhsCode = "NINGUNO";
+            	
+            	locales_ac.push(ob);
+            }
 			private function verificar():void
 			{
 				if(nombre_ti.text.length>0 && numero_ti.text.length>4 && digito_ti.text.length>0 && apellidoPaterno_ti.text.length>0 && apellidoMaterno_ti.text.length>0)
@@ -44,6 +57,7 @@
 				p.rut = numero_ti.text + "-" + digito_ti.text;
 				p.apellidoPaterno = apellidoPaterno_ti.text;
 				p.apellidoMaterno = apellidoMaterno_ti.text;
+				p.mayorista = local_cb.selectedItem.WhsCode;
 				PersonalService.addPersonal(index.usuario,p);
 			}
 			private function addPersonalResult(event:ResultEvent):void
@@ -77,12 +91,14 @@
 	<mx:Label x="163" y="60" text="Rut:"/>
 	<mx:Label x="163" y="169" text="Apellido Paterno:"/>
    	<mx:Label x="163" y="220" text="Apellido Materno:"/>
+   	<mx:Label x="163" y="267" text="Mayorista"/>
    	<mx:Label x="373" y="60" text="-" width="9"/>
 	<mx:TextInput id="numero_ti" x="299" y="58" width="70" maxChars="8" restrict="0-9" change="verificar()"/>
 	<mx:TextInput id="digito_ti" x="387" y="58" width="20" maxChars="1" restrict="0-9k" change="verificar()"/>
 	<mx:TextInput id="nombre_ti" x="299" y="113" width="248" maxChars="50" change="verificar()"/>
 	<mx:TextInput id="apellidoPaterno_ti" x="299" y="167" width="248" maxChars="50" change="verificar()"/>
    	<mx:TextInput id="apellidoMaterno_ti" x="299" y="218" width="248" maxChars="50" change="verificar()"/>
+   	<mx:ComboBox id="local_cb" dataProvider="{locales_ac}" labelField="WhsName" x="299" y="265"/>
    	<mx:Button id="guardar_btn" x="389" y="316" label="Guardar" enabled="false" click="guardar()" width="75"/>
    	<mx:Button x="472" y="316" label="Cancelar" click="atras()"/>
 </mx:Canvas>

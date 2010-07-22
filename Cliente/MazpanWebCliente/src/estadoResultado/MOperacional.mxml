@@ -8,6 +8,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.formatters.NumberFormatter;
 			import mx.rpc.events.ResultEvent;
 			import mx.collections.ArrayCollection;
 			import mx.rpc.events.FaultEvent;
@@ -25,7 +26,7 @@
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
-            	cargar_btn.enabled = false;
+            	cargar_btn.enabled = true;
             	pdf_btn.enabled = false;
             }
 			public function init():void
@@ -38,7 +39,7 @@
 			private function getSucursales2Result(event:ResultEvent):void
             {
             	var aux:Array = event.result.Tables.Sucursales.Rows.source as Array;
-            	var nivel:String = aux[i].Nivel;
+            	var nivel:String = aux[0].Nivel;//0->i
             	for(var i:int=0; i<aux.length;i++)
             	{
             		if(aux[i].Nivel!=nivel)
@@ -46,6 +47,7 @@
             			var total:Object = new Object;
             			total.Name = "                TOTAL "+nivel;
             			total.Nivel = "Total";
+            			total.Tipo = 1;
             			sucursales_ac.push(total);
             			
             			nivel=aux[i].Nivel;
@@ -55,7 +57,14 @@
             	var total2:Object = new Object;
     			total2.Name = "                TOTAL "+nivel;
     			total2.Nivel = "Total";
+    			total2.Tipo = 2;
     			sucursales_ac.push(total2);
+    			
+    			var total3:Object = new Object;
+    			total3.Name = "Margen Operacional Consolidado";
+    			total3.Nivel = "Total";
+    			total3.Tipo = 3;
+    			sucursales_ac.push(total3);
     			
             	tabla.dataProvider = sucursales_ac;
             	cargar_btn.enabled = true;
@@ -65,12 +74,118 @@
             	cargar_btn.enabled = false;
             	ano = ano_ns.value;
             	mes = mes_cb.selectedIndex+1;
-            	Service.getMOC(index.usuario, sucursales_ac[0].Code, mes, ano);
+            	Service.getMOC(sucursales_ac[0].Code, mes, ano);
+            	//Service.getFlujo(sucursales_ac[0].Code,ano,mes);
             }
+            private var flujo:Array;
+        	
             private function getMOCResult(event:ResultEvent):void
             {
+            	cargar_btn.enabled = false;
+            
+            	flujo = event.result.FLUJO.source as Array;
+            	var i:int;
+            	var total:Number = 0;
             	
+            	for (i=0; i<flujo.length; i++)
+            	{
+            		total += Number(flujo[i].Column1);
+            	}
+            	
+            	var stop:Boolean = false;
+            	for(i=0; i<sucursales_ac.length && !stop; i++)
+            	{
+            		if(sucursales_ac[i].Code==event.result.SUCURSAL)
+            		{
+            			stop=true;
+            			sucursales_ac[i].Valor = total;
+            		}
+            	}
+            	if(stop && i<sucursales_ac.length)
+            	{
+            		var j:int=0
+            		var s:Number=0;
+            		
+            		if(sucursales_ac[i].Nivel!="Total") Service.getMOC(sucursales_ac[i].Code, mes, ano);
+            		else if(sucursales_ac[i].Tipo==1)
+            		{
+            			for(j=i-1; j>=0; j--)
+            			{
+            				s += Number(sucursales_ac[j].Valor);
+            			}
+            			sucursales_ac[i].Valor = s;
+            			Service.getMOC(sucursales_ac[i+1].Code, mes, ano);
+            		}
+            		else
+            		{
+            			s=0;
+	        			for(j=i-1; j>=0 && sucursales_ac[j].Tipo!=1; j--)
+	        			{
+	        				s += Number(sucursales_ac[j].Valor);
+	        			}
+	        			sucursales_ac[i].Valor = s;
+	        			
+	        			s=0;
+	        			for(j=0; j<sucursales_ac.length; j++)
+	        			{
+	        				if(sucursales_ac[j].Tipo!=1 && sucursales_ac[j].Tipo!=2 && sucursales_ac[j].Tipo!=3)
+	        					s += Number(sucursales_ac[j].Valor);
+	        			}
+	        			
+		    			sucursales_ac[sucursales_ac.length-1].Valor = s;
+		    			
+		    			calcularPorcentajes(sucursales_ac);
+		    			
+            			pdf_btn.enabled = true;
+            		} 
+            	}
+            	else
+            	{
+            		//sumar las leceras
+            		
+        			pdf_btn.enabled = true;
+            	}
+            	
+            	
+            	tabla.dataProvider = sucursales_ac;
             }
+            private function calcularPorcentajes(arreglo:Array):void
+            {
+            	var total:Number = Number(arreglo[arreglo.length-1].Valor);
+            	var a:Number = 0;
+            	
+            	for(var i:int=0; i<arreglo.length; i++)
+            	{
+            		a = Number(arreglo[i].Valor);
+            		a = a*100;
+            		a = a/total;
+            		arreglo[i].Porcentaje = a;
+            		
+            		arreglo[i].Porcentaje = parentesis(arreglo[i].Porcentaje);
+            		arreglo[i].Valor = parentesis(arreglo[i].Valor);
+            	}
+            }
+            private function parentesis(valorSinFormato:String):String
+			{
+				var formato:NumberFormatter = new NumberFormatter();
+		
+				formato.precision=2;
+				formato.useThousandsSeparator=true;
+				formato.thousandsSeparatorFrom=",";
+				formato.thousandsSeparatorTo=".";
+				formato.decimalSeparatorFrom=".";
+				formato.decimalSeparatorTo=",";
+			
+				valorSinFormato = formato.format(valorSinFormato)
+				var arreglo:Array = valorSinFormato.split('-');
+				if(arreglo.length==1) return valorSinFormato;
+				return "("+arreglo[1]+")";
+			}
+          	private function exportar():void
+          	{
+				var layout:FORMATOMOPERACIONAL = new FORMATOMOPERACIONAL();
+				layout.generarMOC(sucursales_ac, ano.toString(), mes_cb.text);
+          	}
 		]]>
 	</mx:Script>
 	<mx:HBox x="0" y="0" width="775">
@@ -80,11 +195,12 @@
 		<mx:NumericStepper minimum="1990" maximum="9999" value="2010" id="ano_ns"/>
 		<mx:Button label="Cargar" width="72" click="cargar()" id="cargar_btn" enabled="false"/>
 	</mx:HBox>
-	<mx:DataGrid x="10" y="30" width="755" height="382" dataProvider="{sucursales_ac}" id="tabla">
+	<mx:DataGrid x="10" y="30" width="755" height="390" dataProvider="{sucursales_ac}" id="tabla">
 		<mx:columns>
 			<mx:DataGridColumn headerText="" dataField="Name" sortable="false"/>
-			<mx:DataGridColumn headerText="Margen Operacional 1 M$" dataField="Valor" sortable="false" textAlign="right"/>
+			<mx:DataGridColumn headerText="Margen Operacional 1 M$" width="160" dataField="Valor" sortable="false" textAlign="right"/>
+			<mx:DataGridColumn headerText="%" dataField="Porcentaje" width="80" sortable="false" textAlign="right"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Button x="693" y="428" label="PDF" width="72" id="pdf_btn" enabled="false"/>
+	<mx:Button x="693" y="428" label="PDF" width="72" id="pdf_btn" enabled="false" click="exportar()"/>
 </mx:Panel>

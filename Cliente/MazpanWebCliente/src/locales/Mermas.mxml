@@ -2,11 +2,11 @@
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="795" height="500" xmlns:mc="misClases.*" title="Mermas">
 
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
-		<mx:operation name="getLocales" 	result="getLocalesResult(event)" 		fault="ErrorFaultHandler(event, 'getLocales')"/>
-		<mx:operation name="getMermas" 		result="getMermasResult(event)" 		fault="ErrorFaultHandler(event, 'getMermas')"/>
+		<mx:operation name="getLocales" 			result="getLocalesResult(event)" 			fault="ErrorFaultHandler(event, 'getLocales')"/>
+		<mx:operation name="getMermas" 				result="getMermasResult(event)" 			fault="ErrorFaultHandler(event, 'getMermas')"/>
+		<mx:operation name="getProducidoVsMermas" 	result="getProducidoVsMermasResult(event)" 	fault="ErrorFaultHandler(event, 'getProducidoVsMermas')"/>
 	</mx:WebService>
-	
-	
+            		
 	<mx:Script>
 		<![CDATA[
 			import mx.formatters.NumberFormatter;
@@ -50,7 +50,40 @@
             }
             private function cargar():void
             {
-            	if(locales_ac.length>0 && desde_df.text.length>0 && hasta_df.text.length>0) LocalesService.getMermas(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);
+            	if(locales_ac.length>0 && desde_df.text.length>0 && hasta_df.text.length>0)
+            	{
+            		LocalesService.getProducidoVsMermas(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);
+            	//	LocalesService.getMermas(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);
+            	}
+            }
+            private function getProducidoVsMermasResult(event:ResultEvent):void
+            {
+            	var aux:Array = event.result.Tables.Mermas.Rows.source as Array;
+            	
+            	var producidoTotal:Number = 0;
+            	var mermadoTotal:Number = 0;
+            	
+            	formato.precision = 2;
+            	
+            	for(var i:int; i<aux.length; i++)
+            	{
+            		producidoTotal += Number(aux[i].PRODUCIDO);
+            		mermadoTotal += Number(aux[i].MERMADO);
+            		if(aux[i].PRODUCIDO!=0)
+            		{
+            			var ef:Number = Number(aux[i].MERMADO);
+            			ef = ef*100;
+            			aux[i].Desviacion = formato.format(ef/Number(aux[i].PRODUCIDO));
+            		}
+            		else aux[i].Desviacion = 100;
+            		aux[i].PRODUCIDO = formato.format(Number(aux[i].PRODUCIDO));
+            		aux[i].MERMADO 	 = formato.format(Number(aux[i].MERMADO));
+            	}
+            	cantidadTotal  = formato.format(Number(producidoTotal));
+            	montoTotal = formato.format(Number(mermadoTotal));
+            	mermas_ac = aux;
+            	
+            	formato.precision = 3;
             }
             private function getMermasResult(event:ResultEvent):void
             {
@@ -83,12 +116,12 @@
 	</mx:HBox>
 	<mx:DataGrid x="0" y="38" width="775" height="387" dataProvider="{mermas_ac}">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Descripción" dataField="Dscription" width="465" sortable="false"/>
-			<mx:DataGridColumn headerText="Cantidad" dataField="Quantity" width="100" sortable="false"/>
-			<mx:DataGridColumn headerText="Fecha Salida" dataField="U_FechSal" width="110" sortable="false"/>
-			<mx:DataGridColumn headerText="Monto" dataField="Monto" width="100" sortable="false"/>
+			<mx:DataGridColumn headerText="Descripción" dataField="Dscription" width="475" sortable="false"/>
+			<mx:DataGridColumn headerText="Producido" 	dataField="PRODUCIDO" width="110" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Mermado" 	dataField="MERMADO" width="110" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Desviación" dataField="Desviacion" width="80" textAlign="right" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Label x="464" y="432" text="{cantidadTotal}" width="80" textAlign="right" fontWeight="bold"/>
-	<mx:Label x="672" y="432" text="{montoTotal}" width="81" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="481" y="432" text="{cantidadTotal}" width="80" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="594" y="432" text="{montoTotal}" width="81" textAlign="right" fontWeight="bold"/>
 </mx:Panel>

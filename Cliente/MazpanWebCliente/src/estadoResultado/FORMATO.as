@@ -21,15 +21,6 @@ package estadoResultado
 	import org.alivepdf.pdf.PDF;
 	import org.alivepdf.saving.Method;
 	
-	/*
-	 pdf.setFont(new CoreFont(FontFamily.HELVETICA_BOLD),8);
-					
-	 
-pdf.setDisplayMode (Display.FULL_WIDTH, Layout.SINGLE_PAGE, PageMode.USE_NONE, 1);
-	 */
-	
-	
-	
 	public class FORMATO
 	{
 		private var pdf:PDF;

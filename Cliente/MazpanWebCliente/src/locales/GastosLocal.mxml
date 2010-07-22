@@ -5,8 +5,8 @@
 	<mx:WebService id="LocalesService" 	wsdl="{index.URL + 'LocalesService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getLocales" 	result="getLocalesResult(event)" 	fault="ErrorFaultHandler(event, 'getLocales')"/>
 		<mx:operation name="getGastos"		result="getGastosResult(event)" 	fault="ErrorFaultHandler(event, 'getGastos')"/>
-		<mx:operation name="editarGastos"	result="guardarGastosResult(event)" fault="ErrorFaultHandler(event, 'editarGastos')"/>
-		<mx:operation name="guardarGastos"	result="guardarGastosResult(event)" fault="ErrorFaultHandler(event, 'guardarGastos')"/>
+		<mx:operation name="editarGasto"	result="guardarGastoResult(event)" fault="ErrorFaultHandler(event, 'editarGasto')"/>
+		<mx:operation name="guardarGasto"	result="guardarGastoResult(event)" fault="ErrorFaultHandler(event, 'guardarGasto')"/>
 	</mx:WebService>
 	
 	<mx:Script>
@@ -22,7 +22,9 @@
 			private var locales_ac:Array;
 			[Bindable]
 			private var gasto:Object = new Object;
-            private var gastos:Array = new Array; 	
+            private var gastos:Array = new Array;
+            [Bindable]
+            private var tipoGastos_ac:Array;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
@@ -33,6 +35,7 @@
             	locales_ac = new Array;
             	gasto = new Object;
             	LocalesService.getLocales();
+            	tipoGastos_ac = new VARIABLES().getTiposGastos();
             }
             private function getLocalesResult(event:ResultEvent):void
             {
@@ -58,7 +61,7 @@
             	
             	for(var i:int; i<gastos.length; i++)
             	{
-            		if(gastos[i].gasto==tiposGastos.selectedItem.toString()) gasto = gastos[i];
+            		if(gastos[i].gasto==tiposGastos_cb.text) gasto = gastos[i];
             	}
             }
             private function guardar(gasto:Object,tipo:String):void
@@ -66,7 +69,7 @@
             	if(gasto.id!=null) LocalesService.editarGasto(gasto.id,gasto.total,gasto.observaciones);
             	else LocalesService.guardarGasto(tipo,local_cb.selectedItem.WhsCode,gasto.total,gasto.observaciones,fecha_df.text);
             }
-            private function guardarGastosResult(event:ResultEvent):void
+            private function guardarGastoResult(event:ResultEvent):void
             {
             	if(event.result == 1)
             	{
@@ -89,7 +92,7 @@
 	</mx:HBox>
 	
 	<mx:Label x="10" y="58" text="Selecione un tipo de Gastos"/>
-	<mx:ComboBox x="179" y="56" dataProvider="{VARIABLES.TIPOSGASTOS}" id="tiposGastos" change="cambiar()"/>
+	<mx:ComboBox x="179" y="56" dataProvider="{tipoGastos_ac}" labelField="tipo" id="tiposGastos_cb" change="cambiar()"/>
 	
 	<mx:Label x="10" y="100" text="Gasto" fontWeight="bold"/>
 	<mx:Canvas x="10" y="126" width="755" height="221" borderStyle="solid">
@@ -97,7 +100,8 @@
 		<mx:Label x="10" y="39" text="Observaciones"/>
 		<mx:TextInput x="190" y="8" text="{gasto.total}" focusOut="{gasto.total=event.target.text}" restrict="0-9" id="totalPetroleo_ti"/>
 		<mx:TextArea x="190" y="38" width="553" height="141" text="{gasto.observaciones}" focusOut="{gasto.observaciones=event.target.text}" id="obsPetroleo_ta" maxChars="50"/>
-		<mx:Button x="671" y="187" label="Guardar" click="guardar(gasto,tiposGastos.selectedItem.toString())"/>
+		<mx:Button x="671" y="187" label="Guardar" click="guardar(gasto,tiposGastos_cb.text)"/>
 		<mx:Label x="406" y="180" text="Máximo 50 caracteres" fontStyle="italic"/>
+		<mx:Label x="359" y="10" text="{tiposGastos_cb.selectedItem.unidad}"/>
 	</mx:Canvas>
 </mx:Panel>
