@@ -22,37 +22,17 @@ public class Service : System.Web.Services.WebService
     [WebMethod]
     public DataTable getSucursales()
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Sucursales";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
         String query = "SELECT T1.*,T2.Nivel FROM [Maspan].[dbo].[OASC] T1 LEFT JOIN [PracticaDb].[dbo].[NivelSucursal] T2 ON T1.Code=T2.codigo WHERE SegmentId='1' AND Code!='05'";
 
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
+        return obtenerTabla("Sucursales", query);
     }
 
     [WebMethod]
     public DataTable getItems()
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Items";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
         String query = "SELECT * FROM [PracticaDb].[dbo].[Items] ORDER BY orden";
 
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try{ da.Fill(dt);}
-        finally{ cn.Close();}
-
-        return dt;
+        return obtenerTabla("Items",query);
     }
 
     [WebMethod]
@@ -75,20 +55,7 @@ public class Service : System.Web.Services.WebService
                        " WHERE T3.id='" + idItem + "' AND T1.AcctCode='"+codigoCuenta+"' AND RefDate>='" + fi + "' AND RefDate<'" + ft + "'" +
                        " ORDER BY AcctName, RefDate ";
 
-        DataTable dt = new DataTable();
-        dt.TableName = "Especifico";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
-
-        cn.Open();
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-
-        return dt;
+        return obtenerTabla("Especifico",query);
     }
 
     [WebMethod]
@@ -148,20 +115,7 @@ public class Service : System.Web.Services.WebService
                      " GROUP BY AcctName, segment_0,segment_1,segment_2,segment_3,segment_4,AcctCode";
         }
 
-        DataTable dt = new DataTable();
-        dt.TableName = "Detalle";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
-
-        cn.Open();
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-
-        return dt;
+        return obtenerTabla("Detalle", query);
     }
 
     private List<Monto> getMontos(DataTable FLUJO, DataTable ITEMS)
@@ -320,19 +274,8 @@ public class Service : System.Web.Services.WebService
                     " INNER JOIN [Maspan].[dbo].[JDT1] T4 ON T4.[Account]=T1.[AcctCode]" +
                     " WHERE RefDate>='" + fi + "' AND RefDate<'" + ft + "' AND T1.[Segment_1]='" + sucursal + "' GROUP BY T4.[Account]";
         }
-        DataTable dt = new DataTable();
-        dt.TableName = "MES";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
-
-        cn.Open();
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
+       
+        return obtenerTabla("MES",query);
     }
 
     public DataTable PresupuestoMensual(string sucursal, int mes, int ano)
@@ -383,40 +326,18 @@ public class Service : System.Web.Services.WebService
                      " AND 		Line_ID='" + mes + "' GROUP BY 	T4.ItemName";
         }
 
-        DataTable dt = new DataTable();
-        dt.TableName = "PresupuestoMensual";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
-
-        cn.Open();
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
+        return obtenerTabla("PresupuestoMensual",query);
     }
 
     [WebMethod]
     public DataTable getCuentas()
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "Cuentas";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
         String query = " select distinct(AcctName), AcctCode, Segment_0, Segment_1, Segment_2, Segment_3, Segment_4, GroupMask" +
                        " from [Maspan].[dbo].[OACT], [PracticaDB].[dbo].[ItemCuenta]" +
                        " where AcctCode NOT IN (select cuenta from [PracticaDB].[dbo].[itemcuenta]) AND levels=5 AND GroupMask>3" +
                        " order by GroupMask,Segment_0,Segment_1,AcctName";
 
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
+        return obtenerTabla("Cuentas",query);
     }
 
     [WebMethod]
@@ -441,11 +362,6 @@ public class Service : System.Web.Services.WebService
     [WebMethod]
     public DataTable getCuentasItem(int id)
     {
-        DataTable dt = new DataTable();
-        dt.TableName = "CuentasItem";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
         //La primera linea de la query es para borrar cuentas que ya no existan en SAP
         //Esto lo debo preguntar porque los registros de las cuentas me imagino que se mantienen
         String query = " DELETE [PracticaDb].[dbo].[itemCuenta] WHERE cuenta NOT IN (SELECT AcctCode FROM [Maspan].[dbo].[OACT]);"+
@@ -455,12 +371,7 @@ public class Service : System.Web.Services.WebService
                        " WHERE T1.item='"+id+"'"+
                        " ORDER BY GroupMask,Segment_0,Segment_1,AcctName";
 
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
+        return obtenerTabla("CuentasItem",query);
     }
 
     [WebMethod]
@@ -531,19 +442,7 @@ public class Service : System.Web.Services.WebService
                     " AND T3.Segment_1='" + sucursal + "'";
         }
 
-        DataTable dt = new DataTable();
-        dt.TableName = "Presupuesto";
-
-        SqlConnection cn = new SqlConnection(url);
-        SqlDataAdapter da = new SqlDataAdapter();
-
-        cn.Open();
-        da.SelectCommand = new SqlCommand(query, cn);
-
-        try { da.Fill(dt); }
-        finally { cn.Close(); }
-
-        return dt;
+        return obtenerTabla("Presupuesto",query);
     }
 
     public bool existe(string from, string where)
@@ -607,7 +506,7 @@ public class Service : System.Web.Services.WebService
                 }
                 else
                 {
-                    resultado += Ejecutar("INSERT INTO " + MAER + ".[NivelSucursal] (nivel,codigo) VALUES ('"+level+"', '"+s.Code+"'");
+                    resultado += Ejecutar("INSERT INTO " + MAER + ".[NivelSucursal] (nivel,codigo) VALUES ('"+level+"', '"+s.Code+"')");
                 }
             }
             if (sucursales.Count == resultado) return 1;
@@ -637,7 +536,9 @@ public class Service : System.Web.Services.WebService
         SqlConnection cn = new SqlConnection(url);
         SqlDataAdapter da = new SqlDataAdapter();
 
-        da.SelectCommand = new SqlCommand(query, cn);
+        SqlCommand cmd = new SqlCommand(query, cn);
+        cmd.CommandTimeout = 180;
+        da.SelectCommand = cmd;
 
         try
         {
@@ -650,35 +551,15 @@ public class Service : System.Web.Services.WebService
 
         return dt;
     }
-    
 
     [WebMethod]
-    public DataTable getMOC(Usuario u, string sucursal, int mes, int ano)
+    public Flujo getMOC(string sucursal, int mes, int ano)
     {
-        if (existe("PracticaDb.dbo.Usuario", "userName='" + u.user + "' AND password='" + u.pass + "'"))
-        {
-       
-            DateTime f1 = new DateTime(ano, mes, 1);
-            DateTime f2 = f1.AddMonths(1);
-
-            string fi;
-            string ft;
-
-            if (f1.Month > 9) fi = f1.Year + "-" + f1.Month + "-01 00:00.000";
-            else fi = f1.Year + "-0" + f1.Month + "-01 00:00.000";
-            if (f2.Month > 9) ft = f2.Year + "-" + f2.Month + "-01 00:00.000";
-            else ft = f2.Year + "-0" + f2.Month + "-01 00:00.000";
-
-            return obtenerTabla("MOC", " SELECT SUM(CONVERT(INT,Column1)) as Valor FROM " +
-                                      " (SELECT T2.item,SUM(T4.[Credit]-T4.[Debit])/1000 as Column1 " +
-                                      " FROM [PracticaDb].[dbo].[ItemCuenta] T2 "+
-                                      " INNER JOIN [Maspan].[dbo].[JDT1] T4  ON T4.[Account] = T2.[cuenta] AND T2.[sucursal]='" + sucursal + "' " +
-                                      " WHERE [RefDate]>='" + fi + "' AND [RefDate]<'" + ft + "' "+
-                                      " GROUP BY T2.item) TX");
-        }
-        else
-        {
-            return null;
-        }
+        DataTable items = obtenerTabla("ItemsCuentas", "SELECT T6.[itemName],T5.cuenta FROM [PracticaDb].[dbo].[ItemCuenta] T5 JOIN [PracticaDb].[dbo].[Items] T6 ON T6.id = T5.item WHERE orden<='28' ORDER BY T6.[itemName]");
+        Flujo f = new Flujo();
+        f.FLUJO = getMontos(flujo(sucursal, mes, ano), items);
+        f.SUCURSAL = sucursal;
+        
+        return f;
     }
 }

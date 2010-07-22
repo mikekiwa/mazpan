@@ -56,7 +56,7 @@ public class PersonalService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT * FROM [PracticaDb].[dbo].Personal WHERE planta='"+u.planta+"' AND rut!='00000000-0'";
+        String query = " SELECT * FROM [PracticaDb].[dbo].Personal WHERE planta='" + u.planta + "' AND rut!='00000000-0'";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -97,7 +97,7 @@ public class PersonalService : System.Web.Services.WebService
     [WebMethod]
     public int addPersonal(Usuario u,Personal p)
     {
-        string query = " INSERT INTO [PracticaDb].[dbo].Personal (rut,nombres,apellidoPaterno,apellidoMaterno,planta) VALUES ('" + p.rut + "','" + p.nombres + "','" + p.apellidoPaterno + "','" + p.apellidoMaterno + "','"+u.planta+"') ";
+        string query = " INSERT INTO [PracticaDb].[dbo].Personal (rut,nombres,apellidoPaterno,apellidoMaterno,planta,mayorista) VALUES ('" + p.rut + "','" + p.nombres + "','" + p.apellidoPaterno + "','" + p.apellidoMaterno + "','"+u.planta+"','"+p.mayorista+"') ";
         if (Ejecutar(query) == 1) return 1;
         else return 0;
     }
@@ -117,5 +117,55 @@ public class PersonalService : System.Web.Services.WebService
         if (Ejecutar(query) == 1) return 1;
         else return 0;
     }
+
+    public DataTable allPersonalMayorista(string local)
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = "Personal";
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+        String query = " SELECT * FROM [PracticaDb].[dbo].Personal WHERE mayorista='"+local+"'";
+
+        da.SelectCommand = new SqlCommand(query, cn);
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
+
+    //Este webMetodo es de uso exclusivo de este webService
+    [WebMethod]
+    public DataTable getLocales()
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = "Locales";
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+        String query = " SELECT WhsCode,WhsName FROM [Maspan].[dbo].[OWHS] WHERE location='4' ";
+        da.SelectCommand = new SqlCommand(query, cn);
+
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
 }
 

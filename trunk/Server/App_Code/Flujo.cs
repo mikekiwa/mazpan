@@ -51,15 +51,26 @@ public class Flujo
     private DataTable pptoDic;
 
     private int m;//mes numero
-
+    private string s;//sucursal
 	public Flujo()
 	{
 	}
+    public List<Monto> FLUJO
+    {
+        set { flujoEne = value; }
+        get { return flujoEne; }
+    }
+
 
     public int MESNUMERO
     {
         set { m = value; }
         get { return m; }
+    }
+    public string SUCURSAL
+    {
+        set { s = value; }
+        get { return s; }
     }
 
     public List<Monto> FLUJOENE
