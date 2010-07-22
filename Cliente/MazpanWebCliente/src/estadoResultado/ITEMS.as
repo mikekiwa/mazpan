@@ -434,6 +434,35 @@ package estadoResultado
 			
 			return salida;
 		}
+		public function getItemsObjetoContables():Array
+		{
+			var salida:Array = new Array();
+			salida.push(datos[VENTASZONAS]);
+			salida.push(datos[VENTASPANADERIA]);
+			salida.push(datos[DEVOLUCIONESDESCUENTOSBONIFICACIONES]);
+			salida.push(datos[RAPELCLIENTE]);
+			salida.push(datos[COSTOSINSUMOSZONAS]);
+			salida.push(datos[COSTOSINSUMOSPANADERIA]);
+			salida.push(datos[MOOPERATIVA]);
+			salida.push(datos[MERMASYAJUSTEDEINVENTARIO]);
+			salida.push(datos[GASTOSENERGIA]);
+			salida.push(datos[MANTENCION]);
+			salida.push(datos[ASEO]);
+			salida.push(datos[REMUNERACIONES]);
+			salida.push(datos[INDEMNIZACIONES]);
+			salida.push(datos[MANTENCIONYARRIENDO]);
+			salida.push(datos[ADMINISTRACION]);
+			salida.push(datos[TRANSPORTESFLETES]);
+			salida.push(datos[GESTIONVENTAS]);
+			salida.push(datos[ASESORIAS]);
+			salida.push(datos[ADMINISTRACIONCAS]);
+			salida.push(datos[DEPRECIACIONES]);
+			salida.push(datos[GASTOSFINANCIEROS]);
+			salida.push(datos[CORRECCIONMONETARIA]);
+			salida.push(datos[OTROSINGRESOSYGASTOS]);
+			
+			return salida;
+		}
 		public function getItems():Array
 		{
 			var salida:Array = new Array();

@@ -32,7 +32,7 @@
 			private var	ano:int;
 			private var	mes:int;
 			private var codigoCuenta:String;
-			private var dias:ArrayCollection = new ArrayCollection(["Domingo","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado"]);
+			private var dias:ArrayCollection = index.dias;
 			
 			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
