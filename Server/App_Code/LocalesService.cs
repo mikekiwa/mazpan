@@ -269,11 +269,21 @@ public class LocalesService : System.Web.Services.WebService
             hasta = dt.Year + "-" + dt.Month + "-" + dt.Day;
         }
 
-        String query = " SELECT *, ((CantidadCompletada*100)/CantidadElaborada) AS Logrado, (((CantidadCompletada-CantidadElaborada) * 100) / CantidadElaborada) AS NoLogrado " +
-                       " FROM (SELECT T1.[ItemName],SUM(T0.[U_CantElab]) AS CantidadElaborada, SUM(T0.[CmpltQty]) AS CantidadCompletada, SUM((T0.[CmpltQty] - T0.[U_CantElab])) AS Diferencia " +
-                       " FROM "+SAP+".OWOR T0 JOIN "+SAP+".OITM T1 ON T0.ItemCode = T1.ItemCode JOIN "+SAP+".OWHS T2 ON T0.Warehouse = T2.WhsCode "+
-                       " WHERE T0.CmpltQty >= '1' and T0.U_CantElab >= '1' AND T0.[DueDate] >='"+desde+"' AND T0.[DueDate] <='"+hasta+"' AND t2.WhsCode='"+local+"' "+
-                       " GROUP BY T1.[ItemName]) Tx";
+        String query =  " SELECT *, HORNEADO-CONSUMIDO AS 'DIFERENCIA' " +
+                        " FROM ( " +
+                        "   SELECT	T2.[ItemName], " +
+                        "		    SUM(T1.[PlannedQty]) AS 'CONSUMIDO', " +
+                        "		    SUM(T0.[CmpltQty]) AS 'HORNEADO' " +
+                        "   FROM    " + SAP + ".OWOR T0 " +
+                        "      JOIN " + SAP + ".OITM T2 ON T0.ItemCode = T2.ItemCode " +
+                        "	   JOIN " + SAP + ".WOR1 T1 ON T0.DocEntry = T1.DocEntry " +
+                        "   WHERE	T0.[DueDate] >='" + desde + "' AND " +
+                        "           T0.[DueDate] <='" + hasta + "' AND " +
+                        "		    T0.Warehouse='" + local + "' AND " +
+                        "		    T2.ItemName LIKE '%Horneado%' AND " +
+                        "           T0.Status = 'L' "+
+                        " GROUP BY T2.[ItemName]" +
+                        " ) Tx";
 
         return obtenerTabla("Desviaciones",query);
     }
@@ -548,7 +558,7 @@ public class LocalesService : System.Web.Services.WebService
         DateTime dt2 = toDateTime(ddmmaa2);
         string desde = dt1.Year + "-" + dt1.Month + "-" + dt1.Day;
         string hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
-        string sql = " SELECT T1.[ItemCode], T1.[Dscription], SUM(T1.[Quantity]) AS 'PRODUCIDO', SUM(T2.[Quantity]) AS 'MERMADO' " +
+        string sql = " SELECT T1.[ItemCode], T1.[Dscription], SUM(T1.[Quantity]) AS 'PRODUCIDO', SUM(T2.[Quantity]) AS 'MERMADO', SUM(T2.[Quantity]*T2.StockPrice) AS 'MONTOSTOCK' " +
                      " FROM " + SAP + ".ODLN T0 " +
                      " JOIN " + SAP + ".DLN1 T1 ON T0.DocEntry = T1.DocEntry " +
                      " JOIN " + SAP + ".IGE1 T2 ON T1.ItemCode=T2.ItemCode " +
