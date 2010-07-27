@@ -19,6 +19,7 @@
 			private var locales_ac:Array;
 			[Bindable]
 			private var desviaciones_ac:Array;
+			private var porcentaje:Number = 0.1; 
 			
 			private var formato:NumberFormatter = new NumberFormatter();
 			
@@ -57,11 +58,13 @@
             	
             	for(var i:int=0; i<aux.length; i++)
             	{
-            		aux[i].Logrado = formato.format(aux[i].Logrado);
-            		aux[i].NoLogrado = formato.format(aux[i].NoLogrado);
-            		aux[i].Referencia = '-'+formato.format(Number(aux[i].CantidadElaborada)*0.15);
-            		desviaciones_ac.push(aux[i]);
+            		aux[i].Diferencia = Number(aux[i].HORNEADO)-Number(aux[i].CONSUMIDO);
+            		aux[i].Desviacion = formato.format((Number(aux[i].Diferencia)*100)/Number(aux[i].CONSUMIDO));
+            		aux[i].Diferencia =formato.format(aux[i].Diferencia);
+            		aux[i].CONSUMIDO = formato.format(aux[i].CONSUMIDO);
+            		aux[i].HORNEADO = formato.format(aux[i].HORNEADO);
             	}
+            	desviaciones_ac = aux;
             }
 		]]>
 	</mx:Script>
@@ -77,13 +80,11 @@
 	</mx:HBox>
 	<mx:DataGrid x="0" y="38" width="775" height="422" dataProvider="{desviaciones_ac}">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Item" dataField="ItemName" width="155" sortable="false"/>
-			<mx:DataGridColumn headerText="Elaborado" dataField="CantidadElaborada" width="111" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="Completado" dataField="CantidadCompletada" width="111" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="113" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="Dif. Ref." dataField="Referencia" width="95" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="% Logrado" dataField="Logrado" width="95" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="% No Logrado" dataField="NoLogrado" width="95" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Item" dataField="ItemName" sortable="false"/>
+			<mx:DataGridColumn headerText="Congelado" dataField="CONSUMIDO" width="111" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Horneado" dataField="HORNEADO" width="111" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="90" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Desviación %" dataField="Desviacion" width="90" textAlign="right" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
 </mx:Panel>

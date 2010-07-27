@@ -13,6 +13,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import estadoResultado.EstadoResultado;
 			import mx.formatters.NumberFormatter;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.events.FaultEvent;
@@ -32,9 +33,12 @@
 			[Bindable]
 			private var mermas_ac:Array;
 			[Bindable]
-			private var cantidadTotal:String = "0";
+			private var cantidadTotalProducida:String = "0";
             [Bindable]
-			private var montoTotal:String = "0";
+			private var cantidadTotalMermada:String = "0";
+			[Bindable]
+			private var montoTotalMermado:String = "0";
+			private var porcentaje:Number = 0.1;
         
 			
 			private var formato:NumberFormatter = new NumberFormatter();
@@ -77,17 +81,17 @@
             private function getDesviacionesResult(event:ResultEvent):void
             {
             	var desviacionesAux:Array = event.result.Tables.Desviaciones.Rows.source as Array;
-            	
             	for(var i:int=0; i<desviacionesAux.length; i++)
             	{
-            		desviacionesAux[i].Logrado = formato.format(desviacionesAux[i].Logrado);
-            		desviacionesAux[i].NoLogrado = formato.format(desviacionesAux[i].NoLogrado);
-            		desviacionesAux[i].Referencia = '-'+formato.format(Number(desviacionesAux[i].CantidadElaborada)*0.15);
+            		desviacionesAux[i].Diferencia = Number(desviacionesAux[i].HORNEADO)-Number(desviacionesAux[i].CONSUMIDO);
+            		desviacionesAux[i].Desviacion = formato.format((Number(desviacionesAux[i].Diferencia)*100)/Number(desviacionesAux[i].CONSUMIDO));
+            		desviacionesAux[i].Diferencia =formato.format(desviacionesAux[i].Diferencia);
+            		desviacionesAux[i].CONSUMIDO = formato.format(desviacionesAux[i].CONSUMIDO);
+            		desviacionesAux[i].HORNEADO = formato.format(desviacionesAux[i].HORNEADO);
             	}
-            	
             	desviaciones_ac = desviacionesAux;
-            	LocalesService.getGastos(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);//more params
             	
+            	LocalesService.getGastos(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);//more params
             }
             private function getGastosResult(event:ResultEvent):void
             {
@@ -127,6 +131,7 @@
             	
             	var producidoTotal:Number = 0;
             	var mermadoTotal:Number = 0;
+            	var montoStockTotal:Number = 0;
             	
             	formato.precision = 2;
             	
@@ -134,6 +139,7 @@
             	{
             		producidoTotal += Number(aux[i].PRODUCIDO);
             		mermadoTotal += Number(aux[i].MERMADO);
+            		montoStockTotal += Number(aux[i].MONTOSTOCK);
             		if(aux[i].PRODUCIDO!=0)
             		{
             			var ef:Number = Number(aux[i].MERMADO);
@@ -143,18 +149,21 @@
             		else aux[i].Desviacion = 100;
             		aux[i].PRODUCIDO = formato.format(Number(aux[i].PRODUCIDO));
             		aux[i].MERMADO 	 = formato.format(Number(aux[i].MERMADO));
+            		aux[i].MONTOSTOCK= formato.format(Number(aux[i].MONTOSTOCK));
             	}
-            	cantidadTotal  = formato.format(Number(producidoTotal));
-            	montoTotal = formato.format(Number(mermadoTotal));
+            	cantidadTotalProducida  = formato.format(Number(producidoTotal));
+            	cantidadTotalMermada = formato.format(Number(mermadoTotal));
+            	montoTotalMermado = formato.format(Number(montoStockTotal));
             	mermas_ac = aux;
+            	
             	formato.precision = 3;
             	
             	exportar_btn.enabled  = true;
             }
             private function exportar():void
-            {
+            {            	
             	var layoutLocales:LayoutLocales = new LayoutLocales;
-            	layoutLocales.generar(asistencia_ac,desviaciones_ac,stock_ac, gastosLocal, desde_df.text + " al " + hasta_df.text,local_cb.selectedItem,mermas_ac,cantidadTotal, montoTotal);
+            	layoutLocales.generar(asistencia_ac,desviaciones_ac,stock_ac, gastosLocal, desde_df.text + " al " + hasta_df.text,local_cb.selectedItem,mermas_ac,cantidadTotalProducida, cantidadTotalMermada, montoTotalMermado);
             }
             private function todos():void
             {
@@ -201,13 +210,11 @@
 		<mx:Canvas label="Desviaciones" width="100%" height="100%">
 			<mx:DataGrid x="0" y="0" width="100%" height="100%" dataProvider="{desviaciones_ac}" id="tabla2">
 				<mx:columns>
-					<mx:DataGridColumn headerText="Item" dataField="ItemName" width="155" sortable="false"/>
-					<mx:DataGridColumn headerText="Elaborado" dataField="CantidadElaborada" width="111" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="Completado" dataField="CantidadCompletada" width="111" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="113" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="Dif. Ref." dataField="Referencia" width="95" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="% Logrado" dataField="Logrado" width="95" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="% No Logrado" dataField="NoLogrado" width="95" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Item" dataField="ItemName" sortable="false"/>
+					<mx:DataGridColumn headerText="Congelado" dataField="CONSUMIDO" width="111" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Horneado" dataField="HORNEADO" width="111" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Diferencia" dataField="Diferencia" width="90" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Desviación %" dataField="Desviacion" width="90" textAlign="right" sortable="false"/>
 				</mx:columns>
 			</mx:DataGrid>
 		</mx:Canvas>
@@ -245,14 +252,16 @@
 		<mx:Canvas label="Mermas" width="100%" height="100%">
 			<mx:DataGrid x="0" y="0" width="773" height="325" dataProvider="{mermas_ac}">
 				<mx:columns>
-					<mx:DataGridColumn headerText="Descripción" dataField="Dscription" width="475" sortable="false"/>
-					<mx:DataGridColumn headerText="Producido" 	dataField="PRODUCIDO" width="110" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="Mermado" 	dataField="MERMADO" width="110" textAlign="right" sortable="false"/>
-					<mx:DataGridColumn headerText="Desviación" dataField="Desviacion" width="80" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Descripción" dataField="Dscription" 	width="365" sortable="false"/>
+					<mx:DataGridColumn headerText="Producido" 	dataField="PRODUCIDO" 	width="110" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Mermado" 	dataField="MERMADO"  	width="110" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Desviación" 	dataField="Desviacion" 	width="80" textAlign="right" sortable="false"/>
+					<mx:DataGridColumn headerText="Monto $" 	dataField="MONTOSTOCK" 	width="110" textAlign="right" sortable="false"/>
 				</mx:columns>
 			</mx:DataGrid>
-			<mx:Label x="591" y="333" text="{montoTotal}" width="79" textAlign="right" fontWeight="bold"/>
-			<mx:Label x="473" y="333" text="{cantidadTotal}" width="84" textAlign="right" fontWeight="bold"/>
+			<mx:Label x="367" y="333" text="{cantidadTotalProducida}" width="98" textAlign="right" fontWeight="bold"/>
+			<mx:Label x="672" y="333" text="{montoTotalMermado}" width="95" textAlign="right" fontWeight="bold"/>
+			<mx:Label x="480" y="333" text="{cantidadTotalMermada}" width="95" textAlign="right" fontWeight="bold"/>
 		</mx:Canvas>
 	</mx:TabNavigator>
 	<mx:Button x="689" y="428" label="Exportar" click="exportar()" id="exportar_btn" enabled="false"/>
