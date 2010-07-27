@@ -20,9 +20,11 @@
 			[Bindable]
 			private var mermas_ac:Array;
 			[Bindable]
-			private var cantidadTotal:String = "0";
+			private var cantidadTotalProducida:String = "0";
             [Bindable]
-			private var montoTotal:String = "0";
+			private var cantidadTotalMermada:String = "0";
+			[Bindable]
+			private var montoTotalMermado:String = "0";
             
             private var formato:NumberFormatter = new NumberFormatter();
 				
@@ -62,6 +64,7 @@
             	
             	var producidoTotal:Number = 0;
             	var mermadoTotal:Number = 0;
+            	var montoStockTotal:Number = 0;
             	
             	formato.precision = 2;
             	
@@ -69,6 +72,7 @@
             	{
             		producidoTotal += Number(aux[i].PRODUCIDO);
             		mermadoTotal += Number(aux[i].MERMADO);
+            		montoStockTotal += Number(aux[i].MONTOSTOCK);
             		if(aux[i].PRODUCIDO!=0)
             		{
             			var ef:Number = Number(aux[i].MERMADO);
@@ -78,9 +82,11 @@
             		else aux[i].Desviacion = 100;
             		aux[i].PRODUCIDO = formato.format(Number(aux[i].PRODUCIDO));
             		aux[i].MERMADO 	 = formato.format(Number(aux[i].MERMADO));
+            		aux[i].MONTOSTOCK= formato.format(Number(aux[i].MONTOSTOCK));
             	}
-            	cantidadTotal  = formato.format(Number(producidoTotal));
-            	montoTotal = formato.format(Number(mermadoTotal));
+            	cantidadTotalProducida  = formato.format(Number(producidoTotal));
+            	cantidadTotalMermada = formato.format(Number(mermadoTotal));
+            	montoTotalMermado = formato.format(Number(montoStockTotal));
             	mermas_ac = aux;
             	
             	formato.precision = 3;
@@ -99,8 +105,9 @@
             		aux[i].Quantity = formato.format(Number(aux[i].Quantity));
             		aux[i].Monto 	= formato.format(Number(aux[i].Monto));
             	}
-            	cantidadTotal  = formato.format(Number(ct));
-            	montoTotal = formato.format(Number(mt));
+            	cantidadTotalProducida  = formato.format(Number(ct));
+            	cantidadTotalMermada = formato.format(Number(mt));
+            	
             	mermas_ac = aux;
             }
 		]]>
@@ -116,12 +123,14 @@
 	</mx:HBox>
 	<mx:DataGrid x="0" y="38" width="775" height="387" dataProvider="{mermas_ac}">
 		<mx:columns>
-			<mx:DataGridColumn headerText="Descripción" dataField="Dscription" width="475" sortable="false"/>
+			<mx:DataGridColumn headerText="Descripción" dataField="Dscription" width="365" sortable="false"/>
 			<mx:DataGridColumn headerText="Producido" 	dataField="PRODUCIDO" width="110" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="Mermado" 	dataField="MERMADO" width="110" textAlign="right" sortable="false"/>
-			<mx:DataGridColumn headerText="Desviación" dataField="Desviacion" width="80" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Mermado" 	dataField="MERMADO" 	width="110" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Desviación" 	dataField="Desviacion" width="80" textAlign="right" sortable="false"/>
+			<mx:DataGridColumn headerText="Monto $" 	dataField="MONTOSTOCK" width="110" textAlign="right" sortable="false"/>
 		</mx:columns>
 	</mx:DataGrid>
-	<mx:Label x="481" y="432" text="{cantidadTotal}" width="80" textAlign="right" fontWeight="bold"/>
-	<mx:Label x="594" y="432" text="{montoTotal}" width="81" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="369" y="432" text="{cantidadTotalProducida}" width="98" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="484" y="432" text="{cantidadTotalMermada}" width="95" textAlign="right" fontWeight="bold"/>
+	<mx:Label x="673" y="432" text="{montoTotalMermado}" width="95" textAlign="right" fontWeight="bold"/>
 </mx:Panel>

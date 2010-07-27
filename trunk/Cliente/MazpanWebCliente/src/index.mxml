@@ -411,12 +411,12 @@
 					especifico_cmp.parametros(event.objeto.idItem,event.objeto.nombreItem,event.objeto.codigoSucursal,event.objeto.nombreSucursal,event.objeto.codigoCuenta,event.objeto.ano,event.objeto.mes);
 				}
 			}
-			
 			//<mx:Style source="Estilo.css"/>
 		]]>
 	</mx:Script>
 	
 	<mx:Style source="Estilo.css"/>
+	
 	
 	<ns1:Login id="login" complexClick="loginResult(event)" horizontalCenter="0" verticalCenter="-59"/>
 	
@@ -430,5 +430,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 32.22.07.10"/>
+	<mx:Label x="525" y="10" text="Versión 33.27.07.10"/>
 </mx:Application>

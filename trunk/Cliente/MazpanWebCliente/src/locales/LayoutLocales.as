@@ -1,8 +1,10 @@
 package locales
 {
+	
 	import mx.formatters.NumberFormatter;
 	
 	import org.alivepdf.colors.RGBColor;
+	import org.alivepdf.display.Display;
 	import org.alivepdf.layout.Align;
 	import org.alivepdf.layout.Orientation;
 	import org.alivepdf.layout.Size;
@@ -18,6 +20,7 @@ package locales
 		public function LayoutLocales()
 		{
 			pdf = new PDF(Orientation.PORTRAIT,Unit.MM,Size.LETTER);
+			pdf.setDisplayMode(Display.FULL_WIDTH);
 			pdf.setMargins(10,10,10,10);
 			pdf.addPage();
 			pdf.textStyle(new RGBColor(0),1);
@@ -48,7 +51,7 @@ package locales
 			array = aux.split(")");
 			return array.join("");
 		}
-		public function generar(asistencia:Array, desviaciones:Array, stock:Array, gastos_ac:Array , fecha:String, local:Object, mermas:Array, cantidadTotal:String, montoTotal:String):void
+		public function generar(asistencia:Array, desviaciones:Array, stock:Array, gastos_ac:Array , fecha:String, local:Object, mermas:Array, cantidadTotalProducida:String, cantidadTotalMermada:String, montoTotalMermado:String):void
 		{
 			pdf.setFontSize(22);
           	pdf.writeText(22,"Control "+local.WhsName+" "+fecha+"\n");
@@ -115,13 +118,10 @@ package locales
           		pdf.setFontSize(8);
           		
           		pdf.addCell(91, 5,"Item", 1);
-          		pdf.addCell(18, 5,"Elaborado", 1,0,Align.CENTER);
-          		pdf.addCell(18, 5,"Completado", 1,0,Align.CENTER);
-          		pdf.addCell(18, 5,"Diferencia", 1,0,Align.CENTER);
-////////////////////////////////////////////
-          		pdf.addCell(18, 5,"Dif. Ref. 15%", 1,0,Align.CENTER);
-          		pdf.addCell(17, 5,"% Logrado", 1,0,Align.CENTER);
-          		pdf.addCell(20, 5,"% No Logrado", 1,0,Align.CENTER);
+          		pdf.addCell(20, 5,"Congelado", 1,0,Align.CENTER);
+          		pdf.addCell(20, 5,"Horneado", 1,0,Align.CENTER);
+          		pdf.addCell(20, 5,"Diferencia", 1,0,Align.CENTER);
+          		pdf.addCell(20, 5,"Desviación %", 1,0,Align.CENTER);
           		pdf.writeText(5,"\n");
           		
           		var a1:Number;
@@ -130,18 +130,10 @@ package locales
 	          	{//aqui ver si referencia es menor para colocar todo el texto en color diferente
 	          		
 	          		pdf.addCell(91, 5,desviaciones[i].ItemName, 1);
-	          		pdf.addCell(18, 5,desviaciones[i].CantidadElaborada, 1,0,Align.RIGHT);
-	          		pdf.addCell(18, 5,desviaciones[i].CantidadCompletada, 1,0,Align.RIGHT);
-	          		
-	          		a1=Number(removeFormatting(desviaciones[i].Referencia));
-	          		a2=Number(removeFormatting(desviaciones[i].Diferencia));
-	          		if(a1>a2) pdf.textStyle(new RGBColor(16711680),1);
-	          		pdf.addCell(18, 5,desviaciones[i].Diferencia, 1,0,Align.RIGHT);
-	          		pdf.textStyle(new RGBColor(0),1);
-	          		
-	          		pdf.addCell(18, 5,desviaciones[i].Referencia, 1,0,Align.RIGHT);
-	          		pdf.addCell(17, 5,desviaciones[i].Logrado, 1,0,Align.RIGHT);
-	          		pdf.addCell(20, 5,desviaciones[i].NoLogrado, 1,0,Align.RIGHT);
+	          		pdf.addCell(20, 5,desviaciones[i].CONSUMIDO, 1,0,Align.RIGHT);
+	          		pdf.addCell(20, 5,desviaciones[i].HORNEADO, 1,0,Align.RIGHT);
+	          		pdf.addCell(20, 5,desviaciones[i].Diferencia, 1,0,Align.RIGHT);
+	          		pdf.addCell(20, 5,desviaciones[i].Desviacion, 1,0,Align.RIGHT);
 	          		pdf.writeText(5,"\n");
 	          	}
 	          	
@@ -203,34 +195,37 @@ package locales
           		pdf.setFontSize(8);
           		
           		pdf.addCell(85, 5,"Item", 1);
-          		pdf.addCell(30, 5,"Cant. Producida", 1,0,Align.CENTER);
-          		pdf.addCell(30, 5,"Cant. Mermada", 1,0,Align.CENTER);
-          		pdf.addCell(30, 5,"Desviación", 1,0,Align.CENTER);
+          		pdf.addCell(25, 5,"Cant. Producida", 1,0,Align.CENTER);
+          		pdf.addCell(25, 5,"Cant. Mermada", 1,0,Align.CENTER);
+          		pdf.addCell(25, 5,"Desviación", 1,0,Align.CENTER);
+          		pdf.addCell(25, 5,"Monto $", 1,0,Align.CENTER);
           		pdf.writeText(5,"\n");
           		
 		        for(i=0; i<mermas.length; i++)
 	          	{
 	          		pdf.addCell(85, 5,mermas[i].Dscription, 1);
-	          		pdf.addCell(30, 5,mermas[i].PRODUCIDO, 1,0,Align.RIGHT);
-	          		pdf.addCell(30, 5,mermas[i].MERMADO, 1,0,Align.RIGHT);
-	          		pdf.addCell(30, 5,mermas[i].Desviacion, 1,0,Align.RIGHT);
+	          		pdf.addCell(25, 5,mermas[i].PRODUCIDO, 1,0,Align.RIGHT);
+	          		pdf.addCell(25, 5,mermas[i].MERMADO, 1,0,Align.RIGHT);
+	          		pdf.addCell(25, 5,mermas[i].Desviacion, 1,0,Align.RIGHT);
+	          		pdf.addCell(25, 5,mermas[i].MONTOSTOCK, 1,0,Align.RIGHT);
 	          		pdf.writeText(5,"\n");
 	          	}
 	          	pdf.writeText(1,"\n");
 	          	
 	          	pdf.addCell(55, 5,"");
           		pdf.addCell(30, 5,"Total",1);
-          		pdf.addCell(30, 5,cantidadTotal, 1,0,Align.RIGHT);
-          		pdf.addCell(30, 5,montoTotal, 1,0,Align.RIGHT);
-          		if(cantidadTotal!='0')
+          		pdf.addCell(25, 5,cantidadTotalProducida, 1,0,Align.RIGHT);
+          		pdf.addCell(25, 5,cantidadTotalMermada, 1,0,Align.RIGHT);          		
+          		if(cantidadTotalProducida!='0')
         		{
-        			cantidadTotal = removeFormatting(cantidadTotal);
-        			var ef:Number = Number(removeFormatting(montoTotal));
+        			cantidadTotalProducida = removeFormatting(cantidadTotalProducida);
+        			var ef:Number = Number(removeFormatting(cantidadTotalMermada));
         			ef = ef*100;
-        			var desv:String = formato.format(ef/Number(cantidadTotal));
-        			pdf.addCell(30, 5,desv,1,0,Align.RIGHT);
+        			var desv:String = formato.format(ef/Number(cantidadTotalProducida));
+        			pdf.addCell(25, 5,desv,1,0,Align.RIGHT);
         		}
-        		else pdf.addCell(30, 5,'100',1,0,Align.RIGHT);
+        		else pdf.addCell(25, 5,'100',1,0,Align.RIGHT);
+          		pdf.addCell(25, 5,montoTotalMermado, 1,0,Align.RIGHT);
           		
           		pdf.writeText(5,"\n");
           	}
@@ -243,6 +238,7 @@ package locales
           	
           	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php",'inline', "Informe"+fecha+".pdf");
           	//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Informe"+fecha+".pdf");
+          	
 		}
 	}
 }
