@@ -398,9 +398,17 @@
 			}
 			private function generarPDF3():void
 			{
-				var pdf:FORMATO = new FORMATO();
-				if(sucursales_cb.selectedIndex==0) pdf.generarTabla3(items,img,ano_var.toString(),"Estado de Resultado Consolidado", sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
-				else pdf.generarTabla4(items,img,ano_var.toString(),sucursales_ac[sucursales_cb.selectedIndex].Name, sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+				var pdf:FORMATO4 = new FORMATO4();
+						
+				if(sucursales_cb.selectedIndex==0) 
+				{
+					pdf.generarTabla3(items,img,ano_var.toString(),"Estado de Resultado Consolidado", 				sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+				}
+				else 
+				{
+					//pdf.generarTabla4
+					pdf.generarTabla3(items,img,ano_var.toString(),sucursales_ac[sucursales_cb.selectedIndex].Name, sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+				}	
 			}
             private function actualizarColumnas():void
             {
