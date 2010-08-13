@@ -84,11 +84,7 @@ package estadoResultado
 			pdf.addCell(70,1);//espacio para la imagen
 			pdf.addCell(195,10,elMES+" "+ano,0,0,Align.CENTER);
 			pdf.writeText(10,"\n");
-/******************************************************/
-/******************************************************/
-/******************************************************/
-/******************************************************/
-/******************************************************/			
+						
 			pdf.setFontSize(8);
 			pdf.writeText(2,"\n");
 			pdf.addCell(83, 4,ano,1,0,Align.CENTER);
@@ -1125,9 +1121,7 @@ package estadoResultado
 				pdf.addCell(44,0.3,"",1,0,Align.RIGHT);
 				pdf.writeText(2,"\n");
 			}
-			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);
-			
+			pdf.setFont(new CoreFont(FontFamily.HELVETICA),8);	
 		}
-
 	}
 }
