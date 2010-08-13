@@ -8,6 +8,10 @@
 		<mx:operation name="getSucursales" 	result="getSucursalesResult(event)"		fault="ErrorFaultHandler(event, 'getSucursales')"/>
 	</mx:WebService>
 	
+	<mx:WebService id="EstadoResultadoService" 	wsdl="{index.URL + 'EstadoResultadoService.asmx?WSDL'}" showBusyCursor="true" requestTimeout="60">
+		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
+	</mx:WebService>
+	
 	<mx:Metadata>
 		[Event(name="complexClick",type="eventos.ComplexEvent")]
 	</mx:Metadata>
@@ -63,6 +67,24 @@
             private function getSucursalesResult(event:ResultEvent):void
             {
             	sucursales_ac = event.result.Tables.Sucursales.Rows.source as Array;
+            	
+            	var zonas:Object =new Object;
+            	zonas.Name = "Zonas";
+            	zonas.Code = "Zonas";
+            	zonas.Nivel = "Zonas";
+            	zonas.SegmentId = 1;
+            	zonas.ShortName = "Zonas";
+            	
+            	var panaderias:Object =new Object;
+            	panaderias.Name = "Panaderías";
+            	panaderias.Code = "Panaderías";
+            	panaderias.Nivel = "Panaderías";
+            	panaderias.SegmentId = 1;
+            	panaderias.ShortName = "Panaderías";
+            	
+            	sucursales_ac.push(zonas);
+            	sucursales_ac.push(panaderias);
+            	
             	for(var i:int=0; i<sucursales_ac.length; i++)
             	{
             		nombreSucursales_ac.push(sucursales_ac[i].ShortName);
@@ -74,7 +96,7 @@
             private function getItemsResult(event:ResultEvent):void
             {
             	items = event.result.Tables.Items.Rows.source as Array;
-				
+								
 				inicializado = true;
             	cargar_btn.enabled = true;
             	meses_cb.enabled = true;
@@ -112,7 +134,7 @@
             	meses_cb.enabled = false;
 				var defaults:ITEMS = new ITEMS(items);defaults.default_values();
             	ano_var = ano.value;
-            	Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,ano_var,1);
+            	obtenerFlujos(sucursales_ac[sucursales_cb.selectedIndex].Code,ano_var,1);
             	cargar_btn.label='Recargar';
             	actualizarCombos();
             }
@@ -383,8 +405,13 @@
             	}
             	else
             	{
-            		Service.getFlujo(sucursales_ac[sucursales_cb.selectedIndex].Code,ano_var,event.result.MESNUMERO+1);
+            		obtenerFlujos(sucursales_ac[sucursales_cb.selectedIndex].Code,ano_var,event.result.MESNUMERO+1);
             	}
+            }
+            private function obtenerFlujos(codigo:String,ano:int,mes:int):void
+            {
+            	if(codigo=="Zonas" || codigo=="Panaderías") EstadoResultadoService.getFlujo(codigo,ano,mes);
+            	else Service.getFlujo(codigo,ano,mes);
             }
 			private function generarPDF():void
 			{
@@ -402,12 +429,13 @@
 						
 				if(sucursales_cb.selectedIndex==0) 
 				{
+					//pdf.generarTabla3
 					pdf.generarTabla3(items,img,ano_var.toString(),"Estado de Resultado Consolidado", 				sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 				}
 				else 
 				{
-					//pdf.generarTabla4
-					pdf.generarTabla3(items,img,ano_var.toString(),sucursales_ac[sucursales_cb.selectedIndex].Name, sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+					//pdf.generarTabla4 
+					pdf.generarTabla4(items,img,ano_var.toString(),sucursales_ac[sucursales_cb.selectedIndex].Name, sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 				}	
 			}
             private function actualizarColumnas():void

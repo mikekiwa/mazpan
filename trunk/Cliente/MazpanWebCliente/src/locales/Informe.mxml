@@ -125,9 +125,48 @@
             	}
             	LocalesService.getProducidoVsMermas(local_cb.selectedItem.WhsCode, desde_df.text, hasta_df.text);
             }
+            private function juntar(mermas:Array, producido:Array):Array
+            {
+            	var aux:Array = new Array;
+            	var encontrado:Boolean = false;
+            	for(var i:int=0; i<mermas.length; i++)
+            	{
+            		var m:Object = new Object;
+	            	encontrado = false;
+            		for(var j:int=0; j<producido.length; j++)
+            		{
+	            		if(mermas[i].ItemCode==producido[j].ItemCode)
+	            		{
+	            			m.ItemCode = mermas[i].ItemCode;
+	            			m.Dscription = mermas[i].ItemName;
+	            			m.MERMADO = mermas[i].MERMADO;
+	            			m.MONTOSTOCK = mermas[i].MONTOSTOCK;
+	            			
+	            			m.PRODUCIDO = producido[j].PRODUCIDO;
+	            			
+	            			encontrado =true;
+	            		}
+	            		//else //descartar
+	            	}
+	            	if(!encontrado)
+	            	{
+	            		m.ItemCode = mermas[i].ItemCode;
+            			m.Dscription = mermas[i].ItemName;
+            			m.MERMADO = mermas[i].MERMADO;
+            			m.MONTOSTOCK = mermas[i].MONTOSTOCK;
+            			
+            			m.PRODUCIDO =  0000;//mermas[i].MERMADO;
+	            	}
+	            	
+            		aux.push(m);
+            	}
+            	return aux;
+            } 
             private function getProducidoVsMermasResult(event:ResultEvent):void
             {
-            	var aux:Array = event.result.Tables.Mermas.Rows.source as Array;
+            	var aux1:Array = event.result.Mermas.Tables.Mermas.Rows.source as Array;
+            	var aux2:Array = event.result.Producido.Tables.Producido.Rows.source as Array;
+            	var aux:Array = juntar(aux1,aux2);
             	
             	var producidoTotal:Number = 0;
             	var mermadoTotal:Number = 0;

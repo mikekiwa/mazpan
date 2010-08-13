@@ -3,6 +3,7 @@
 	
 	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
 		<mx:operation name="editUsuario" 	result="editUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'editUsuario')"/>
+		<mx:operation name="getMenus" 	result="getMenusResult(event)" 	fault="ErrorFaultHandler(event, 'getMenus')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -25,26 +26,98 @@
    			[Bindable]
    			private var usuario:Object;
    			
+   			[Bindable]
+   			private var menus_ac:Array;
+   			
    			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
             }
+            
             public function parametros(_usuario:Object):void
             {
+            	UsuarioService.getMenus();
             	usuario = _usuario;
             	username.text = usuario.userName;
             	password.text = usuario.password;
-            	var aux:String = usuario.privilegio;
-            	var arr:Array = aux.split('');
-            	if(arr[0]=='1')	p1.selected = true;
-				if(arr[1]=='1')	p2.selected = true;
-				if(arr[2]=='1')	p3.selected = true;
-				if(arr[3]=='1')	p4.selected = true;
-				if(arr[4]=='1')	p5.selected = true;
-				if(arr[5]=='1')	p6.selected = true;
-				if(arr[6]=='1')	p7.selected = true;
-				if(arr[7]=='1')	p8.selected = true;
+            	
 				editar_btn.enabled = true;
+				
+				UsuarioService.getMenus();
+            }
+            private function getMenusResult(event:ResultEvent):void
+            {
+            	menus_ac = event.result.Tables.Menus.Rows.source as Array;
+            	
+            	var menusAux:Array = new Array;
+				var i:int=0;
+				var j:int=0;
+				
+				for(i=0; i<menus_ac.length; i++)
+				{
+					var encontrado:Boolean = false;
+					for(j=0; j<menusAux.length; j++)
+						if(menus_ac[i].menu==menusAux[j])encontrado = true;
+					if(!encontrado)
+					{
+						menusAux.push(menus_ac[i].menu);
+					}
+				}
+				
+				var misMenux:Array =  new Array;
+				j=0;
+				var indexMenu:int = 0;
+				for(i=0; i<menusAux.length; i++)
+				{
+					var menu:Object = new Object;
+					menu.menu = menus_ac[j];
+					menu.opcion = "";
+					misMenux.push(menu);
+					
+					for(; j<menus_ac.length; j++)
+					{
+						if(menus_ac[j].menu==menus_ac[indexMenu])
+						{
+							misMenux.push(menus_ac[j]);
+						}
+						else
+						{
+							indexMenu = j+1;
+							break;
+						}
+					}
+				}
+				
+				var p:String = usuario.privilegio;
+            	var aux:Array = p.split('');
+            	
+            	for(i=0; i<aux.length; i++)
+            	{
+            		if(i>=misMenux.length) break;
+            		
+            		if(aux[i]=='2' || aux[i]=='1') misMenux[i].ok = true;
+            	}
+            	menus_ac=menusAux;
+            	/*var index:int = 1;
+            	var indexOpcion:int = 0;
+				for(i=0; i<menusAux.length; i++)
+				{
+					for(j=index; j<aux.length; j++)
+					{
+						if(aux[j]=='3')//es sub-menu
+						{
+							index = j+1;//encontre el siguiente cambio de menu
+							break;
+						}
+						else if(aux[j]=='1')//acceso opcion del submenu
+						{
+							menus_ac[indexOpcion].ok = true;
+						}
+						indexOpcion++;
+					}
+				}*/
+				
+				tabla.dataProvider = menus_ac;
             }
 			private function editar():void
 			{
@@ -73,14 +146,7 @@
 				personal_ac = new Array();
 				if(username!=null) username.text="";
 				if(password!=null) password.text="";
-				if(p1!=null) p1.selected = false;
-				if(p2!=null) p2.selected = false;
-				if(p3!=null) p3.selected = false;
-				if(p4!=null) p4.selected = false;
-				if(p5!=null) p5.selected = false;
-				if(p6!=null) p6.selected = false;
-				if(p7!=null) p7.selected = false;
-				if(p8!=null) p8.selected = false;
+				menus_ac = new Array;
 			}
 			private function verificar():void
 			{
@@ -95,59 +161,52 @@
 			}
 			private function tienePrivilegio():Boolean
 			{
-				if(	p1.selected || p2.selected || p3.selected || p4.selected || p5.selected || p6.selected || p7.selected || p8.selected)
+				var count:int=0;
+				for(var i:int=0;i<menus_ac.length; i++)
 				{
-					return true;
+					if(menus_ac[i].ok)count++;
 				}
 				return false;
 			}
-			private function privilegio():String
+			private function privilegio():Array
 			{
-				var p:String = "";
+				var privilegios:Array = new Array;
+				var aux:String = menus_ac[0].menu;
+				var p:String;
 				
-				if(p1.selected) p+="1"; else p+="0";
-				if(p2.selected) p+="1"; else p+="0";
-				if(p3.selected) p+="1"; else p+="0";
-				if(p4.selected) p+="1"; else p+="0";
-				if(p5.selected) p+="1"; else p+="0";
-				if(p6.selected) p+="1"; else p+="0";
-				if(p7.selected) p+="1"; else p+="0";
-				if(p8.selected) p+="1"; else p+="0";
 				
-				p+="000";
 				
-				return p;
+				return privilegios;
 			}
    		]]>
    	</mx:Script>
-   	<mx:Label x="76" y="30" text="Rut"/>
-   	<mx:Label x="76" y="179" text="Nombre de Usuario"/>
-   	<mx:Label x="76" y="207" text="Contraseña"/>
-   	<mx:Label x="76" y="235" text="Privilegio"/>
+   	<mx:Label x="34" y="10" text="Rut"/>
+   	<mx:Label x="34" y="116" text="Nombre de Usuario"/>
+   	<mx:Label x="34" y="144" text="Contraseña"/>
+   	<mx:Label x="34" y="170" text="Privilegio"/>
    	
-   	<mx:TextInput x="207" y="177" id="username" maxChars="50" change="verificar()"/>
-   	<mx:TextInput x="207" y="205" id="password" maxChars="50" change="verificar()"/>
-   	<mx:Canvas x="207" y="235" width="220" height="74" borderStyle="solid">
-   	   	<mx:CheckBox id="p1" label="Estado de Resultado" x="10" y="10" change="verificar()"/>
-   	   	<mx:CheckBox id="p2" y="40" label="Amarre de Cuentas" x="10" change="verificar()"/>
-   	</mx:Canvas>
-   	<mx:Canvas x="207" y="317" width="220" height="43" borderStyle="solid">
-   	   	<mx:CheckBox x="10" y="10" label="Ventas" id="p8" change="verificar()"/>
-   	</mx:Canvas>
-   	<mx:Canvas x="442" y="235" width="220" height="159" borderStyle="solid">
-   	   	<mx:CheckBox id="p3" x="10" y="10" label="General" change="verificar()"/>
-   	   	<mx:CheckBox id="p4" x="10" y="40" label="Agentes Externos" change="verificar()"/>
-   	   	<mx:CheckBox id="p5" x="10" y="70" label="Personal" change="verificar()"/>
-   	   	<mx:CheckBox id="p6" x="10" y="100" label="Mantenciones" change="verificar()"/>
-   	   	<mx:CheckBox id="p7" x="10" y="130" label="Plan de Mantencion" change="verificar()"/>
-   	</mx:Canvas>
-   	<mx:Button x="510" y="428" label="Guardar" id="editar_btn" enabled="false" click="editar()"/>
-   	<mx:Button x="590" y="428" label="Atras" width="72" click="atras()"/>
-   	<mx:Label x="76" y="63" text="Nombres"/>
-   	<mx:Label x="76" y="100" text="Apellido Paterno"/>
-   	<mx:Label x="76" y="139" text="Apellido Materno"/>
-   	<mx:Label x="207" y="30" text="{usuario.rut_persona}" width="455"/>
-   	<mx:Label x="207" y="63" text="{usuario.nombres}" width="455"/>
-   	<mx:Label x="207" y="100" text="{usuario.apellidoPaterno}" width="455"/>
-   	<mx:Label x="207" y="139" text="{usuario.apellidoMaterno}" width="455"/>
+   	<mx:TextInput x="162" y="114" id="username" maxChars="50" change="verificar()"/>
+   	<mx:TextInput x="162" y="142" id="password" maxChars="50" change="verificar()"/>
+   	<mx:Button x="589" y="428" label="Guardar" id="editar_btn" enabled="false" click="editar()"/>
+   	<mx:Button x="669" y="428" label="Atras" width="72" click="atras()"/>
+   	<mx:Label x="34" y="36" text="Nombres"/>
+   	<mx:Label x="34" y="62" text="Apellido Paterno"/>
+   	<mx:Label x="34" y="88" text="Apellido Materno"/>
+   	<mx:Label x="162" y="10" text="{usuario.rut_persona}" width="579"/>
+   	<mx:Label x="162" y="36" text="{usuario.nombres}" width="579"/>
+   	<mx:Label x="162" y="62" text="{usuario.apellidoPaterno}" width="579"/>
+   	<mx:Label x="162" y="88" text="{usuario.apellidoMaterno}" width="579"/>
+   	<mx:DataGrid x="162" y="172" dataProvider="{menus_ac}" id="tabla" width="579" height="248">
+   	   	<mx:columns>
+   	   		<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingLeft="2" textAlign="center" sortable="false">
+				<mx:itemRenderer>
+					<mx:Component>
+						<mx:CheckBox click="{data.ok=!data.ok}" selected="{data.ok}"/>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			<mx:DataGridColumn headerText="Menu" dataField="menu" width="200"/>
+   	   	   	<mx:DataGridColumn headerText="Privilegio" dataField="opcion"/>
+   	   	</mx:columns>
+   	</mx:DataGrid>
 </mx:Canvas>
