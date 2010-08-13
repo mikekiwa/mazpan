@@ -74,7 +74,10 @@ public class LocalesService : System.Web.Services.WebService
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
 
-        da.SelectCommand = new SqlCommand(query, cn);
+
+        SqlCommand cmd = new SqlCommand(query, cn);
+        cmd.CommandTimeout = 180;
+        da.SelectCommand = cmd;
 
         try
         {
@@ -552,22 +555,35 @@ public class LocalesService : System.Web.Services.WebService
     }
 
     [WebMethod]
-    public DataTable getProducidoVsMermas(string local, string ddmmaa1, string ddmmaa2)
+    public Merma getProducidoVsMermas(string local, string ddmmaa1, string ddmmaa2)
     {
         DateTime dt1 = toDateTime(ddmmaa1);
         DateTime dt2 = toDateTime(ddmmaa2);
         string desde = dt1.Year + "-" + dt1.Month + "-" + dt1.Day;
         string hasta = dt2.Year + "-" + dt2.Month + "-" + dt2.Day;
-        string sql = " SELECT T1.[ItemCode], T1.[Dscription], SUM(T1.[Quantity]) AS 'PRODUCIDO', SUM(T2.[Quantity]) AS 'MERMADO', SUM(T2.[Quantity]*T2.StockPrice) AS 'MONTOSTOCK' " +
-                     " FROM " + SAP + ".ODLN T0 " +
-                     " JOIN " + SAP + ".DLN1 T1 ON T0.DocEntry = T1.DocEntry " +
-                     " JOIN " + SAP + ".IGE1 T2 ON T1.ItemCode=T2.ItemCode " +
-                     " JOIN " + SAP + ".OIGE T3 ON T2.DocEntry = T3.DocEntry " +
-                     " WHERE T1.[WhsCode]='" + local + "' AND T2.[WhsCode] ='" + local + "' AND " +
-                     " T0.[DocDate] >='" + desde + "' AND T0.[DocDate] <='" + hasta + "' AND " +
-                     " T3.[DocDate] >='" + desde + "' AND T3.[DocDate] <='" + hasta + "' " +
-                     " GROUP BY T1.[ItemCode], T1.[Dscription]";
-        return obtenerTabla("Mermas", sql);
+        string sql1 = " SELECT T1.[ItemCode], T3.[ItemName], SUM(T1.[Quantity]) AS 'MERMADO', SUM(T1.[Quantity]*T1.StockPrice) AS 'MONTOSTOCK' " +
+                      " FROM " + SAP + ".OIGE T0 " +
+                      " JOIN " + SAP + ".IGE1 T1 ON T0.DocEntry = T1.DocEntry " +
+                      " JOIN " + SAP + ".OACT T2 ON T1.AcctCode = T2.AcctCode" +
+                      " JOIN " + SAP + ".OITM T3 ON T1.ItemCode = T3.ItemCode " +
+                      " WHERE T1.[WhsCode]='" + local + "' AND  " +
+                      " T2.[AcctName] NOT Like '%Productos%' AND T2.[AcctName] Like '%Merma%' AND " +
+                      " T0.[DocDate] >='" + desde + "' AND T0.[DocDate] <='" + hasta + "' " +
+                      " GROUP BY T1.[ItemCode], T3.[ItemName]";
+
+        string sql2 = " SELECT T1.[ItemCode], T3.[ItemName], SUM(T1.[Quantity]) AS 'PRODUCIDO' " +
+                      " FROM " + SAP + ".ODLN T0 " +
+                      " JOIN " + SAP + ".DLN1 T1 ON T0.DocEntry = T1.DocEntry " +
+                      " JOIN " + SAP + ".OITM T3 ON T1.ItemCode = T3.ItemCode " +
+                      " WHERE T1.[WhsCode]='" + local + "' AND  " +
+                      " T0.[DocDate] >='" + desde + "' AND T0.[DocDate] <='" + hasta + "' " +
+                      " GROUP BY T1.[ItemCode], T3.[ItemName]";
+
+
+        Merma m = new Merma();
+        m.Mermas = obtenerTabla("Mermas", sql1);
+        m.Producido = obtenerTabla("Producido", sql2);
+        return m;
     }
 }
 

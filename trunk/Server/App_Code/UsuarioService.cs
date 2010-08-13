@@ -122,7 +122,21 @@ public class UsuarioService : System.Web.Services.WebService
 
         SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
-        String query = " SELECT * FROM [PracticaDb].[dbo].Usuario T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rut_persona=T2.rut WHERE visible='True' ";
+//        String query = " SELECT T1.estadoResultado+'3'+T1.amarre+'3'+T1.general+'3'+T1.agentesExternos+'3'+T1.personal+'3'+T1.mantenciones+'3'+T1.planMantecion+'3'+T1.ventas+'3'+T1.locales+'3'+T1.configurarEvaluacion+'3'+T1.evaluacion+'3'+T1.sistema+'3' as privilegio,* FROM [PracticaDb].[dbo].Usuario T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rut_persona=T2.rut WHERE visible='True' ";
+        String query = " SELECT T1.estadoResultado+"+
+                                "T1.amarre+"+
+                                "T1.general+"+
+                                "T1.agentesExternos+"+
+                                "T1.personal+"+
+                                "T1.mantenciones+"+
+                                "T1.planMantecion+"+
+                                "T1.ventas+"+
+                                "T1.locales+"+
+                                "T1.configurarEvaluacion+"+
+                                "T1.evaluacion+"+
+                                "T1.sistema as privilegio"+
+                                ",*"+
+                        "FROM [PracticaDb].[dbo].Usuario T1 JOIN [PracticaDb].[dbo].Personal T2 ON T1.rut_persona=T2.rut WHERE visible='True' ";
 
         da.SelectCommand = new SqlCommand(query, cn);
 
@@ -184,5 +198,37 @@ public class UsuarioService : System.Web.Services.WebService
         else return 0;
     }
 
+
+    private DataTable obtenerTabla(string nombre, string query)
+    {
+        DataTable dt = new DataTable();
+        dt.TableName = nombre;
+
+        SqlConnection cn = new SqlConnection(coneccionString);
+        SqlDataAdapter da = new SqlDataAdapter();
+
+
+        SqlCommand cmd = new SqlCommand(query, cn);
+        cmd.CommandTimeout = 180;
+        da.SelectCommand = cmd;
+
+        try
+        {
+            da.Fill(dt);
+        }
+        finally
+        {
+            cn.Close();
+        }
+
+        return dt;
+    }
+
+    [WebMethod]
+    public DataTable getMenus()
+    {
+        string sql = "SELECT * from [PracticaDb].[dbo].Menus T0 JOIN [PracticaDb].[dbo].Opciones T1 ON T0.id=T1.menu";
+        return obtenerTabla("Menus",sql);
+    }
 }
 
