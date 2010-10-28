@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460" creationComplete="init()">
 	
-	<mx:WebService id="PersonalService" 		wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" 	showBusyCursor="true">
+	<mx:WebService id="PersonalService" wsdl="{index.URL + 'PersonalService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="allPersonal" 	result="allPersonalResult(event)" 	fault="ErrorFaultHandler(event, 'allPersonal')"/>
 	</mx:WebService>
 	
-	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
+	<mx:WebService id="UsuarioService" wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="addUsuario" 	result="addUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'addUsuario')"/>
+		<mx:operation name="getMenus" 	 	result="getMenusResult(event)" 		fault="ErrorFaultHandler(event, 'getMenus')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -25,6 +26,9 @@
    			[Bindable]
    			private var personal_ac:Array = new Array();
    			
+   			[Bindable]
+   			private var menus_ac:Array;
+   			
    			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
             {
             	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
@@ -37,7 +41,55 @@
 			private function allPersonalResult(event:ResultEvent):void
 			{
 				personal_ac = event.result.Tables.Personal.Rows.source as Array;
-			}
+			UsuarioService.getMenus();
+            }
+            private function getMenusResult(event:ResultEvent):void
+            {
+            	menus_ac = event.result.Tables.Menus.Rows.source as Array;
+            	
+            	var menusAux:Array = new Array;
+				var i:int=0;
+				var j:int=0;
+				
+				for(i=0; i<menus_ac.length; i++)
+				{
+					var encontrado:Boolean = false;
+					for(j=0; j<menusAux.length; j++)
+						if(menus_ac[i].menu==menusAux[j])encontrado = true;
+					if(!encontrado)
+					{
+						menusAux.push(menus_ac[i].menu);
+					}
+				}
+				
+				var misMenux:Array =  new Array;
+				j=0;
+				var indexMenu:int = 0;
+				for(i=0; i<menusAux.length; i++)
+				{
+					var menu:Object = new Object;
+					menu.menu = menus_ac[j].menu;
+					menu.opcion = "";
+					misMenux.push(menu);
+					
+					for(; j<menus_ac.length; j++)
+					{
+						if(menus_ac[j].menu==menus_ac[indexMenu].menu)
+						{
+							misMenux.push(menus_ac[j]);
+						}
+						else
+						{
+							indexMenu = j+1;
+							break;
+						}
+					}
+				}
+				
+            	menus_ac=misMenux;
+            	
+				tabla.dataProvider = menus_ac;
+            }
 			private function guardar():void
 			{
 				var u:Object = new Object();
@@ -66,14 +118,7 @@
 				personal_ac = new Array();
 				if(username!=null) username.text="";
 				if(password!=null) password.text="";
-				if(p1!=null) p1.selected = false;
-				if(p2!=null) p2.selected = false;
-				if(p3!=null) p3.selected = true;
-				if(p4!=null) p4.selected = false;
-				if(p5!=null) p5.selected = false;
-				if(p6!=null) p6.selected = false;
-				if(p7!=null) p7.selected = false;
-				if(p8!=null) p8.selected = false;
+				menus_ac = new Array;
 			}
 			private function verificar():void
 			{
@@ -88,35 +133,77 @@
 			}
 			private function tienePrivilegio():Boolean
 			{
-				if(	p1.selected || p2.selected || p3.selected || p4.selected || p5.selected || p6.selected || p7.selected || p8.selected)
+				var count:int=0;
+				for(var i:int=0;i<menus_ac.length; i++)
 				{
-					return true;
+					if(menus_ac[i].ok) count++;
 				}
+				if(count>0) return true;
 				return false;
 			}
 			private function privilegio():String
 			{
-				var p:String = "";
+				var privilegios:String = "";
+				var indexMenu:int = 0;
 				
-				if(p1.selected) p+="1"; else p+="0";
-				if(p2.selected) p+="1"; else p+="0";
-				if(p3.selected) p+="1"; else p+="0";
-				if(p4.selected) p+="1"; else p+="0";
-				if(p5.selected) p+="1"; else p+="0";
-				if(p6.selected) p+="1"; else p+="0";
-				if(p7.selected) p+="1"; else p+="0";
-				if(p8.selected) p+="1"; else p+="0";
-				p+="000";
+				for(var i:int=0; i<menus_ac.length; i++)
+				{
+					if(menus_ac[indexMenu].menu!=menus_ac[i].menu)
+					{
+						privilegios += "-";
+						indexMenu = i;
+					}
+					
+					if(menus_ac[i].ok) privilegios += "1";
+					else privilegios += "0";
+				}
 				
-				return p;
+				return privilegios;
+			}
+			public function actualizarXX():void
+			{
+				var i:int=0;
+				if(tabla.selectedItem!=null)
+				{
+					if(tabla.selectedItem.opcion=="")
+					{
+						for(i=tabla.selectedIndex; i<menus_ac.length; i++)
+						{
+							if(menus_ac[i].menu == tabla.selectedItem.menu)
+							{
+								menus_ac[i].ok = tabla.selectedItem.ok;
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+					else
+					{
+						var count:int = 0;
+						var indexMenu:int = 0;
+						for(i=0; i<menus_ac.length; i++)
+						{
+							if(menus_ac[i].menu == tabla.selectedItem.menu)
+							{
+								if(menus_ac[i].opcion == "") indexMenu = i;
+								else if(menus_ac[i].ok) count++;
+							}
+						}
+						if(count>0) menus_ac[indexMenu].ok = true;
+						else menus_ac[indexMenu].ok = false;
+					}
+				}
+				verificar();
 			}
    		]]>
    	</mx:Script>
-   	<mx:Label x="76" y="30" text="Datos Personales"/>
-   	<mx:Label x="76" y="179" text="Nombre de Usuario"/>
-   	<mx:Label x="76" y="207" text="Contraseña"/>
-   	<mx:Label x="76" y="235" text="Privilegio"/>
-   	<mx:DataGrid x="207" y="27" id="personal_dg" dataProvider="{personal_ac}" change="verificar()" height="142">
+   	<mx:Label x="10" y="10" text="Datos Personales"/>
+   	<mx:Label x="10" y="155" text="Nombre de Usuario"/>
+   	<mx:Label x="10" y="181" text="Contraseña"/>
+   	<mx:Label x="10" y="207" text="Privilegio"/>
+   	<mx:DataGrid x="164" y="7" id="personal_dg" dataProvider="{personal_ac}" change="verificar()" height="142" width="601">
    		<mx:columns>
    			<mx:DataGridColumn headerText="Rut" dataField="rut" width="90"/>
    			<mx:DataGridColumn headerText="Nombres" dataField="nombres" width="120"/>
@@ -124,23 +211,22 @@
    			<mx:DataGridColumn headerText="Apellido Materno" dataField="apellidoMaterno" width="120"/>
    		</mx:columns>
    	</mx:DataGrid>
-   	<mx:TextInput x="207" y="177" id="username" maxChars="50" change="verificar()"/>
-   	<mx:TextInput x="207" y="205" id="password" maxChars="50" change="verificar()"/>
-   	<mx:Canvas x="207" y="235" width="220" height="74" borderStyle="solid">
-   	   	<mx:CheckBox id="p1" label="Estado de Resultado" x="10" y="10" change="verificar()"/>
-   	   	<mx:CheckBox id="p2" y="40" label="Amarre de Cuentas" x="10" change="verificar()"/>
-   	</mx:Canvas>
-   	<mx:Canvas x="207" y="317" width="220" height="43" borderStyle="solid">
-   	   	<mx:CheckBox x="10" y="10" label="Ventas" id="p8" change="verificar()"/>
-   	</mx:Canvas>
-   	<mx:Canvas x="442" y="235" width="220" height="159" borderStyle="solid">
-   	   	<mx:CheckBox id="p3" x="10" y="10" label="General" selected="true" change="verificar()"/>
-   	   	<mx:CheckBox id="p4" x="10" y="40" label="Agentes Externos" change="verificar()"/>
-   	   	<mx:CheckBox id="p5" x="10" y="70" label="Personal" change="verificar()"/>
-   	   	<mx:CheckBox id="p6" x="10" y="100" label="Mantenciones" change="verificar()"/>
-   	   	<mx:CheckBox id="p7" x="10" y="130" label="Plan de Mantencion" change="verificar()"/>
-   	</mx:Canvas>
-   	<mx:Button x="510" y="428" label="Guardar" id="guardar_btn" enabled="false" click="guardar()"/>
-   	<mx:Button x="590" y="428" label="Atras" width="72" click="atras()"/>
+   	<mx:TextInput x="164" y="153" id="username" maxChars="50" change="verificar()"/>
+   	<mx:TextInput x="164" y="179" id="password" maxChars="50" change="verificar()"/>
+   	<mx:Button x="613" y="428" label="Guardar" id="guardar_btn" enabled="false" click="guardar()"/>
+   	<mx:Button x="693" y="428" label="Atras" width="72" click="atras()"/>
+   	<mx:DataGrid x="164" y="209" dataProvider="{menus_ac}" id="tabla" width="601" height="217" click="actualizarXX()">
+   	   	<mx:columns>
+   	   		<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingLeft="2" textAlign="center" sortable="false">
+   	   		<mx:itemRenderer>
+   	   			<mx:Component>
+   	   				<mx:CheckBox click="{data.ok=!data.ok;}" selected="{data.ok}"/>
+   	   			</mx:Component>
+   	   		</mx:itemRenderer>
+   	   		</mx:DataGridColumn>
+   	   	<mx:DataGridColumn headerText="Menu" dataField="menu" width="200" sortable="false"/>
+   	   	   	<mx:DataGridColumn headerText="Sub-Menu" dataField="opcion" sortable="false"/>
+   	   	</mx:columns>
+   	</mx:DataGrid>
    	
 </mx:Canvas>

@@ -27,7 +27,7 @@
 				var niveles:Array = privilegio.split('');
 				var index:int = 0;
 
-				if(niveles[index]=='2')//ocupa 6 bit
+				if(niveles[index]=='1')//ocupa 6 bit
 				{
 					var menuEstadoResultado:MenuEstadoResultado = new MenuEstadoResultado();
 					menuEstadoResultado.privilegios(niveles,index+1);
@@ -35,7 +35,7 @@
 					accordion.addChild(menuEstadoResultado);
 				}
 				index+=MenuEstadoResultado.bits;
-				if(niveles[index]=='2')//ocupa 4 bit
+				if(niveles[index]=='1')//ocupa 4 bit
 				{
 					var menuAmarre:MenuAmarre = new MenuAmarre();
 					menuAmarre.privilegios(niveles,index+1);
@@ -43,7 +43,7 @@
 					accordion.addChild(menuAmarre);
 				}
 				index+=MenuAmarre.bits;
-				if(niveles[index]=='2')//ocupa 3 bit
+				if(niveles[index]=='1')//ocupa 3 bit
 				{
 					var menuGeneral:MenuGerenal = new MenuGerenal();
 					menuGeneral.privilegios(niveles,index+1);
@@ -51,7 +51,7 @@
 					accordion.addChild(menuGeneral);
 				}
 				index+=MenuGerenal.bits;
-				if(niveles[index]=='2')//ocupa 4 bit
+				if(niveles[index]=='1')//ocupa 4 bit
 				{
 					var menuAgentesExternos:MenuAgentesExternos = new MenuAgentesExternos();
 					menuAgentesExternos.privilegios(niveles,index+1);
@@ -59,7 +59,7 @@
 					accordion.addChild(menuAgentesExternos);
 				}
 				index+=MenuAgentesExternos.bits;
-				if(niveles[index]=='2')//ocupa 3 bit
+				if(niveles[index]=='1')//ocupa 3 bit
 				{
 					var menuPersonal:MenuPersonal = new MenuPersonal();
 					menuPersonal.privilegios(niveles,index+1);
@@ -67,7 +67,7 @@
 					accordion.addChild(menuPersonal);
 				}
 				index+=MenuPersonal.bits;
-				if(niveles[index]=='2')//ocupa 4 bit
+				if(niveles[index]=='1')//ocupa 4 bit
 				{
 					var menuMantencion:MenuMantenciones = new MenuMantenciones();
 					menuMantencion.privilegios(niveles,index+1);
@@ -75,7 +75,7 @@
 					accordion.addChild(menuMantencion);
 				}
 				index+=MenuMantenciones.bits;
-				if(niveles[index]=='2')//ocupa 5 bit
+				if(niveles[index]=='1')//ocupa 5 bit
 				{
 					var menuPlan:MenuPlanMantencion = new MenuPlanMantencion();
 					menuPlan.privilegios(niveles,index+1);
@@ -83,7 +83,7 @@
 					accordion.addChild(menuPlan);
 				}
 				index+=MenuPlanMantencion.bits;
-				if(niveles[index]=='2')//ocupa 6 bit
+				if(niveles[index]=='1')//ocupa 6 bit
 				{
 					var menuVentas:MenuVentas = new MenuVentas();
 					menuVentas.privilegios(niveles,index+1);
@@ -91,7 +91,7 @@
 					accordion.addChild(menuVentas);
 				}
 				index+=MenuVentas.bits;
-				if(niveles[index]=='2')//ocupa 7 bit
+				if(niveles[index]=='1')//ocupa 7 bit
 				{
 					var menuLocales:MenuLocales = new MenuLocales();
 					menuLocales.privilegios(niveles,index+1);
@@ -99,7 +99,7 @@
 					accordion.addChild(menuLocales);
 				}
 				index+=MenuLocales.bits;
-				if(niveles[index]=='2')//ocupa 5 bit
+				if(niveles[index]=='1')//ocupa 5 bit
 				{
 					var menuConfigurarEvaluacion:MenuConfigurarEvaluacion = new MenuConfigurarEvaluacion();
 					menuConfigurarEvaluacion.privilegios(niveles,index+1);
@@ -107,7 +107,7 @@
 					accordion.addChild(menuConfigurarEvaluacion);
 				}
 				index+=MenuConfigurarEvaluacion.bits;
-				if(niveles[index]=='2')//ocupa 3 bit
+				if(niveles[index]=='1')//ocupa 3 bit
 				{
 					var menuEvaluacion:MenuEvaluacion = new MenuEvaluacion();
 					menuEvaluacion.privilegios(niveles,index+1);
@@ -115,7 +115,7 @@
 					accordion.addChild(menuEvaluacion);
 				}
 				index+=MenuEvaluacion.bits;
-				if(niveles[index]=='2')////ocupa 3 bit
+				if(niveles[index]=='1')////ocupa 3 bit
 				{
 					var menuSistema:MenuSistema = new MenuSistema();
 					menuSistema.privilegios(niveles,index+1);

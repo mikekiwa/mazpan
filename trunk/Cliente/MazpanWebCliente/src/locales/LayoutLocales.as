@@ -69,6 +69,7 @@ package locales
           		pdf.addCell(70, 5,"Tipo Gasto", 1);
 	          	pdf.addCell(50, 5,"Total", 1,0,Align.CENTER);
 	          	pdf.addCell(20, 5,"Unidad", 1);
+	          	pdf.addCell(20, 5,"Fecha", 1);
 	          	pdf.addCell(30, 5,"Observaciones", 1);
 	          	pdf.writeText(5,"\n");
 	          	
@@ -77,6 +78,7 @@ package locales
 	          		pdf.addCell(70, 5,gastos_ac[i].gasto, 1);
 	          		pdf.addCell(50, 5,gastos_ac[i].total, 1,0,Align.RIGHT);
 	          		pdf.addCell(20, 5,gastos_ac[i].unidad, 1);
+	          		pdf.addCell(20, 5,gastos_ac[i].ddmmaaaa, 1);
 	          		pdf.addCell(30, 5,gastos_ac[i].observaciones, 1);
 	          		pdf.writeText(5,"\n");
 	          	}
