@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="775" height="460">
 	
-	<mx:WebService id="UsuarioService" 		wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" 	showBusyCursor="true">
-		<mx:operation name="editUsuario" 	result="editUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'editUsuario')"/>
-		<mx:operation name="getMenus" 	result="getMenusResult(event)" 	fault="ErrorFaultHandler(event, 'getMenus')"/>
+	<mx:WebService id="UsuarioService" wsdl="{index.URL + 'UsuarioService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="editUsuario" result="editUsuarioResult(event)" 	fault="ErrorFaultHandler(event, 'editUsuario')"/>
+		<mx:operation name="getMenus" 	 result="getMenusResult(event)" 	fault="ErrorFaultHandler(event, 'getMenus')"/>
 	</mx:WebService>
 	
 	<mx:Metadata>
@@ -18,7 +18,7 @@
    			import mx.rpc.events.ResultEvent;
    			import mx.rpc.events.FaultEvent;
    			
-   			public static const nombre:String = "AgregarUsuario";
+   			public static const nombre:String = "EditarUsuario";
    			
    			[Bindable]
    			private var personal_ac:Array = new Array();
@@ -70,13 +70,13 @@
 				for(i=0; i<menusAux.length; i++)
 				{
 					var menu:Object = new Object;
-					menu.menu = menus_ac[j];
+					menu.menu = menus_ac[j].menu;
 					menu.opcion = "";
 					misMenux.push(menu);
 					
 					for(; j<menus_ac.length; j++)
 					{
-						if(menus_ac[j].menu==menus_ac[indexMenu])
+						if(menus_ac[j].menu==menus_ac[indexMenu].menu)
 						{
 							misMenux.push(menus_ac[j]);
 						}
@@ -95,28 +95,10 @@
             	{
             		if(i>=misMenux.length) break;
             		
-            		if(aux[i]=='2' || aux[i]=='1') misMenux[i].ok = true;
+            		if(aux[i]=='1') misMenux[i].ok = true;
             	}
-            	menus_ac=menusAux;
-            	/*var index:int = 1;
-            	var indexOpcion:int = 0;
-				for(i=0; i<menusAux.length; i++)
-				{
-					for(j=index; j<aux.length; j++)
-					{
-						if(aux[j]=='3')//es sub-menu
-						{
-							index = j+1;//encontre el siguiente cambio de menu
-							break;
-						}
-						else if(aux[j]=='1')//acceso opcion del submenu
-						{
-							menus_ac[indexOpcion].ok = true;
-						}
-						indexOpcion++;
-					}
-				}*/
-				
+            	menus_ac=misMenux;
+            	
 				tabla.dataProvider = menus_ac;
             }
 			private function editar():void
@@ -164,19 +146,66 @@
 				var count:int=0;
 				for(var i:int=0;i<menus_ac.length; i++)
 				{
-					if(menus_ac[i].ok)count++;
+					if(menus_ac[i].ok) count++;
 				}
+				if(count>0) return true;
 				return false;
 			}
-			private function privilegio():Array
+			private function privilegio():String
 			{
-				var privilegios:Array = new Array;
-				var aux:String = menus_ac[0].menu;
-				var p:String;
+				var privilegios:String = "";
+				var indexMenu:int = 0;
 				
-				
+				for(var i:int=0; i<menus_ac.length; i++)
+				{
+					if(menus_ac[indexMenu].menu!=menus_ac[i].menu)
+					{
+						privilegios += "-";
+						indexMenu = i;
+					}
+					
+					if(menus_ac[i].ok) privilegios += "1";
+					else privilegios += "0";
+				}
 				
 				return privilegios;
+			}
+			public function actualizarXX():void
+			{
+				var i:int=0;
+				if(tabla.selectedItem!=null)
+				{
+					if(tabla.selectedItem.opcion=="")
+					{
+						for(i=tabla.selectedIndex; i<menus_ac.length; i++)
+						{
+							if(menus_ac[i].menu == tabla.selectedItem.menu)
+							{
+								menus_ac[i].ok = tabla.selectedItem.ok;
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+					else
+					{
+						var count:int = 0;
+						var indexMenu:int = 0;
+						for(i=0; i<menus_ac.length; i++)
+						{
+							if(menus_ac[i].menu == tabla.selectedItem.menu)
+							{
+								if(menus_ac[i].opcion == "") indexMenu = i;
+								else if(menus_ac[i].ok) count++;
+							}
+						}
+						if(count>0) menus_ac[indexMenu].ok = true;
+						else menus_ac[indexMenu].ok = false;
+					}
+				}
+				verificar();
 			}
    		]]>
    	</mx:Script>
@@ -196,17 +225,17 @@
    	<mx:Label x="162" y="36" text="{usuario.nombres}" width="579"/>
    	<mx:Label x="162" y="62" text="{usuario.apellidoPaterno}" width="579"/>
    	<mx:Label x="162" y="88" text="{usuario.apellidoMaterno}" width="579"/>
-   	<mx:DataGrid x="162" y="172" dataProvider="{menus_ac}" id="tabla" width="579" height="248">
+   	<mx:DataGrid x="162" y="172" dataProvider="{menus_ac}" id="tabla" width="579" height="248" click="actualizarXX()">
    	   	<mx:columns>
    	   		<mx:DataGridColumn id="colsel" headerText=""  width="20" paddingLeft="2" textAlign="center" sortable="false">
 				<mx:itemRenderer>
 					<mx:Component>
-						<mx:CheckBox click="{data.ok=!data.ok}" selected="{data.ok}"/>
+						<mx:CheckBox click="{data.ok=!data.ok;}" selected="{data.ok}"/>
 					</mx:Component>
 				</mx:itemRenderer>
 			</mx:DataGridColumn>
-			<mx:DataGridColumn headerText="Menu" dataField="menu" width="200"/>
-   	   	   	<mx:DataGridColumn headerText="Privilegio" dataField="opcion"/>
+			<mx:DataGridColumn headerText="Menu" dataField="menu" width="200" sortable="false"/>
+   	   	   	<mx:DataGridColumn headerText="Sub-Menu" dataField="opcion" sortable="false"/>
    	   	</mx:columns>
    	</mx:DataGrid>
 </mx:Canvas>

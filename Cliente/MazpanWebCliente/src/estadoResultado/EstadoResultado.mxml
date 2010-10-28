@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" title="Estado de Resultado" width="940" height="400" 
 	backgroundColor="#cccccc" creationComplete="init()" xmlns:estadoResultado="estadoResultado.*">
+	<mx:states>
+		<mx:State name="CargandoState">
+			<mx:AddChild position="lastChild">
+				<mx:Canvas x="236" y="104" width="437" height="51" backgroundColor="#FEFDFD" borderStyle="solid">
+					<mx:ProgressBar id="pbar" labelPlacement="bottom" minimum="0" visible="true" maximum="100" label="Cargando 0%" 
+					             direction="right" mode="manual" width="417" y="10" x="10"/>
+				</mx:Canvas>
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
 
-	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true" requestTimeout="60">
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getItems" 		result="getItemsResult(event)"			fault="ErrorFaultHandler(event, 'getItems')"/>
 		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
 		<mx:operation name="getSucursales" 	result="getSucursalesResult(event)"		fault="ErrorFaultHandler(event, 'getSucursales')"/>
 	</mx:WebService>
 	
-	<mx:WebService id="EstadoResultadoService" 	wsdl="{index.URL + 'EstadoResultadoService.asmx?WSDL'}" showBusyCursor="true" requestTimeout="60">
+	<mx:WebService id="EstadoResultadoService" 	wsdl="{index.URL + 'EstadoResultadoService.asmx?WSDL'}" showBusyCursor="true">
 		<mx:operation name="getFlujo" 		result="getFlujoResult(event)"			fault="ErrorFaultHandler(event, 'getFlujo')"/>
 	</mx:WebService>
 	
@@ -121,6 +131,12 @@
             	cargar_btn.enabled = true;
             	cargar_btn.label = "Cargar";
             	balanceCargado = false;
+            	if(pbar!=null)
+            	{
+	            	pbar.setProgress(0, 12);
+	                pbar.label = "Cargando: 0%";
+            	}
+            	currentState = '';
             }
             public function cargar():void
             {
@@ -137,6 +153,10 @@
             	obtenerFlujos(sucursales_ac[sucursales_cb.selectedIndex].Code,ano_var,1);
             	cargar_btn.label='Recargar';
             	actualizarCombos();
+            	
+            	currentState = 'CargandoState';
+            	pbar.setProgress(0, 12);
+                pbar.label = "Cargando: 0%";
             }
             private var flujoEne:Array;
             private var flujoFeb:Array;
@@ -166,33 +186,37 @@
             	
             private function getFlujoResult(event:ResultEvent):void
             {
-            	if(event.result.MESNUMERO==1)flujoEne = event.result.FLUJOENE.source as Array;// flujoEne=trimSucursal(flujoEne);
-            	if(event.result.MESNUMERO==2)flujoFeb = event.result.FLUJOFEB.source as Array;// flujoFeb=trimSucursal(flujoFeb);
-            	if(event.result.MESNUMERO==3)flujoMar = event.result.FLUJOMAR.source as Array;// flujoMar=trimSucursal(flujoMar);
-            	if(event.result.MESNUMERO==4)flujoAbr = event.result.FLUJOABR.source as Array;// flujoAbr=trimSucursal(flujoAbr);
-            	if(event.result.MESNUMERO==5)flujoMay = event.result.FLUJOMAY.source as Array;// flujoMay=trimSucursal(flujoMay);
-            	if(event.result.MESNUMERO==6)flujoJun = event.result.FLUJOJUN.source as Array;// flujoJun=trimSucursal(flujoJun);
-            	if(event.result.MESNUMERO==7)flujoJul = event.result.FLUJOJUL.source as Array;// flujoJul=trimSucursal(flujoJul);
-            	if(event.result.MESNUMERO==8)flujoAgo = event.result.FLUJOAGO.source as Array;// flujoAgo=trimSucursal(flujoAgo);
-            	if(event.result.MESNUMERO==9)flujoSep = event.result.FLUJOSEP.source as Array;// flujoSep=trimSucursal(flujoSep);
-            	if(event.result.MESNUMERO==10)flujoOct = event.result.FLUJOOCT.source as Array;// flujoOct=trimSucursal(flujoOct);
-            	if(event.result.MESNUMERO==11)flujoNov = event.result.FLUJONOV.source as Array;// flujoNov=trimSucursal(flujoNov);
-            	if(event.result.MESNUMERO==12)flujoDic = event.result.FLUJODIC.source as Array;// flujoDic=trimSucursal(flujoDic);
+            	var MESNUMERO:Number = event.result.MESNUMERO as Number;
+            	if(MESNUMERO==1)flujoEne = event.result.FLUJOENE.source as Array;// flujoEne=trimSucursal(flujoEne);
+            	if(MESNUMERO==2)flujoFeb = event.result.FLUJOFEB.source as Array;// flujoFeb=trimSucursal(flujoFeb);
+            	if(MESNUMERO==3)flujoMar = event.result.FLUJOMAR.source as Array;// flujoMar=trimSucursal(flujoMar);
+            	if(MESNUMERO==4)flujoAbr = event.result.FLUJOABR.source as Array;// flujoAbr=trimSucursal(flujoAbr);
+            	if(MESNUMERO==5)flujoMay = event.result.FLUJOMAY.source as Array;// flujoMay=trimSucursal(flujoMay);
+            	if(MESNUMERO==6)flujoJun = event.result.FLUJOJUN.source as Array;// flujoJun=trimSucursal(flujoJun);
+            	if(MESNUMERO==7)flujoJul = event.result.FLUJOJUL.source as Array;// flujoJul=trimSucursal(flujoJul);
+            	if(MESNUMERO==8)flujoAgo = event.result.FLUJOAGO.source as Array;// flujoAgo=trimSucursal(flujoAgo);
+            	if(MESNUMERO==9)flujoSep = event.result.FLUJOSEP.source as Array;// flujoSep=trimSucursal(flujoSep);
+            	if(MESNUMERO==10)flujoOct = event.result.FLUJOOCT.source as Array;// flujoOct=trimSucursal(flujoOct);
+            	if(MESNUMERO==11)flujoNov = event.result.FLUJONOV.source as Array;// flujoNov=trimSucursal(flujoNov);
+            	if(MESNUMERO==12)flujoDic = event.result.FLUJODIC.source as Array;// flujoDic=trimSucursal(flujoDic);
             	
-            	if(event.result.MESNUMERO==1)pptoEne = event.result.PPTOENE.Tables.PresupuestoMensual.Rows.source as Array;// pptoEne=trimSucursal(pptoEne);
-            	if(event.result.MESNUMERO==2)pptoFeb = event.result.PPTOFEB.Tables.PresupuestoMensual.Rows.source as Array;// pptoFeb=trimSucursal(pptoFeb);
-            	if(event.result.MESNUMERO==3)pptoMar = event.result.PPTOMAR.Tables.PresupuestoMensual.Rows.source as Array;// pptoMar=trimSucursal(pptoMar);
-            	if(event.result.MESNUMERO==4)pptoAbr = event.result.PPTOABR.Tables.PresupuestoMensual.Rows.source as Array;// pptoAbr=trimSucursal(pptoAbr);
-            	if(event.result.MESNUMERO==5)pptoMay = event.result.PPTOMAY.Tables.PresupuestoMensual.Rows.source as Array;// pptoMay=trimSucursal(pptoMay);
-            	if(event.result.MESNUMERO==6)pptoJun = event.result.PPTOJUN.Tables.PresupuestoMensual.Rows.source as Array;// pptoJun=trimSucursal(pptoJun);
-            	if(event.result.MESNUMERO==7)pptoJul = event.result.PPTOJUL.Tables.PresupuestoMensual.Rows.source as Array;// pptoJul=trimSucursal(pptoJul);
-            	if(event.result.MESNUMERO==8)pptoAgo = event.result.PPTOAGO.Tables.PresupuestoMensual.Rows.source as Array;// pptoAgo=trimSucursal(pptoAgo);
-            	if(event.result.MESNUMERO==9)pptoSep = event.result.PPTOSEP.Tables.PresupuestoMensual.Rows.source as Array;// pptoSep=trimSucursal(pptoSep);
-            	if(event.result.MESNUMERO==10)pptoOct = event.result.PPTOOCT.Tables.PresupuestoMensual.Rows.source as Array;// pptoOct=trimSucursal(pptoOct);
-            	if(event.result.MESNUMERO==11)pptoNov = event.result.PPTONOV.Tables.PresupuestoMensual.Rows.source as Array;// pptoNov=trimSucursal(pptoNov);
-            	if(event.result.MESNUMERO==12)pptoDic = event.result.PPTODIC.Tables.PresupuestoMensual.Rows.source as Array;// pptoDic=trimSucursal(pptoDic);
+            	if(MESNUMERO==1)pptoEne = event.result.PPTOENE.Tables.PresupuestoMensual.Rows.source as Array;// pptoEne=trimSucursal(pptoEne);
+            	if(MESNUMERO==2)pptoFeb = event.result.PPTOFEB.Tables.PresupuestoMensual.Rows.source as Array;// pptoFeb=trimSucursal(pptoFeb);
+            	if(MESNUMERO==3)pptoMar = event.result.PPTOMAR.Tables.PresupuestoMensual.Rows.source as Array;// pptoMar=trimSucursal(pptoMar);
+            	if(MESNUMERO==4)pptoAbr = event.result.PPTOABR.Tables.PresupuestoMensual.Rows.source as Array;// pptoAbr=trimSucursal(pptoAbr);
+            	if(MESNUMERO==5)pptoMay = event.result.PPTOMAY.Tables.PresupuestoMensual.Rows.source as Array;// pptoMay=trimSucursal(pptoMay);
+            	if(MESNUMERO==6)pptoJun = event.result.PPTOJUN.Tables.PresupuestoMensual.Rows.source as Array;// pptoJun=trimSucursal(pptoJun);
+            	if(MESNUMERO==7)pptoJul = event.result.PPTOJUL.Tables.PresupuestoMensual.Rows.source as Array;// pptoJul=trimSucursal(pptoJul);
+            	if(MESNUMERO==8)pptoAgo = event.result.PPTOAGO.Tables.PresupuestoMensual.Rows.source as Array;// pptoAgo=trimSucursal(pptoAgo);
+            	if(MESNUMERO==9)pptoSep = event.result.PPTOSEP.Tables.PresupuestoMensual.Rows.source as Array;// pptoSep=trimSucursal(pptoSep);
+            	if(MESNUMERO==10)pptoOct = event.result.PPTOOCT.Tables.PresupuestoMensual.Rows.source as Array;// pptoOct=trimSucursal(pptoOct);
+            	if(MESNUMERO==11)pptoNov = event.result.PPTONOV.Tables.PresupuestoMensual.Rows.source as Array;// pptoNov=trimSucursal(pptoNov);
+            	if(MESNUMERO==12)pptoDic = event.result.PPTODIC.Tables.PresupuestoMensual.Rows.source as Array;// pptoDic=trimSucursal(pptoDic);
             	
-            	if(event.result.MESNUMERO==12)
+            	pbar.setProgress(MESNUMERO, 12);
+                pbar.label = "Cargando: " + int(MESNUMERO*100/12) + "%";
+            	
+            	if(MESNUMERO==12)
             	{
 	            	var i:int;
 	            	var j:int;
@@ -402,6 +426,7 @@
 	        		cargarOtros = true;
 	        		meses_cb.enabled = true;
 	        		sucursales_cb.enabled = true;
+	        		currentState = '';
             	}
             	else
             	{
@@ -430,7 +455,7 @@
 				if(sucursales_cb.selectedIndex==0) 
 				{
 					//pdf.generarTabla3
-					pdf.generarTabla3(items,img,ano_var.toString(),"Estado de Resultado Consolidado", 				sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
+					pdf.generarTabla3(items,img,ano_var.toString(),"Estado de Resultado Zonas-Panaderías Consolidado", 				sucursales_ac[sucursales_cb.selectedIndex].Name,mes_seleccionado);
 				}
 				else 
 				{

@@ -263,6 +263,7 @@
 					<mx:DataGridColumn headerText="Gasto" dataField="gasto" width="120"  sortable="false"/>
 					<mx:DataGridColumn headerText="Total" dataField="total" width="120" sortable="false"/>
 					<mx:DataGridColumn headerText="Unidad" dataField="unidad" width="100" sortable="false"/>
+					<mx:DataGridColumn headerText="Fecha" dataField="ddmmaaaa" width="100" sortable="false"/>
 					<mx:DataGridColumn headerText="Observaciones" dataField="observaciones" sortable="false"/>
 				</mx:columns>
 			</mx:DataGrid>

@@ -21,6 +21,7 @@ package estadoResultado
 		private var pdf:PDF;
 		private var formato:NumberFormatter = new NumberFormatter();
 		private var titulo_var:String = "Estado de Resultado Consolidado";
+		private var titulo2_var:String = "Estado de Resultado";
 		
 		public function FORMATO4()
 		{
@@ -211,7 +212,8 @@ package estadoResultado
 			pdf.setFontSize(15);
 			pdf.addImage(img,null,0,0);
 			pdf.addCell(53,1);//espacio para la imagen
-			pdf.addCell(147,10,titulo_var,0,0,Align.CENTER);
+			if(sucursal=="Zonas" || sucursal=="Panaderías") pdf.addCell(147,10,titulo_var,0,0,Align.CENTER);
+			else pdf.addCell(147,10,titulo2_var,0,0,Align.CENTER);
 			pdf.writeText(5,"\n");
 			pdf.addCell(53,1);//espacio para la imagen
 			pdf.addCell(147, 10,titulo,0,0,Align.CENTER);
@@ -440,7 +442,7 @@ package estadoResultado
 		}
 		private function addTotalGastosAdministrativosYVentas(nombre:String,arreglo:Array,meses:int,escala:int=1,porcentaje:Boolean=false):void
 		{
-			var m0:Number = getAcumulado(arreglo,meses,ITEMS.TOTALGASTOSADMINISTRATIVOS);
+			var m0:Number = getAcumulado(arreglo,meses,ITEMS.TOTALGASTOSADMINISTRATIVOS)-getAcumulado(arreglo,meses,ITEMS.DEPRECIACIONES);
 			var m0String:String = '-';
 				
 			var m1:String='-';
@@ -569,7 +571,16 @@ package estadoResultado
 		}
 		private function addTotalMargenOperacionalBruto(nombre:String,arreglo:Array,meses:int,escala:int=1,porcentaje:Boolean=false):void
 		{
-			var m0:Number = getAcumulado(arreglo,meses,ITEMS.MARGENCOMERCIAL);
+			/**
+			 * NOTA: Cambio para actualizar la primera columna (acumulado de meses no visibles), del informe final.
+			 * 
+			 * Esto es lo que se cambio:
+			 * Se supone que me faltaba restarle los gastos ya que este item es un valor que no tenia calculado en el arreglo original
+			 * y para los otros datos funciona porque solo se necesita hacer la suma de los items de esa categoria, en este caso,
+			 * en este caso no aplica lo anterior, porque tengo que sumar dos subtotales para generar la categoria. 
+			 * */
+			var m0:Number = getAcumulado(arreglo,meses,ITEMS.MARGENCOMERCIAL)+getAcumulado(arreglo,meses,ITEMS.TOTALGASTOSADMINISTRATIVOS)-getAcumulado(arreglo,meses,ITEMS.DEPRECIACIONES);
+			
 			var m0String:String = '-';
 				
 			var m1:String='-';
