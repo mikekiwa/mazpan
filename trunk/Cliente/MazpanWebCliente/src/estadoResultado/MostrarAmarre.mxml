@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="850" height="500"
+	title="Detalle de Amarre de Cuentas" backgroundColor="#cccccc">
+	
+	<mx:WebService id="DetalleService" wsdl="{index.URL + 'DetalleService.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="detalle" 		result="detalleResult(event)"		fault="ErrorFaultHandler(event, 'detalle')"/>
+	</mx:WebService>
+	
+	<mx:WebService id="Service" 	wsdl="{index.URL + 'Service.asmx?WSDL'}" showBusyCursor="true">
+		<mx:operation name="getItems" 		result="getItemsResult(event)"		fault="ErrorFaultHandler(event, 'getItems')"/>
+		<mx:operation name="getSucursales" 	result="getSucursalesResult(event)"	fault="ErrorFaultHandler(event, 'getSucursales')"/>
+	</mx:WebService>
+	
+	<mx:Metadata>
+		[Event(name="complexClick",type="eventos.ComplexEvent")]
+	</mx:Metadata>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.collections.ArrayCollection;
+			import eventos.ComplexEvent;
+			
+			public static const nombre:String = "MostrarAmarre";//correspondiente al estado en que se debiera colocar
+			
+			[Bindable]
+			private var detalle_ac:Array;
+			[Bindable]
+			private var itemsCombo:Array;
+			[Bindable]
+			private var sucursales_ac:Array =  new Array();
+			[Bindable]
+			private var nombreSucursales_ac:Array = new Array();
+			
+			private var items:Array;
+			
+			private function ErrorFaultHandler(event:FaultEvent, metodo:String):void
+            {
+            	trace("Error en clase "+nombre+".mxml en metodo " + metodo + "\nDetalle: "+event.fault.faultString);
+            }
+			public function init():void
+			{
+				Service.getSucursales();
+            }
+            private function getSucursalesResult(event:ResultEvent):void
+            {
+            	sucursales_ac = event.result.Tables.Sucursales.Rows.source as Array;
+            	sucursales_cb.selectedIndex = 0;
+            	sucursales_cb.enabled = true;
+            	Service.getItems();
+            }
+			private function getItemsResult(event:ResultEvent):void
+            {
+            	items = event.result.Tables.Items.Rows.source as Array;
+            	
+            	itemsCombo = new ITEMS(items).getItemsObjetoContables();
+				if(items_cb!=null) items_cb.selectedIndex=0;
+            }
+			private function detalleResult(event:ResultEvent):void
+            {
+            	detalle_ac = event.result.Tables.Detalle.Rows.source as Array;
+            	var aux:int = 0;
+            	for(var i:int=0; i<detalle_ac.length; i++)
+            	{
+            		var j:int = detalle_ac[i].Column1;
+            		aux += j;
+            	}
+            }
+           
+           	private function limpiarDetalle():void
+            {
+            	detalle_ac = new Array();
+			}
+			private function cambiarDetalle():void
+            {
+            	limpiarDetalle();
+	           	DetalleService.detalle(sucursales_ac[sucursales_cb.selectedIndex].Code,items_cb.selectedItem.id);
+            }
+		]]>
+	</mx:Script>
+	
+	<mx:HBox id="hbox">
+		<mx:Label x="0" y="12" text="Sucursal:"/>
+		<mx:ComboBox dataProvider="{sucursales_ac}" labelField="ShortName" change="limpiarDetalle()" id="sucursales_cb"  selectedIndex="0"/>
+		<mx:ComboBox id="items_cb" dataProvider="{itemsCombo}" labelField="itemName" change="limpiarDetalle()" selectedIndex="0"/>
+		<mx:Button label="Cargar" click="cambiarDetalle()"/>
+	</mx:HBox>
+	<mx:DataGrid id="tabla" dataProvider="{detalle_ac}" x="0" y="30" width="100%" height="415">
+		<mx:columns>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_0" 	width="60" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_1" 	width="30" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_2" 	width="35" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_3" 	width="30" 	sortable="false"/>
+			<mx:DataGridColumn headerText="" 			dataField="Segment_4" 	width="35" 	sortable="false"/>
+			<mx:DataGridColumn headerText="Cuenta" 		dataField="AcctName" 	width="590" sortable="false"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:Panel>
