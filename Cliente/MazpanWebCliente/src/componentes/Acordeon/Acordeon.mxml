@@ -35,7 +35,7 @@
 					accordion.addChild(menuEstadoResultado);
 				}
 				index+=MenuEstadoResultado.bits;
-				if(niveles[index]=='1')//ocupa 4 bit
+				if(niveles[index]=='1')//ocupa 5 bit
 				{
 					var menuAmarre:MenuAmarre = new MenuAmarre();
 					menuAmarre.privilegios(niveles,index+1);
