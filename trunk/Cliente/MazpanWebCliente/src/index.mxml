@@ -274,6 +274,12 @@
 				<ns7:DuracionTurno id="duracionTurno_cmp"/>
 			</mx:AddChild>
 		</mx:State>
+		<mx:State name="MostrarAmarre">
+			<mx:RemoveChild target="{login}"/>
+			<mx:AddChild relativeTo="{hbox1}" position="lastChild">
+				<ns11:MostrarAmarre id="mostrarAmarre_cmp"/>
+			</mx:AddChild>
+		</mx:State>
 	</mx:states>
 
 	<mx:Script>
@@ -382,6 +388,7 @@
 					if(event.stateDestination == Solicitudes.nombre) solicitudes_cmp.init();
 					if(event.stateDestination == DuracionTurno.nombre) duracionTurno_cmp.init();
 					if(event.stateOrigin == CambiarPassword.nombre) cerrar();
+					if(event.stateDestination == MostrarAmarre.nombre) mostrarAmarre_cmp.init();
 				}
 				else
 				{
@@ -432,5 +439,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 44.28.10.10"/>
+	<mx:Label x="525" y="10" text="Versión 45.11.11.10"/>
 </mx:Application>
