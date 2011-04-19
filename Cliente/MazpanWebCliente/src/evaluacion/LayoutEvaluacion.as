@@ -1,5 +1,7 @@
 package evaluacion
 {
+	import misClases.Constantes;
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.CheckBox;
 	
@@ -106,7 +108,7 @@ package evaluacion
       		grid.columns=columnas;
       	   	pdf.addGrid(grid, 0, 0, true);
 			
-			pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Evaluacion-"+_trabajador.CardCode+".pdf");
+			pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "Evaluacion-"+_trabajador.CardCode+".pdf");
 		}
 		public function mostrar(local:String,nTrabajador:String,cTrabajador:String,evaluaciones:Array,categorias:Array,fecha:String,resumenEvaluacion:Array,index:int,meses:ArrayCollection):void
 		{
@@ -179,7 +181,7 @@ package evaluacion
       		grid.columns=columnas;
       	   	pdf.addGrid(grid, 0, 0, true);
 			
-			pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Evaluacion-"+cTrabajador+".pdf");
+			pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "Evaluacion-"+cTrabajador+".pdf");
 		}
 	}
 }

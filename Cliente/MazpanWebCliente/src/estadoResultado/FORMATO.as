@@ -4,8 +4,9 @@ package estadoResultado
 	
 	import flash.display.DisplayObject;
 	
+	import misClases.Constantes;
+	
 	import mx.collections.ArrayCollection;
-	import mx.controls.Alert;
 	import mx.formatters.NumberFormatter;
 	
 	import org.alivepdf.colors.RGBColor;
@@ -43,8 +44,7 @@ package estadoResultado
 			pdf.addText(sucursal, 110,30);
 			pdf.addImage(grafico,null,10,30,250,160);
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "Grafico.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"Grafico.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "Grafico.pdf");
 		}
 		
 		public function generarTabla(arreglo:Array,tabla:DisplayObject, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
@@ -138,8 +138,7 @@ package estadoResultado
 			}
 			
 			
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER1.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER1.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "ER1.pdf");
 		}
 		
 		private function removeFormatting(e:String):String
@@ -601,8 +600,7 @@ package estadoResultado
 				}
 			}
 			
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER2.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"ER2.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "ER2.pdf");
 		}
 
 		public function actividades(array:ArrayCollection, fecha:String):void
@@ -637,8 +635,7 @@ package estadoResultado
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 0, true);
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "actividades.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "actividades.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "actividades.pdf");
 		}
 		private function to20(codigo:String):String
 		{
@@ -674,8 +671,7 @@ package estadoResultado
           	pdf.setFontSize(10);
           	pdf.addGrid(grid, 0, 18, false);
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "solicitudes.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline',"solicitudes.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "solicitudes.pdf");
 		}
 		public function vistaComponente(componente:Object):void
 		{
@@ -748,8 +744,7 @@ package estadoResultado
           		pdf.addGrid(manten);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosComponente.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosComponente.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "DatosComponente.pdf");
 		}
 		public function vistaMaquina(maquina:Object):void
 		{
@@ -840,8 +835,7 @@ package estadoResultado
           		pdf.addGrid(union);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosMaquina.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosMaquina.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "DatosMaquina.pdf");
 		}
 		public function vistaLinea(linea:Object):void
 		{
@@ -900,8 +894,7 @@ package estadoResultado
           		pdf.addGrid(union);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosLinea.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "DatosLinea.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "DatosLinea.pdf");
 		}
 	}
 }

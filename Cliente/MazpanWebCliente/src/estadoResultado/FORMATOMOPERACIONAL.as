@@ -1,5 +1,7 @@
 package estadoResultado
 {
+	import misClases.Constantes;
+	
 	import org.alivepdf.colors.RGBColor;
 	import org.alivepdf.layout.Align;
 	import org.alivepdf.layout.Orientation;
@@ -92,7 +94,7 @@ package estadoResultado
 			pdf.writeText(1,"\n");
 			pdf.addCell(30,4,"");
 			pdf.addCell(140,0.3,"",1);
-			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "DatosLinea.pdf");	
+			pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "DatosLinea.pdf");	
 		}
 
 	}

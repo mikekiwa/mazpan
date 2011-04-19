@@ -1,5 +1,7 @@
 package componentes.planMantencion
 {
+	import misClases.Constantes;
+	
 	import org.alivepdf.colors.RGBColor;
 	import org.alivepdf.data.Grid;
 	import org.alivepdf.data.GridColumn;
@@ -42,7 +44,7 @@ package componentes.planMantencion
 			
           	pdf.addGrid(grid, 0, 0, true);
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "FallasReportadas.pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "FallasReportadas.pdf");
 		}
 		public function generarReparaciones(reparaciones:Array, mes:String, año:String):void
 		{
@@ -71,7 +73,7 @@ package componentes.planMantencion
           	
           	pdf.addGrid(grid, 0, 0, true);
           	
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "Reparaciones"+mes+año+".pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "Reparaciones"+mes+año+".pdf");
 		
 		}
 	}

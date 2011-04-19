@@ -2,6 +2,8 @@ package estadoResultado
 {
 	import flash.display.DisplayObject;
 	
+	import misClases.Constantes;
+	
 	import mx.formatters.NumberFormatter;
 	
 	import org.alivepdf.colors.RGBColor;
@@ -184,8 +186,7 @@ package estadoResultado
 			addTotal(arreglo,ITEMS.RESULTADO,meses);
 			addLineaTotal();
 			
-			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER3-1.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "ER3-1.pdf");
+			pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "ER3-1.pdf");
 		}
 		
 		public function generarTabla4(arreglo:Array, img:DisplayObject, ano:String, titulo:String, sucursal:String, meses:int):void
@@ -381,8 +382,7 @@ package estadoResultado
 			addTotalMargenOperacionalBruto("MARGEN OPERACIONAL BRUTO",arreglo,meses,2,true);
 			addLineaTotal(1,2);
 			
-			pdf.save(Method.REMOTE, "http://192.168.3.117/create.php", 'inline', "ER3-2.pdf");
-			//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php", 'inline', "ER3-2.pdf");
+			pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "ER3-2.pdf");
 		}
 		
 		private function getVentas(arreglo:Array,meses:int):Array
