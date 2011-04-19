@@ -308,8 +308,8 @@
 			
 			[Bindable]
 			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			public static var URL:String = "http://192.168.3.117/Server/";  		   	//cliente Local
-			//public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
+			//public static var URL:String = "http://192.168.3.101/Server/";  		   	//cliente Local
+			public static var URL:String = "http://200.68.44.234/Server/";  			//cliente Web
 			
 			[Bindable]
 			public static var meses:ArrayCollection = new ArrayCollection(["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]);
@@ -439,5 +439,5 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 45.11.11.10"/>
+	<mx:Label x="525" y="10" text="Versión 46.19.04.11"/>
 </mx:Application>

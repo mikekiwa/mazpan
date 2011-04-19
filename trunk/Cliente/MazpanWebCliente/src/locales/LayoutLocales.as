@@ -1,6 +1,8 @@
 package locales
 {
 	
+	import misClases.Constantes;
+	
 	import mx.formatters.NumberFormatter;
 	
 	import org.alivepdf.colors.RGBColor;
@@ -238,8 +240,7 @@ package locales
           		pdf.setFontSize(8);
           	}
           	
-          	pdf.save(Method.REMOTE, "http://192.168.3.117/create.php",'inline', "Informe"+fecha+".pdf");
-          	//pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Informe"+fecha+".pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "Informe"+fecha+".pdf");
           	
 		}
 	}

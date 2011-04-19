@@ -1,5 +1,7 @@
 package gastosVentas
 {
+	import misClases.Constantes;
+	
 	import org.alivepdf.colors.RGBColor;
 	import org.alivepdf.data.Grid;
 	import org.alivepdf.data.GridColumn;
@@ -78,7 +80,7 @@ package gastosVentas
           	 		}
           	 	}
           	}
-          	pdf.save(Method.REMOTE, "http://propiedadesmartinez.cl/create.php",'inline', "Ventas"+mes+ano+".pdf");
+          	pdf.save(Method.REMOTE, Constantes.createPhp, 'inline', "Ventas"+mes+ano+".pdf");
 		}
 	}
 }
