@@ -59,15 +59,18 @@
 		]]>
 	</mx:Script>
 	
-	<mx:Panel x="0" y="166" width="400" height="200" layout="absolute" title="Ingresar">
-		<mx:Label x="135" y="10" text="Nombre Usuario"/>
-		<mx:TextInput x="135" y="36" width="235" id="username_ti"/>
-		<mx:Label x="135" y="70" text="Contraseña"/>
-		<mx:TextInput x="135" y="96" width="235" displayAsPassword="true" id="password_ti"/>
-		<mx:Button x="215" y="128" label="Aceptar" id="aceptar_btn" click="click()"/>
-		<mx:Button x="295" y="128" label="Cancelar" id="cancelar_btn"/>
-		<mx:Image x="8" y="16" width="117" height="124" source="iconos/user.png" tabEnabled="false"/>
-	</mx:Panel>
+	<mx:VBox horizontalAlign="center">
+		<mx:Image width="200" height="160" source="@Embed('iconos/logo.swf')"/>
+		
+		<mx:Panel width="400" height="200" layout="absolute" title="Ingresar">
+			<mx:Label x="135" y="10" text="Nombre Usuario"/>
+			<mx:TextInput x="135" y="36" width="235" id="username_ti"/>
+			<mx:Label x="135" y="70" text="Contraseña"/>
+			<mx:TextInput x="135" y="96" width="235" displayAsPassword="true" id="password_ti"/>
+			<mx:Button x="215" y="128" label="Aceptar" id="aceptar_btn" click="click()"/>
+			<mx:Button x="295" y="128" label="Cancelar" id="cancelar_btn"/>
+			<mx:Image x="8" y="16" width="117" height="124" source="iconos/user.png" tabEnabled="false"/>
+		</mx:Panel>
+	</mx:VBox>
 	
-	<mx:Image x="100" y="3" width="200" height="160" source="iconos/logo.swf"/>
 </mx:Canvas>
