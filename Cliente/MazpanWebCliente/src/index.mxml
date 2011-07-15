@@ -308,7 +308,7 @@
 			
 			[Bindable]
 			//public static var URL:String = "http://localhost:7070/ServerApp/";   		//Visual Studio
-			public static var URL:String = "http://192.168.3.101/Server/";  		   	//Cliente
+			public static var URL:String = "http://192.168.6.2/Server/";  		   		//Cliente
 			//public static var URL:String = "http://200.68.44.234/Server/";  			//ClienteWeb
 		
 			[Bindable]
@@ -439,5 +439,8 @@
 			</mx:HBox>
 		</mx:VBox>
 	</mx:Canvas>
-	<mx:Label x="525" y="10" text="Versión 47.27.04.11"/>
+	
+	<mx:VBox y="10" horizontalAlign="center" width="100%">	
+		<mx:Label text="Versión 48.13.07.11"/>
+	</mx:VBox>
 </mx:Application>
