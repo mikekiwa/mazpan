@@ -17,8 +17,8 @@ using System.Collections.Generic;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class ElementoService : System.Web.Services.WebService
 {
-    private string coneccionString = ConeccionMaspan.coneccionStringSVRMASPAN;
-    private string MAER = ConeccionMaspan.PracticaDb;
+    private string coneccionString = Coneccion.coneccionString;
+    private string MAER = Coneccion.PracticaDbMaspan;
 
     public ElementoService ()
     {

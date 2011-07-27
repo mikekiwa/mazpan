@@ -14,9 +14,9 @@ using System.Data.SqlClient;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class PersonalService : System.Web.Services.WebService
 {
-    private string coneccionString = ConeccionMaspan.coneccionStringSVRMASPAN;
-    private string SAP = ConeccionMaspan.SapDb;
-    private string MAER = ConeccionMaspan.PracticaDb;
+    private string coneccionString = Coneccion.coneccionString;
+    private string SAP = Coneccion.SapDbMaspan;
+    private string MAER = Coneccion.PracticaDbMaspan;
 
     public PersonalService ()
     { 
