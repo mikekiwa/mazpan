@@ -12,9 +12,9 @@ using System.Collections.Generic;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class Service : System.Web.Services.WebService
 {
-    private string url = ConeccionMaspan.coneccionStringSVRMASPAN;
-    private string SAP = ConeccionMaspan.SapDb;
-    private string MAER = ConeccionMaspan.PracticaDb;
+    private string coneccionString = Coneccion.coneccionString;
+    private string SAP = Coneccion.SapDbMaspan;
+    private string MAER = Coneccion.PracticaDbMaspan;
 
 
     public Service ()
@@ -351,7 +351,7 @@ public class Service : System.Web.Services.WebService
         foreach (string c in codigos)
         {
             String query = "INSERT INTO " + MAER + ".[ItemCuenta](cuenta,item) VALUES('" + c + "','" + itemId + "')";
-            SqlConnection cn = new SqlConnection(url);
+            SqlConnection cn = new SqlConnection(coneccionString);
             cn.Open();
             SqlCommand insert = new SqlCommand(query, cn);
 
@@ -385,7 +385,7 @@ public class Service : System.Web.Services.WebService
         foreach (string c in cuentas)
         {
             String query = "DELETE " + MAER + ".[ItemCuenta] WHERE cuenta='"+c+"'";
-            SqlConnection cn = new SqlConnection(url);
+            SqlConnection cn = new SqlConnection(coneccionString);
             cn.Open();
             SqlCommand insert = new SqlCommand(query, cn);
 
@@ -452,7 +452,7 @@ public class Service : System.Web.Services.WebService
     public bool existe(string from, string where)
     {
         String query = " SELECT COUNT(*) FROM " + from + " WHERE " + where + " ";
-        SqlConnection selectConn = new SqlConnection(url);
+        SqlConnection selectConn = new SqlConnection(coneccionString);
         selectConn.Open();
         SqlCommand select = new SqlCommand(query, selectConn);
         SqlDataReader reader = select.ExecuteReader();
@@ -475,7 +475,7 @@ public class Service : System.Web.Services.WebService
     }
     private int Ejecutar(string query)
     {
-        SqlConnection conn = new SqlConnection(url);
+        SqlConnection conn = new SqlConnection(coneccionString);
         conn.Open();
         SqlCommand insert = new SqlCommand(query, conn);
 
@@ -537,7 +537,7 @@ public class Service : System.Web.Services.WebService
         DataTable dt = new DataTable();
         dt.TableName = nombre;
 
-        SqlConnection cn = new SqlConnection(url);
+        SqlConnection cn = new SqlConnection(coneccionString);
         SqlDataAdapter da = new SqlDataAdapter();
 
         SqlCommand cmd = new SqlCommand(query, cn);

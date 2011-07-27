@@ -14,8 +14,8 @@ using System.Data.SqlClient;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class PlantaService : System.Web.Services.WebService
 {
-    private string coneccionString = ConeccionMaspan.coneccionStringSVRMASPAN;
-    private string MAER = ConeccionMaspan.PracticaDb;
+    private string coneccionString = Coneccion.coneccionString;
+    private string MAER = Coneccion.PracticaDbMaspan;
 
     public PlantaService ()
     {

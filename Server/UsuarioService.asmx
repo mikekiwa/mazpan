@@ -15,8 +15,8 @@ using System.Data;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class UsuarioService : System.Web.Services.WebService
 {
-    private String coneccionString = ConeccionMaspan.coneccionStringSVRMASPAN;
-    private string MAER = ConeccionMaspan.PracticaDb;
+    private string coneccionString = Coneccion.coneccionString;
+    private string MAER = Coneccion.PracticaDbMaspan;
    
     public UsuarioService ()
     { 

@@ -16,9 +16,9 @@ using System.Collections.Generic;
 [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
 public class EstadoResultadoService : System.Web.Services.WebService
 {
-    private string url = ConeccionMaspan.coneccionStringSVRMASPAN;
-    private string SAP = ConeccionMaspan.SapDb;
-    private string MAER = ConeccionMaspan.PracticaDb;
+    private string url = Coneccion.coneccionString;
+    private string SAP = Coneccion.SapDbMaspan;
+    private string MAER = Coneccion.PracticaDbMaspan;
 
     public EstadoResultadoService () {
 
